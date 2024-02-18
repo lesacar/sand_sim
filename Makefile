@@ -44,7 +44,8 @@ $(OBJ_DIR):
 	@mkdir -p $(OBJ_DIR)
 
 check: $(SRC)
-	$(CC) -I$(INCLUDE) -L$(RAYLIB_A) $(WARN) $(CFLAGS) $^ -o $@ $(LDFLAGS)
+	@mkdir -p $(BUILD_DIR)
+	$(CC) -I$(INCLUDE) -L$(RAYLIB_A) $(WARN) $(CFLAGS) $^ -o $(TARGET) $(LDFLAGS)
 	cppcheck -q -I../raylib/include/ --enable=warning $(SRC)
 
 clean:

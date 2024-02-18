@@ -19,7 +19,7 @@ WARN = -Wall -Wextra -Wpedantic \
          -Wconversion -Wsign-compare \
          -Wtype-limits
 
-LDFLAGS = -lm -lraylib
+LDFLAGS = -lm -lraylib -export-dynamic
 INCLUDE = ../raylib/include
 RAYLIB_A = ../raylib
 BUILD_DIR = build
@@ -49,6 +49,4 @@ check: $(SRC)
 	cppcheck -q -I../raylib/include/ --enable=warning $(SRC)
 
 clean:
-	test -f $(TARGET) && rm $(TARGET)
-	test -f $(OBJ) && rm $(OBJ)
-	rmdir $(BUILD_DIR) $(OBJ_DIR)
+	rm -r $(BUILD_DIR) $(OBJ_DIR)

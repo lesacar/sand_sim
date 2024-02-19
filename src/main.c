@@ -9,13 +9,15 @@
 #include "arg_handler.h"
 #include "setup.h"
 
-#define SCREEN_WIDTH 1440
-#define SCREEN_HEIGHT 720
-#define ROWS 180
-#define COLS 360
+#define SCREEN_WIDTH 1920
+#define SCREEN_HEIGHT 1080
 
-const int32_t cellWidth = SCREEN_WIDTH / COLS;
-const int32_t cellHeight = SCREEN_HEIGHT / ROWS;
+// Define the size of the sand block in pixels
+#define BLOCK_SIZE 4
+
+// Calculate the number of rows and columns based on the screen size and block size
+#define ROWS (SCREEN_HEIGHT / BLOCK_SIZE)
+#define COLS (SCREEN_WIDTH / BLOCK_SIZE)
 
 typedef struct Cell
 {
@@ -59,72 +61,71 @@ int32_t main(int32_t argc, char **argv)
         ClearBackground(BLACK);
 
         // Update falling logic for sand blocks
-for (int j = ROWS - 2; j >= 0; j--)
-{
-    for (int i = 0; i < COLS; i++)
-    {
-        if (grid[i][j].material > 0 && !grid[i][j].doneFalling)
+        for (int j = ROWS - 2; j >= 0; j--)
         {
-            if (grid[i][j + 1].material == 0)
+            for (int i = 0; i < COLS; i++)
             {
-                grid[i][j + 1].material = grid[i][j].material;
-                grid[i][j].material = 0;
-                grid[i][j].doneFalling = false;
-            }
-            else
-            {
-                // Check if sand block can move diagonally
-                bool canMoveLeft = (i > 0 && grid[i - 1][j + 1].material == 0 && grid[i - 1][j].material == 0);
-                bool canMoveRight = (i < COLS - 1 && grid[i + 1][j + 1].material == 0 && grid[i + 1][j].material == 0);
+                if (grid[i][j].material > 0 && !grid[i][j].doneFalling)
+                {
+                    if (grid[i][j + 1].material == 0)
+                    {
+                        grid[i][j + 1].material = grid[i][j].material;
+                        grid[i][j].material = 0;
+                        grid[i][j].doneFalling = false;
+                    }
+                    else
+                    {
+                        // Check if sand block can move diagonally
+                        bool canMoveLeft = (i > 0 && grid[i - 1][j + 1].material == 0 && grid[i - 1][j].material == 0);
+                        bool canMoveRight = (i < COLS - 1 && grid[i + 1][j + 1].material == 0 && grid[i + 1][j].material == 0);
 
-                // If not blocked on both sides, move diagonally
-                if (canMoveLeft && !canMoveRight)
-                {
-                    grid[i - 1][j + 1].material = grid[i][j].material;
-                    grid[i][j].material = 0;
-                    grid[i][j].doneFalling = false;
-                }
-                else if (!canMoveLeft && canMoveRight)
-                {
-                    grid[i + 1][j + 1].material = grid[i][j].material;
-                    grid[i][j].material = 0;
-                    grid[i][j].doneFalling = false;
-                }
-                else
-                {
-                    // If blocked on both sides, mark as done falling
-                    grid[i][j].doneFalling = true;
+                        // If not blocked on both sides, move diagonally
+                        if (canMoveLeft && !canMoveRight)
+                        {
+                            grid[i - 1][j + 1].material = grid[i][j].material;
+                            grid[i][j].material = 0;
+                            grid[i][j].doneFalling = false;
+                        }
+                        else if (!canMoveLeft && canMoveRight)
+                        {
+                            grid[i + 1][j + 1].material = grid[i][j].material;
+                            grid[i][j].material = 0;
+                            grid[i][j].doneFalling = false;
+                        }
+                        else
+                        {
+                            // If blocked on both sides, mark as done falling
+                            grid[i][j].doneFalling = true;
+                        }
+                    }
                 }
             }
         }
-    }
-}
-
-
 
         // Draw sand blocks
         for (int i = 0; i < COLS; i++)
         {
             for (int j = 0; j < ROWS; j++)
             {
-                if (grid[i][j].material == 1)
+                if (grid[i][j].material > 0)
                 {
-                    DrawRectangle(i * cellWidth, j * cellHeight, cellWidth, cellHeight, YELLOW);
+                    // Draw sand block with specified dimensions
+                    DrawRectangle(i * BLOCK_SIZE, j * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE, YELLOW);
                 }
             }
         }
-		int sandBlockCount = 0;
-		for (int i = 0; i < COLS; i++)
-		{
-			for (int j = 0; j < ROWS; j++)
-			{
-				if (grid[i][j].material > 0)
-				{
-					sandBlockCount++;
-				}
-			}
-		}
-		DrawText(TextFormat("FPS: %.2f | Sand Blocks: %d", (double)((float)1.0 / (float)cur_dt), sandBlockCount), 20, 20, 20, RED);
+        int sandBlockCount = 0;
+        for (int i = 0; i < COLS; i++)
+        {
+            for (int j = 0; j < ROWS; j++)
+            {
+                if (grid[i][j].material > 0)
+                {
+                    sandBlockCount++;
+                }
+            }
+        }
+        DrawText(TextFormat("FPS: %.2f | Sand Blocks: %d", (double)((float)1.0 / (float)cur_dt), sandBlockCount), 20, 20, 20, RED);
 
         // Spawn sand block if left mouse button is held down
         if (IsMouseButtonDown(MOUSE_LEFT_BUTTON))
@@ -133,8 +134,8 @@ for (int j = ROWS - 2; j >= 0; j--)
             int my = GetMouseY();
 
             // Get the grid indices
-            int gridX = mx / cellWidth;
-            int gridY = my / cellHeight;
+            int gridX = mx / BLOCK_SIZE;
+            int gridY = my / BLOCK_SIZE;
 
             // Draw sand block if it's not already drawn and within the grid bounds
             if (gridX >= 0 && gridX < COLS && gridY >= 0 && gridY < ROWS && grid[gridX][gridY].material == 0)

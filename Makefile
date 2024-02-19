@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -std=c99 -O3 -flto
+CFLAGS = -std=c99 -O3
 RM = rm
 WARN = -Wall -Wextra -Wpedantic \
          -Wmissing-prototypes -Wstrict-prototypes -Wold-style-definition \
@@ -19,9 +19,8 @@ WARN = -Wall -Wextra -Wpedantic \
          -Wconversion -Wsign-compare \
          -Wtype-limits
 
-LDFLAGS = -lm -lraylib -export-dynamic
-INCLUDE = ../raylib/include
-RAYLIB_A = ../raylib
+LDFLAGS = -lraylib -lm
+INCLUDE = -I./src/include -L./static
 BUILD_DIR = build
 TARGET = $(BUILD_DIR)/main
 SRC_DIR = src
@@ -35,18 +34,18 @@ all: $(TARGET)
 
 $(TARGET): $(OBJ)
 	@mkdir -p $(BUILD_DIR)
-	$(CC) -I$(INCLUDE) -L$(RAYLIB_A) $(CFLAGS) $^ -o $@ $(LDFLAGS)
+	$(CC) $(INCLUDE) $(CFLAGS) $^ -o $@ $(LDFLAGS) 
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
-	@$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(INCLUDE) $(CFLAGS) -c $< -o $@ $(LDFLAGS)
 
 $(OBJ_DIR):
 	@mkdir -p $(OBJ_DIR)
 
 check: $(SRC)
 	@mkdir -p $(BUILD_DIR)
-	$(CC) -I$(INCLUDE) -L$(RAYLIB_A) $(WARN) $(CFLAGS) $^ -o $(TARGET) $(LDFLAGS)
+	$(CC) -I$(INCLUDE) $(WARN) $(CFLAGS) $^ -o $(TARGET) $(LDFLAGS)
 	cppcheck -q -I../raylib/include/ --enable=warning $(SRC)
 
 clean:
-	rm -r $(BUILD_DIR) $(OBJ_DIR)
+	$(RM) -rf $(BUILD_DIR) $(OBJ_DIR)

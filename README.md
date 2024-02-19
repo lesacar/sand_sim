@@ -4,7 +4,7 @@ Early development stages, currently supports
 - dynamic raylib loading from ./dll/
  
 # Linux
-Shouldn't require any special packages, and raylib so's are bundled with the source code.
+Requires raylib installed system wide or libraylib.a in the static directory
 ```
 git clone https://github.com/lesacar/sand_sim
 make

@@ -5,9 +5,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <stdint.h>
 
 // Function prototype
-int setup_stuff(int sc_wi, int sc_he, const char* WindowTitle, int log_lvl);
-int set_monitor_and_fps(int monitor);
+int32_t setup_stuff(int32_t sc_wi, int32_t sc_he, const char* WindowTitle, int32_t log_lvl);
+int32_t set_monitor_and_fps(int32_t monitor);
 
 #endif /* SETUP_H */

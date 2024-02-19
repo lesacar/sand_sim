@@ -42,9 +42,9 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
 $(OBJ_DIR):
 	@mkdir -p $(OBJ_DIR)
 
-check: $(SRC)
+check: $(TARGET)
 	@mkdir -p $(BUILD_DIR)
-	$(CC) -I$(INCLUDE) $(WARN) $(CFLAGS) $^ -o $(TARGET) $(LDFLAGS)
+	$(CC) $(INCLUDE) $(WARN) $(CFLAGS) $(SRC) -o $(TARGET) $(LDFLAGS)
 	cppcheck -q -I../raylib/include/ --enable=warning $(SRC)
 
 clean:

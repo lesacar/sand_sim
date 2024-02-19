@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#include <dlfcn.h>
 #include <unistd.h>
 #include "arg_handler.h"
 #include "setup.h"

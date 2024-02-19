@@ -24,7 +24,6 @@ typedef struct Cell
     int16_t i;
     int16_t j;
     uint8_t material;
-    bool doneFalling;
 } Cell;
 
 int32_t main(int32_t argc, char **argv)
@@ -38,7 +37,6 @@ int32_t main(int32_t argc, char **argv)
             grid[i][j].i = i;
             grid[i][j].j = j;
             grid[i][j].material = 0;
-            grid[i][j].doneFalling = false;
         }
     }
 
@@ -65,37 +63,29 @@ int32_t main(int32_t argc, char **argv)
         {
             for (int i = 0; i < COLS; i++)
             {
-                if (grid[i][j].material > 0 && !grid[i][j].doneFalling)
+                if (grid[i][j].material > 0)
                 {
                     if (grid[i][j + 1].material == 0)
                     {
                         grid[i][j + 1].material = grid[i][j].material;
                         grid[i][j].material = 0;
-                        grid[i][j].doneFalling = false;
                     }
                     else
                     {
                         // Check if sand block can move diagonally
-                        bool canMoveLeft = (i > 0 && grid[i - 1][j + 1].material == 0 && grid[i - 1][j].material == 0);
-                        bool canMoveRight = (i < COLS - 1 && grid[i + 1][j + 1].material == 0 && grid[i + 1][j].material == 0);
+                        bool canMoveLeft = (i > 0 && j + 1 < ROWS && grid[i - 1][j + 1].material == 0 && grid[i - 1][j].material == 0);
+                        bool canMoveRight = (i < COLS - 1 && j + 1 < ROWS && grid[i + 1][j + 1].material == 0 && grid[i + 1][j].material == 0);
 
                         // If not blocked on both sides, move diagonally
                         if (canMoveLeft && !canMoveRight)
                         {
                             grid[i - 1][j + 1].material = grid[i][j].material;
                             grid[i][j].material = 0;
-                            grid[i][j].doneFalling = false;
                         }
                         else if (!canMoveLeft && canMoveRight)
                         {
                             grid[i + 1][j + 1].material = grid[i][j].material;
                             grid[i][j].material = 0;
-                            grid[i][j].doneFalling = false;
-                        }
-                        else
-                        {
-                            // If blocked on both sides, mark as done falling
-                            grid[i][j].doneFalling = true;
                         }
                     }
                 }
@@ -141,7 +131,6 @@ int32_t main(int32_t argc, char **argv)
             if (gridX >= 0 && gridX < COLS && gridY >= 0 && gridY < ROWS && grid[gridX][gridY].material == 0)
             {
                 grid[gridX][gridY].material = 1;
-                grid[gridX][gridY].doneFalling = false;
             }
         }
 

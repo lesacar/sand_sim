@@ -9,8 +9,8 @@
 #include "arg_handler.h"
 #include "setup.h"
 
-#define SCREEN_WIDTH 1920
-#define SCREEN_HEIGHT 1080
+#define SCREEN_WIDTH 1440
+#define SCREEN_HEIGHT 720
 
 // Define the size of the sand block in pixels
 #define BLOCK_SIZE 4
@@ -26,6 +26,10 @@ typedef struct Cell
     uint8_t material;
 } Cell;
 
+// Function prototype
+void spawnSandBrush(Cell grid[COLS][ROWS], int mouseX, int mouseY, int brushSize);
+
+
 int32_t main(int32_t argc, char **argv)
 {
     Cell grid[COLS][ROWS];
@@ -40,7 +44,7 @@ int32_t main(int32_t argc, char **argv)
         }
     }
 
-    setup_stuff(SCREEN_WIDTH, SCREEN_HEIGHT, "RAYtitle", LOG_ERROR);
+    setup_stuff(SCREEN_WIDTH, SCREEN_HEIGHT, "RAYtitle", LOG_ERROR, false);
     int32_t current_monitor = handle_arguments(argc, argv);
     if (current_monitor < 0)
     {
@@ -58,7 +62,7 @@ int32_t main(int32_t argc, char **argv)
         BeginDrawing();
         ClearBackground(BLACK);
 
-        // Update falling logic for sand blocks
+		// Update falling logic for sand blocks
         for (int j = ROWS - 2; j >= 0; j--)
         {
             for (int i = 0; i < COLS; i++)
@@ -70,24 +74,28 @@ int32_t main(int32_t argc, char **argv)
                         grid[i][j + 1].material = grid[i][j].material;
                         grid[i][j].material = 0;
                     }
-                    else
-                    {
-                        // Check if sand block can move diagonally
-                        bool canMoveLeft = (i > 0 && j + 1 < ROWS && grid[i - 1][j + 1].material == 0 && grid[i - 1][j].material == 0);
-                        bool canMoveRight = (i < COLS - 1 && j + 1 < ROWS && grid[i + 1][j + 1].material == 0 && grid[i + 1][j].material == 0);
+					else
+{
+    // Generate a random number between 0 and 1
+    float randomValue = GetRandomValue(0, 1);
 
-                        // If not blocked on both sides, move diagonally
-                        if (canMoveLeft && !canMoveRight)
-                        {
-                            grid[i - 1][j + 1].material = grid[i][j].material;
-                            grid[i][j].material = 0;
-                        }
-                        else if (!canMoveLeft && canMoveRight)
-                        {
-                            grid[i + 1][j + 1].material = grid[i][j].material;
-                            grid[i][j].material = 0;
-                        }
-                    }
+    // Check if sand block can move diagonally
+    bool canMoveLeft = (i > 0 && j + 1 < ROWS && grid[i - 1][j + 1].material == 0 && grid[i - 1][j].material == 0);
+    bool canMoveRight = (i < COLS - 1 && j + 1 < ROWS && grid[i + 1][j + 1].material == 0 && grid[i + 1][j].material == 0);
+
+    // If not blocked on both sides, move diagonally
+    if (canMoveLeft && !canMoveRight && randomValue < 0.5)
+    {
+        grid[i - 1][j + 1].material = grid[i][j].material;
+        grid[i][j].material = 0;
+    }
+    else if (!canMoveLeft && canMoveRight && randomValue >= 0.5)
+    {
+        grid[i + 1][j + 1].material = grid[i][j].material;
+        grid[i][j].material = 0;
+    }
+}
+
                 }
             }
         }
@@ -117,7 +125,7 @@ int32_t main(int32_t argc, char **argv)
         }
         DrawText(TextFormat("FPS: %.2f | Sand Blocks: %d", (double)((float)1.0 / (float)cur_dt), sandBlockCount), 20, 20, 20, RED);
 
-        // Spawn sand block if left mouse button is held down
+        // Spawn sand block brush if left mouse button is held down
         if (IsMouseButtonDown(MOUSE_LEFT_BUTTON))
         {
             int mx = GetMouseX();
@@ -127,10 +135,11 @@ int32_t main(int32_t argc, char **argv)
             int gridX = mx / BLOCK_SIZE;
             int gridY = my / BLOCK_SIZE;
 
-            // Draw sand block if it's not already drawn and within the grid bounds
-            if (gridX >= 0 && gridX < COLS && gridY >= 0 && gridY < ROWS && grid[gridX][gridY].material == 0)
+            // Draw sand brush if it's not already drawn and within the grid bounds
+            if (gridX >= 0 && gridX < COLS && gridY >= 0 && gridY < ROWS)
             {
-                grid[gridX][gridY].material = 1;
+                // Call the function to spawn sand blocks in a brush-like manner
+                spawnSandBrush(grid, mx, my, 5);
             }
         }
 
@@ -139,3 +148,26 @@ int32_t main(int32_t argc, char **argv)
 
     return 0;
 }
+
+// Function definition
+void spawnSandBrush(Cell grid[COLS][ROWS], int mouseX, int mouseY, int brushSize) {
+    // Calculate the starting position of the brush based on the mouse position
+    int startX = mouseX / BLOCK_SIZE - brushSize / 2;
+    int startY = mouseY / BLOCK_SIZE - brushSize / 2;
+
+    // Ensure the brush doesn't go outside the grid boundaries
+    startX = (startX < 0) ? 0 : startX;
+    startY = (startY < 0) ? 0 : startY;
+    startX = (startX > COLS - brushSize) ? COLS - brushSize : startX;
+    startY = (startY > ROWS - brushSize) ? ROWS - brushSize : startY;
+
+    // Fill random cells within the brush area with sand
+    for (int i = startX; i < startX + brushSize; i++) {
+        for (int j = startY; j < startY + brushSize; j++) {
+            if (GetRandomValue(0,10) > 8) { // Randomly decide whether to place sand
+                grid[i][j].material = 1;
+            }
+        }
+    }
+}
+

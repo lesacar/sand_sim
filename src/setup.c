@@ -1,9 +1,12 @@
 #include "setup.h"
 #include <raylib.h>
 
-int32_t setup_stuff(int32_t sc_wi, int32_t sc_he, const char* WindowTitle, int32_t log_lvl){
+int32_t setup_stuff(int32_t sc_wi, int32_t sc_he, const char* WindowTitle, int32_t log_lvl, bool fullscreen){
     SetTraceLogLevel(log_lvl);
-	SetConfigFlags(FLAG_FULLSCREEN_MODE);
+	if (fullscreen)
+	{
+		SetConfigFlags(FLAG_FULLSCREEN_MODE);
+	}
     InitWindow(sc_wi,sc_he, WindowTitle);
     return 0;
 }

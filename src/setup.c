@@ -7,6 +7,7 @@ int32_t setup_stuff(int32_t sc_wi, int32_t sc_he, const char* WindowTitle, int32
 	{
 		SetConfigFlags(FLAG_FULLSCREEN_MODE);
 	}
+
     InitWindow(sc_wi,sc_he, WindowTitle);
     return 0;
 }

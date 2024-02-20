@@ -1,4 +1,3 @@
-// sand_blocks.glsl
 #version 330 core
 
 in vec2 fragCoord;
@@ -10,6 +9,9 @@ uniform vec2 screenSize;       // Screen size
 void main()
 {
     vec4 block = texture(gridTexture, fragCoord / screenSize);
+    
+    // Debug statement to print the value of 'block.r'
+    printf("block.r: %f\n", block.r);
     
     // Render rectangles only if the current cell contains material
     if (block.r > 0.0)

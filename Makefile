@@ -19,10 +19,10 @@ WARN = -Wall -Wextra -Wpedantic \
          -Wconversion -Wsign-compare \
          -Wtype-limits
 
-LDFLAGS = -lraylib -lm
-INCLUDE = -I./src/include -L./static
+LDFLAGS = -L./static -lraylib -lm
+INCLUDE = -I./src/include
 BUILD_DIR = build
-TARGET = $(BUILD_DIR)/main
+TARGET = $(BUILD_DIR)/sand
 SRC_DIR = src
 SRC = $(wildcard $(SRC_DIR)/*.c)
 OBJ_DIR = dbg
@@ -37,6 +37,7 @@ $(TARGET): $(OBJ)
 	$(CC) $(INCLUDE) $(CFLAGS) $^ -o $@ $(LDFLAGS) 
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
+	@mkdir -p $(dir $@)
 	$(CC) $(INCLUDE) $(CFLAGS) -c $< -o $@ $(LDFLAGS)
 
 $(OBJ_DIR):
@@ -48,4 +49,12 @@ check: $(TARGET)
 	cppcheck -q -I../raylib/include/ --enable=warning $(SRC)
 
 clean:
-	$(RM) -rf $(BUILD_DIR) $(OBJ_DIR)
+	$(RM) -rf $(BUILD_DIR) $(OBJ_DIR) windows_obj
+
+win: CC = x86_64-w64-mingw32-gcc -mwindows
+win: LDFLAGS = -L./static/windows -lraylib -lm -lopengl32 -lgdi32 -lwinmm
+win: INCLUDE = -I./static/windows/include/
+win: TARGET = $(BUILD_DIR)/main.exe
+win: OBJ = $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(SRC))
+
+win: $(TARGET)

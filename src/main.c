@@ -38,7 +38,7 @@ int main(int argc, char **argv)
 	int32_t mscroll_brushSize = 1;
 	bool scroll_hint_message = false;
 
-	Shader shader = LoadShader(0, "sand_blocks.fs");
+	Shader shader = LoadShader(0, "sand_blocks.glsl");
 
 	SetTargetFPS(4000);
 	float cur_dt = 0;

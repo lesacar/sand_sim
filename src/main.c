@@ -6,14 +6,6 @@
 #include "arg_handler.h"
 #include "setup.h"
 
-#define SCREEN_WIDTH 1440
-#define SCREEN_HEIGHT 720
-#define BLOCK_SIZE 4
-#define ROWS (SCREEN_HEIGHT / BLOCK_SIZE)
-#define COLS (SCREEN_WIDTH / BLOCK_SIZE)
-
-
-
 void spawnSandBrush(Cell grid[COLS][ROWS], int32_t mouseX, int32_t mouseY, int32_t brushSize);
 
 int main(int argc, char **argv)

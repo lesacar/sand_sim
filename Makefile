@@ -51,7 +51,7 @@ check: $(TARGET)
 clean:
 	$(RM) -rf $(BUILD_DIR) $(OBJ_DIR) windows_obj
 
-win: CC = x86_64-w64-mingw32-gcc -mwindows
+win: CC = x86_64-w64-mingw32-gcc -mwindows -D WIN32
 win: LDFLAGS = -L./static/windows -lraylib -lm -lopengl32 -lgdi32 -lwinmm
 win: INCLUDE = -I./static/windows/include/
 win: TARGET = $(BUILD_DIR)/main.exe

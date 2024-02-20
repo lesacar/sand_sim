@@ -8,11 +8,12 @@
 
 void spawnSandBrush(Cell grid[COLS][ROWS], int32_t mouseX, int32_t mouseY, int32_t brushSize);
 
+
 int main(int argc, char **argv)
 {
 	// Initialize grid and random seed
 	Cell grid[COLS][ROWS] = {0};
-	srand(time(NULL));
+	srand((uint32_t)time(NULL));
 
 	// Setup window and display settings
 	setup_stuff(SCREEN_WIDTH, SCREEN_HEIGHT, "RAYtitle", LOG_INFO, false);
@@ -33,7 +34,9 @@ int main(int argc, char **argv)
 	int frame_counter = 0;
 	float average_fps = 0.0f;
 	SetConfigFlags(FLAG_MSAA_4X_HINT);
-	Font jetmono = LoadFontEx("./src/fonts/JetBrainsMonoNLNerdFont-Regular.ttf", 20, 0, 251);
+	int defaultCodepoints[] = { 0 };
+	Font jetmono = LoadFontEx("./src/fonts/JetBrainsMonoNLNerdFont-Regular.ttf", 20, defaultCodepoints, 1);
+
 
 	// Create a texture to render the grid
 	RenderTexture2D gridTexture = LoadRenderTexture(COLS, ROWS);
@@ -62,7 +65,7 @@ int main(int argc, char **argv)
 					}
 					else
 					{
-						float randomValue = (float)rand() / RAND_MAX;
+						float randomValue = (float)rand() / (float)RAND_MAX;
 						bool canMoveLeft = (i > 0 && j + 1 < ROWS && grid[i - 1][j + 1].material == 0 && grid[i - 1][j].material == 0);
 						bool canMoveRight = (i < COLS - 1 && j + 1 < ROWS && grid[i + 1][j + 1].material == 0 && grid[i + 1][j].material == 0);
 
@@ -135,7 +138,7 @@ int main(int argc, char **argv)
 		}*/
 
 		// Update brush size with mouse wheel input
-		mscroll_brushSize += GetMouseWheelMove();
+		mscroll_brushSize += (int32_t)GetMouseWheelMove();
 		if (mscroll_brushSize < 1)
 			mscroll_brushSize = 1;
 		else if (mscroll_brushSize > 50)
@@ -155,8 +158,14 @@ int main(int argc, char **argv)
 		}
 
 		// Display FPS and sand block count
-		DrawRectangle(15,15,550,50,WHITE);
-		DrawTextEx(jetmono, TextFormat("Sand Blocks: %05d | Average FPS: %.2f | FPS: %05d ", sandBlockCount, average_fps, (int)(1.0 / cur_dt)), (Vector2){20, 20}, 20, 1, BLACK);
+		DrawRectangle(15,15,580,50,WHITE);
+		#ifdef WIN32
+		DrawText(TextFormat("Sand Blocks: %05d | Average FPS: %.2f | FPS: %05d ", sandBlockCount, (double)average_fps, (int)(1.0f / cur_dt)), 20, 20, 20, BLACK);
+
+		
+		#else
+		DrawTextEx(jetmono, TextFormat("Sand Blocks: %05d | Average FPS: %.2f | FPS: %05d ", sandBlockCount, (double)average_fps, (int)(1.0f / cur_dt)), (Vector2){20, 20}, 20, 1, BLACK);
+		#endif
 		DrawText(TextFormat("Brush size: %d", mscroll_brushSize), 20, 44, 20, RED);
 
 		// Display scroll hint message
@@ -200,7 +209,7 @@ int main(int argc, char **argv)
 		if (second_counter >= 1.0f)
 		{
 			// Calculate average FPS
-			average_fps = frame_counter / fps_counter;
+			average_fps = (float)frame_counter / fps_counter;
 
 			// Reset counters
 			second_counter -= 1.0f;

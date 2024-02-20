@@ -30,16 +30,13 @@ int main(int argc, char **argv)
 	SetTargetFPS(4000);
 	float cur_dt = 0;
 
-	Shader shader = LoadShader(0, TextFormat("resources/shaders/glsl%i/grass.fs", 330));
-	if (!shader.id)
+	// Create a texture to render the grid
+	RenderTexture2D gridTexture = LoadRenderTexture(COLS, ROWS);
+	if (gridTexture.id == 0)
 	{
-		printf("Failed to load shader\n");
+		printf("Failed to create grid texture\n");
 		exit(EXIT_FAILURE);
 	}
-
-	// Pass grid size as uniform to the shader
-	SetShaderValue(shader, GetShaderLocation(shader, "cols"), &COLS, SHADER_UNIFORM_INT);
-	SetShaderValue(shader, GetShaderLocation(shader, "rows"), &ROWS, SHADER_UNIFORM_INT);
 
 	while (!WindowShouldClose())
 	{
@@ -77,9 +74,25 @@ int main(int argc, char **argv)
 		}
 		BeginDrawing();
 		ClearBackground(BLACK);
-		BeginShaderMode(shader);
-		DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), WHITE); // Fill screen with white color
-		EndShaderMode();
+		// Activate render texture
+		BeginTextureMode(gridTexture);
+		ClearBackground(BLACK);
+
+		for (int i = 0; i < COLS; i++)
+		{
+			for (int j = 0; j < ROWS; j++)
+			{
+				if (grid[i][j].material > 0)
+				{
+					DrawRectangle(i, j, 1, 1, WHITE);
+				}
+			}
+		}
+
+		// End drawing to render texture
+		EndTextureMode();
+		DrawTexturePro(gridTexture.texture, (Rectangle){0, 0, (float)gridTexture.texture.width, (float)-gridTexture.texture.height}, (Rectangle){0, 0, (float)GetScreenWidth(), (float)GetScreenHeight()}, (Vector2){0, 0}, 0, WHITE);
+
 
 		// Draw sand blocks using CPU
 		/*for (int i = 0; i < COLS; i++)

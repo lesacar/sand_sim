@@ -27,18 +27,20 @@ int main(int argc, char **argv)
 	int32_t mscroll_brushSize = 1;
 	bool scroll_hint_message = false;
 
-	Shader shader = LoadShader(0, "sand_blocks.glsl");
-
 	SetTargetFPS(4000);
 	float cur_dt = 0;
+
+	// Create a texture to render the grid
+	RenderTexture2D gridTexture = LoadRenderTexture(COLS, ROWS);
+	if (gridTexture.id == 0)
+	{
+		printf("Failed to create grid texture\n");
+		exit(EXIT_FAILURE);
+	}
 
 	while (!WindowShouldClose())
 	{
 		cur_dt = GetFrameTime(); // Get frame time
-		BeginDrawing();
-		ClearBackground(BLACK);
-
-		// Update falling logic for sand blocks
 		for (int j = ROWS - 2; j >= 0; j--)
 		{
 			for (int i = 0; i < COLS; i++)
@@ -70,15 +72,30 @@ int main(int argc, char **argv)
 				}
 			}
 		}
+		BeginDrawing();
+		ClearBackground(BLACK);
+		// Activate render texture
+		BeginTextureMode(gridTexture);
+		ClearBackground(BLACK);
 
-		BeginShaderMode(shader);
-
-		// Pass grid data to shader
-		SetShaderValue(shader, GetShaderLocation(shader, "grid"), grid, SHADER_UNIFORM_INT);
-
-		// Draw a single rectangle to cover the entire screen (shader will handle the rest)
-		// Draw sand blocks
 		for (int i = 0; i < COLS; i++)
+		{
+			for (int j = 0; j < ROWS; j++)
+			{
+				if (grid[i][j].material > 0)
+				{
+					DrawRectangle(i, j, 1, 1, WHITE);
+				}
+			}
+		}
+
+		// End drawing to render texture
+		EndTextureMode();
+		//DrawTexturePro(gridTexture.texture, (Rectangle){0, 0, (float)gridTexture.texture.width, (float)-gridTexture.texture.height}, (Rectangle){0, 0, (float)GetScreenWidth(), (float)GetScreenHeight()}, (Vector2){0, 0}, 0, WHITE);
+
+
+		// Draw sand blocks using CPU
+		/*for (int i = 0; i < COLS; i++)
 		{
 			for (int j = 0; j < ROWS; j++)
 			{
@@ -87,9 +104,7 @@ int main(int argc, char **argv)
 					DrawRectangle(i * BLOCK_SIZE, j * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE, (Color){201, 170, 127, 255});
 				}
 			}
-		}
-
-		EndShaderMode();
+		}*/
 
 		// Update brush size with mouse wheel input
 		mscroll_brushSize += GetMouseWheelMove();
@@ -150,10 +165,6 @@ int main(int argc, char **argv)
 
 		EndDrawing();
 	}
-
-	// Unload shader
-	UnloadShader(shader);
-
+	UnloadRenderTexture(gridTexture);
 	return 0;
 }
-

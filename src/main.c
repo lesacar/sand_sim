@@ -26,7 +26,7 @@ int main(int argc, char **argv)
 	srand(time(NULL));
 
 	// Setup window and display settings
-	setup_stuff(SCREEN_WIDTH, SCREEN_HEIGHT, "RAYtitle", LOG_ERROR, false);
+	setup_stuff(SCREEN_WIDTH, SCREEN_HEIGHT, "RAYtitle", LOG_INFO, false);
 	int32_t current_monitor = handle_arguments(argc, argv);
 	if (current_monitor < 0)
 	{

@@ -17,3 +17,37 @@ int32_t set_monitor_and_fps(int32_t monitor){
     SetTargetFPS(initial_fps);
     return 0;
 }
+
+
+
+// Function to spawn sand brush
+void spawnSandBrush(Cell grid[COLS][ROWS], int32_t mouseX, int32_t mouseY, int32_t brushSize)
+{
+	int startX = mouseX / BLOCK_SIZE - brushSize / 2;
+	int startY = mouseY / BLOCK_SIZE - brushSize / 2;
+
+	startX = (startX < 0) ? 0 : startX;
+	startY = (startY < 0) ? 0 : startY;
+	startX = (startX > COLS - brushSize) ? COLS - brushSize : startX;
+	startY = (startY > ROWS - brushSize) ? ROWS - brushSize : startY;
+
+	int centerX = startX + brushSize / 2;
+	int centerY = startY + brushSize / 2;
+
+	for (int i = startX; i < startX + brushSize; i++)
+	{
+		for (int j = startY; j < startY + brushSize; j++)
+		{
+			float distance = sqrt(pow(i - centerX, 2) + pow(j - centerY, 2));
+
+			if (brushSize == 1)
+			{
+				grid[i][j].material = 1;
+			}
+			else if ((float)rand() / RAND_MAX > 0.8f && distance <= brushSize / 2)
+			{
+				grid[i][j].material = 1;
+			}
+		}
+	}
+}

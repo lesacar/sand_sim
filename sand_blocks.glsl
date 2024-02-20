@@ -5,10 +5,11 @@ in vec2 fragCoord;
 out vec4 fragColor;
 
 uniform sampler2D gridTexture; // Texture containing the grid data
+uniform vec2 screenSize;       // Screen size
 
 void main()
 {
-    vec4 block = texture(gridTexture, fragCoord);
+    vec4 block = texture(gridTexture, fragCoord / screenSize);
     
     // Render rectangles only if the current cell contains material
     if (block.r > 0.0)

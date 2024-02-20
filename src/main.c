@@ -159,13 +159,11 @@ int main(int argc, char **argv)
 
 		// Display FPS and sand block count
 		DrawRectangle(15,15,580,50,WHITE);
-		#ifdef WIN32
+		/*#ifdef WIN32
 		DrawText(TextFormat("Sand Blocks: %05d | Average FPS: %.2f | FPS: %05d ", sandBlockCount, (double)average_fps, (int)(1.0f / cur_dt)), 20, 20, 20, BLACK);
-
-		
-		#else
+		#else*/
 		DrawTextEx(jetmono, TextFormat("Sand Blocks: %05d | Average FPS: %.2f | FPS: %05d ", sandBlockCount, (double)average_fps, (int)(1.0f / cur_dt)), (Vector2){20, 20}, 20, 1, BLACK);
-		#endif
+		//#endif
 		DrawText(TextFormat("Brush size: %d", mscroll_brushSize), 20, 44, 20, RED);
 
 		// Display scroll hint message

@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <time.h>
 #include <stdint.h>
+#include <math.h>
 #include "arg_handler.h"
 #include "setup.h"
 
@@ -56,6 +57,7 @@ int32_t main(int32_t argc, char **argv)
 	int32_t mscroll_brushSize = 1;
 	bool scroll_hint_message = false;
 
+	SetTargetFPS(400);
 	while (!WindowShouldClose())
 	{
 		last_dt = cur_dt;
@@ -117,7 +119,7 @@ int32_t main(int32_t argc, char **argv)
 				if (grid[i][j].material > 0)
 				{
 					// Draw sand block with specified dimensions
-					DrawRectangle(i * BLOCK_SIZE, j * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE, YELLOW);
+					DrawRectangle(i * BLOCK_SIZE, j * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE, (Color){201,170,127,255});
 				}
 			}
 		}
@@ -193,18 +195,24 @@ void spawnSandBrush(Cell grid[COLS][ROWS], int32_t mouseX, int32_t mouseY, int32
 	startY = (startY > ROWS - brushSize) ? ROWS - brushSize : startY;
 
 	// Fill random cells within the brush area with sand
-	for (int i = startX; i < startX + brushSize; i++)
-	{
-		for (int j = startY; j < startY + brushSize; j++)
-		{
-			if (brushSize == 1)
-			{
-				grid[i][j].material = 1;
-			}
-			else if (GetRandomValue(0, 10) > 8)
-			{ // Randomly decide whether to place sand
-				grid[i][j].material = 1;
-			}
-		}
-	}
+int centerX = startX + brushSize / 2; // Calculate the center X position of the brush
+int centerY = startY + brushSize / 2; // Calculate the center Y position of the brush
+
+for (int i = startX; i < startX + brushSize; i++)
+{
+    for (int j = startY; j < startY + brushSize; j++)
+    {
+        // Calculate the distance from the current position to the center of the brush
+        float distance = sqrt(pow(i - centerX, 2) + pow(j - centerY, 2));
+
+        if (brushSize == 1)
+        {
+            grid[i][j].material = 1;
+        }
+        else if (GetRandomValue(0, 10) > 8 && distance <= brushSize / 2)
+        { // Randomly decide whether to place sand within the circular area
+            grid[i][j].material = 1;
+        }
+    }
+}
 }

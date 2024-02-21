@@ -22,6 +22,7 @@ int32_t set_monitor_and_fps(int32_t monitor);
 
 struct Cell {
     uint8_t material;
+	float friction;
     bool isFreeFalling;
     float velocityX;
     float velocityY;

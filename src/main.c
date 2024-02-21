@@ -6,9 +6,6 @@
 #include "arg_handler.h"
 #include "setup.h"
 
-#define MAX_VELOCITY_Y 2.0f
-#define FRICTION 0.95f
-
 int main(int argc, char **argv)
 {
 	// Initialize grid and random seed
@@ -20,7 +17,8 @@ int main(int argc, char **argv)
 			grid[i][j].material = 0;
 			grid[i][j].isFreeFalling = false;
 			grid[i][j].velocityX = 0.0f;
-			grid[i][j].velocityY = 0.0f; // Set friction value here
+			grid[i][j].velocityY = 0.0f;
+			grid[i][j].friction = 0.0f;
 		}
 	}
 
@@ -72,6 +70,16 @@ int main(int argc, char **argv)
 					{
 						grid[i][j + 1].material = grid[i][j].material;
 						grid[i][j].material = 0;
+						
+						if (grid[i][j+1].velocityY > 9.8f)
+						{
+							grid[i][j+1].velocityY = 9.8f;
+						}
+						else {
+							grid[i][j+1].velocityY += 1.0f;
+						}
+						
+						
 					}
 					else
 					{

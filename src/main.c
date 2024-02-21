@@ -6,6 +6,7 @@
 #include "arg_handler.h"
 #include "setup.h"
 
+
 int main(int argc, char **argv)
 {
 	int32_t material = 0;
@@ -57,7 +58,7 @@ int main(int argc, char **argv)
 		printf("Failed to create grid texture\n");
 		exit(EXIT_FAILURE);
 	}
-
+	SetTargetFPS(0);
 	while (!WindowShouldClose())
 	{
 		cur_dt = GetFrameTime(); // Get frame time
@@ -244,7 +245,7 @@ int main(int argc, char **argv)
 		DrawTexturePro(gridTexture.texture, (Rectangle){0, 0, (float)gridTexture.texture.width, (float)-gridTexture.texture.height}, (Rectangle){0, 0, (float)GetScreenWidth(), (float)GetScreenHeight()}, (Vector2){0, 0}, 0, WHITE);
 
 		// Update brush size with mouse wheel input
-		mscroll_brushSize += (int32_t)GetMouseWheelMove()*4;
+		mscroll_brushSize += (int32_t)GetMouseWheelMove()*2;
 		if (mscroll_brushSize < 1)
 			mscroll_brushSize = 1;
 		else if (mscroll_brushSize > 50)

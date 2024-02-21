@@ -20,12 +20,14 @@ int32_t setup_stuff(int32_t sc_wi, int32_t sc_he, const char* WindowTitle, int32
 int32_t set_monitor_and_fps(int32_t monitor);
 
 
-struct Cell
-{
-	uint8_t material;
+struct Cell {
+    uint8_t material;
+    bool isFreeFalling;
+    float velocityX;
+    float velocityY;
 };
+
 typedef struct Cell Cell;
 
-void spawnSandBrush(Cell grid[COLS][ROWS], int32_t mouseX, int32_t mouseY, int32_t brushSize);
-
+void spawnSandBrush(Cell (*grid)[ROWS], int32_t mouseX, int32_t mouseY, int32_t brushSize, int32_t material);
 #endif /* SETUP_H */

@@ -6,13 +6,24 @@
 #include "arg_handler.h"
 #include "setup.h"
 
-void spawnSandBrush(Cell grid[COLS][ROWS], int32_t mouseX, int32_t mouseY, int32_t brushSize);
-
+#define MAX_VELOCITY_Y 2.0f
+#define FRICTION 0.95f
 
 int main(int argc, char **argv)
 {
 	// Initialize grid and random seed
 	Cell grid[COLS][ROWS] = {0};
+	for (size_t i = 0; i < COLS; i++)
+	{
+		for (size_t j = 0; j < ROWS; j++)
+		{
+			grid[i][j].material = 0;
+			grid[i][j].isFreeFalling = false;
+			grid[i][j].velocityX = 0.0f;
+			grid[i][j].velocityY = 0.0f; // Set friction value here
+		}
+	}
+
 	srand((uint32_t)time(NULL));
 
 	// Setup window and display settings
@@ -34,9 +45,8 @@ int main(int argc, char **argv)
 	int frame_counter = 0;
 	float average_fps = 0.0f;
 	SetConfigFlags(FLAG_MSAA_4X_HINT);
-	int defaultCodepoints[] = { 0 };
-	Font jetmono = LoadFontEx("./src/fonts/JetBrainsMonoNLNerdFont-Regular.ttf", 20, defaultCodepoints, 1);
-
+	// Font jetmono = LoadFontEx("./src/fonts/JetBrainsMonoNLNerdFont-Regular.ttf", 20, defaultCodepoints, 1);
+	Font jetmono = LoadFontEx("./src/fonts/JetBrainsMonoNLNerdFont-Regular.ttf", 20, 0, 251);
 
 	// Create a texture to render the grid
 	RenderTexture2D gridTexture = LoadRenderTexture(COLS, ROWS);
@@ -52,7 +62,7 @@ int main(int argc, char **argv)
 								 // Update frame counters
 		frame_counter++;
 		fps_counter += cur_dt;
-		for (int j = ROWS - 2; j >= 0; j--)
+				for (int j = ROWS - 2; j >= 0; j--)
 		{
 			for (int i = 0; i < COLS; i++)
 			{
@@ -69,12 +79,12 @@ int main(int argc, char **argv)
 						bool canMoveLeft = (i > 0 && j + 1 < ROWS && grid[i - 1][j + 1].material == 0 && grid[i - 1][j].material == 0);
 						bool canMoveRight = (i < COLS - 1 && j + 1 < ROWS && grid[i + 1][j + 1].material == 0 && grid[i + 1][j].material == 0);
 
-						if (canMoveLeft && !canMoveRight && randomValue < 0.5f)
+						if (canMoveLeft && randomValue < 0.5f)
 						{
 							grid[i - 1][j + 1].material = grid[i][j].material;
 							grid[i][j].material = 0;
 						}
-						else if (!canMoveLeft && canMoveRight && randomValue >= 0.5f)
+						else if (canMoveRight && randomValue >= 0.5f)
 						{
 							grid[i + 1][j + 1].material = grid[i][j].material;
 							grid[i][j].material = 0;
@@ -88,38 +98,38 @@ int main(int argc, char **argv)
 		// Activate render texture
 		BeginTextureMode(gridTexture);
 		ClearBackground(BLACK);
-        for (int i = 0; i < COLS; i++)
-        {
-            int j = 0;
-            while (j < ROWS)
-            {
-                // Find the first non-empty cell
-                while (j < ROWS && grid[i][j].material == 0)
-                {
-                    j++;
-                }
+		for (int i = 0; i < COLS; i++)
+		{
+			int j = 0;
+			while (j < ROWS)
+			{
+				// Find the first non-empty cell
+				while (j < ROWS && grid[i][j].material == 0)
+				{
+					j++;
+				}
 
-                if (j == ROWS)
-                {
-                    break; // No more non-empty cells in this column
-                }
+				if (j == ROWS)
+				{
+					break; // No more non-empty cells in this column
+				}
 
-                // Start of a batch
-                int startJ = j;
+				// Start of a batch
+				int startJ = j;
 
-                // Find the end of the batch
-                while (j < ROWS && grid[i][j].material > 0)
-                {
-                    j++;
-                }
+				// Find the end of the batch
+				while (j < ROWS && grid[i][j].material > 0)
+				{
+					j++;
+				}
 
-                // End of batch (exclusive)
-                int endJ = j;
+				// End of batch (exclusive)
+				int endJ = j;
 
-                // Draw the batched rectangle
-                DrawRectangle(i, startJ, 1, endJ - startJ, (Color){201, 170, 127, 255});
-            }
-        }
+				// Draw the batched rectangle
+				DrawRectangle(i, startJ, 1, endJ - startJ, (Color){201, 170, 127, 255});
+			}
+		}
 
 		// End drawing to render texture
 		EndTextureMode();
@@ -158,12 +168,12 @@ int main(int argc, char **argv)
 		}
 
 		// Display FPS and sand block count
-		DrawRectangle(15,15,580,50,WHITE);
+		DrawRectangle(15, 15, 580, 50, WHITE);
 		/*#ifdef WIN32
 		DrawText(TextFormat("Sand Blocks: %05d | Average FPS: %.2f | FPS: %05d ", sandBlockCount, (double)average_fps, (int)(1.0f / cur_dt)), 20, 20, 20, BLACK);
 		#else*/
 		DrawTextEx(jetmono, TextFormat("Sand Blocks: %05d | Average FPS: %.2f | FPS: %05d ", sandBlockCount, (double)average_fps, (int)(1.0f / cur_dt)), (Vector2){20, 20}, 20, 1, BLACK);
-		//#endif
+		// #endif
 		DrawText(TextFormat("Brush size: %d", mscroll_brushSize), 20, 44, 20, RED);
 
 		// Display scroll hint message
@@ -195,7 +205,7 @@ int main(int argc, char **argv)
 
 			if (gridX >= 0 && gridX < COLS && gridY >= 0 && gridY < ROWS)
 			{
-				spawnSandBrush(grid, mx, my, mscroll_brushSize);
+				spawnSandBrush(grid, mx, my, mscroll_brushSize, 1);
 			}
 		}
 

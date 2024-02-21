@@ -284,7 +284,7 @@ int main(int argc, char **argv)
 		{
 			int mx = GetMouseX();
 			int my = GetMouseY();
-			if (my > 145 && mx < 185)
+			if (my > 145 && my < 185)
 			{
 				if (mx > 20 && mx < 60)
 				{
@@ -297,7 +297,6 @@ int main(int argc, char **argv)
 				else if (mx > 65 + 45 && mx < 140)
 				{
 					material = 3;
-					printf("ROCK AND STONE\n");
 				}
 			}
 		}

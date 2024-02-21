@@ -13,6 +13,8 @@ int main(int argc, char **argv)
 	bool brushMode = true;
 	// Initialize grid and random seed
 	Cell grid[COLS][ROWS] = {0};
+	memset(grid, 0, sizeof(grid)); // new zoomer way of memsetting everything to 0 (totally safe)
+	/* old boomer way of initializing grid
 	for (size_t i = 0; i < COLS; i++)
 	{
 		for (size_t j = 0; j < ROWS; j++)
@@ -25,7 +27,7 @@ int main(int argc, char **argv)
 			grid[i][j].mass = 0;
 			grid[i][j].spreadFactor = 0.0f;
 		}
-	}
+	}*/
 
 	srand((uint32_t)time(NULL));
 

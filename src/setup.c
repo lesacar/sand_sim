@@ -54,7 +54,7 @@ void spawnSandBrush(Cell (*grid)[ROWS], int32_t mouseX, int32_t mouseY, int32_t 
 				grid[i][j].velocityX = 0.0f;
 				grid[i][j].velocityY = 0.0f;
 			}
-			
+
 			if (i >= 0 && i < COLS && j >= 0 && j < ROWS && grid[i][j].material == 0)
 			{
 				if (brushMode)
@@ -79,7 +79,8 @@ void spawnSandBrush(Cell (*grid)[ROWS], int32_t mouseX, int32_t mouseY, int32_t 
 						}
 					}
 				}
-				else {
+				else
+				{
 					if (distance <= brushSize / 2)
 					{
 						// Set material and properties
@@ -97,6 +98,74 @@ void spawnSandBrush(Cell (*grid)[ROWS], int32_t mouseX, int32_t mouseY, int32_t 
 						{
 							grid[i][j].friction = 0.0f;
 							grid[i][j].spreadFactor = 0.0f;
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+void sand(Cell (*grid)[ROWS])
+{
+	for (int j = ROWS - 2; j >= 0; j--)
+	{
+		for (int i = 0; i < COLS; i++)
+		{
+			if (grid[i][j].material == 1)
+			{
+				if (grid[i][j + 1].material == 0)
+				{
+					grid[i][j + 1].material = grid[i][j].material;
+					grid[i][j].material = 0;
+
+					if (grid[i][j + 1].velocityY > 9.8f)
+					{
+						grid[i][j + 1].velocityY = 9.8f;
+					}
+					else
+					{
+						grid[i][j + 1].velocityY += 1.0f;
+					}
+				}
+				else if (grid[i][j + 1].material == 2)
+				{
+					// Apply downward movement
+					grid[i][j + 1].material = grid[i][j].material;
+					grid[i][j].material = 2;
+
+					// Apply gravity
+					if (grid[i][j + 1].velocityY > 9.8f)
+					{
+						grid[i][j + 1].velocityY = 9.8f;
+					}
+					else
+					{
+						grid[i][j + 1].velocityY += 1.0f;
+					}
+				}
+				else
+				{
+					float randomValue = (float)rand() / (float)RAND_MAX;
+					if (randomValue <= 0.5f)
+					{
+						randomValue = -1.0f;
+					}
+					else
+					{
+						randomValue = 1.0f;
+					}
+
+					bool canMoveLeft = (i > 0 && j + 1 < ROWS && grid[i - 1][j + 1].material == 0 && grid[i - 1][j].material == 0);
+					bool canMoveRight = (i < COLS - 1 && j + 1 < ROWS && grid[i + 1][j + 1].material == 0 && grid[i + 1][j].material == 0);
+
+					if (canMoveLeft || canMoveRight)
+					{
+						int newX = i + (int32_t)randomValue;
+						if (newX >= 0 && newX < COLS && j + 1 < ROWS && grid[newX][j].material == 0)
+						{
+							grid[newX][j + 1].material = grid[i][j].material;
+							grid[i][j].material = 0;
 						}
 					}
 				}

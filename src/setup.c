@@ -22,7 +22,8 @@ int32_t set_monitor_and_fps(int32_t monitor)
 }
 
 // Function to spawn sand brush
-void spawnSandBrush(Cell (*grid)[ROWS], int32_t mouseX, int32_t mouseY, int32_t brushSize, int32_t material)
+// Function to spawn sand brush
+void spawnSandBrush(Cell (*grid)[ROWS], int32_t mouseX, int32_t mouseY, int32_t brushSize, int32_t material, bool brushMode)
 {
 	int startX = mouseX / BLOCK_SIZE - brushSize / 2;
 	int startY = mouseY / BLOCK_SIZE - brushSize / 2;
@@ -41,21 +42,64 @@ void spawnSandBrush(Cell (*grid)[ROWS], int32_t mouseX, int32_t mouseY, int32_t 
 		{
 			float distance = sqrt(pow(i - centerX, 2) + pow(j - centerY, 2));
 
-			if (brushSize == 1)
+			// Check if the cell is within the grid bounds and is empty
+			if (i >= 0 && i < COLS && j >= 0 && j < ROWS && material == 0)
 			{
-				if (material == 1)
-				{
-					grid[i][j].friction = 0.95f;
-				}
-				grid[i][j].material = material;
+				grid[i][j].friction = 0.0f;
+				grid[i][j].isFreeFalling = false;
+				grid[i][j].mass = 0;
+				grid[i][j].material = 0;
+				grid[i][j].spreadFactor = 0;
+				grid[i][j].spreadFactor = 0.0f;
+				grid[i][j].velocityX = 0.0f;
+				grid[i][j].velocityY = 0.0f;
 			}
-			else if ((float)rand() / RAND_MAX > 0.8f && distance <= brushSize / 2)
+			
+			if (i >= 0 && i < COLS && j >= 0 && j < ROWS && grid[i][j].material == 0)
 			{
-				if (material == 1)
+				if (brushMode)
 				{
-					grid[i][j].friction = 0.95f;
+					if (brushSize == 1 || ((float)rand() / RAND_MAX > 0.8f && distance <= brushSize / 2))
+					{
+						// Set material and properties
+						grid[i][j].material = material;
+						if (material == 1)
+						{
+							grid[i][j].friction = 0.95f;
+						}
+						else if (material == 2)
+						{
+							grid[i][j].friction = 0.0f;
+							grid[i][j].spreadFactor = 5.0f;
+						}
+						else if (material == 3)
+						{
+							grid[i][j].friction = 0.0f;
+							grid[i][j].spreadFactor = 0.0f;
+						}
+					}
 				}
-				grid[i][j].material = material;
+				else {
+					if (distance <= brushSize / 2)
+					{
+						// Set material and properties
+						grid[i][j].material = material;
+						if (material == 1)
+						{
+							grid[i][j].friction = 0.95f;
+						}
+						else if (material == 2)
+						{
+							grid[i][j].friction = 0.0f;
+							grid[i][j].spreadFactor = 5.0f;
+						}
+						else if (material == 3)
+						{
+							grid[i][j].friction = 0.0f;
+							grid[i][j].spreadFactor = 0.0f;
+						}
+					}
+				}
 			}
 		}
 	}

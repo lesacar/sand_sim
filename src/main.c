@@ -8,6 +8,8 @@
 
 int main(int argc, char **argv)
 {
+	int32_t material = 0;
+	bool brushMode = true;
 	// Initialize grid and random seed
 	Cell grid[COLS][ROWS] = {0};
 	for (size_t i = 0; i < COLS; i++)
@@ -19,6 +21,8 @@ int main(int argc, char **argv)
 			grid[i][j].velocityX = 0.0f;
 			grid[i][j].velocityY = 0.0f;
 			grid[i][j].friction = 0.0f;
+			grid[i][j].mass = 0;
+			grid[i][j].spreadFactor = 0.0f;
 		}
 	}
 
@@ -60,47 +64,114 @@ int main(int argc, char **argv)
 								 // Update frame counters
 		frame_counter++;
 		fps_counter += cur_dt;
-				for (int j = ROWS - 2; j >= 0; j--)
+		// START SAND
+		for (int j = ROWS - 2; j >= 0; j--)
 		{
 			for (int i = 0; i < COLS; i++)
 			{
-				if (grid[i][j].material > 0)
+				if (grid[i][j].material == 1)
 				{
 					if (grid[i][j + 1].material == 0)
 					{
 						grid[i][j + 1].material = grid[i][j].material;
 						grid[i][j].material = 0;
-						
-						if (grid[i][j+1].velocityY > 9.8f)
+
+						if (grid[i][j + 1].velocityY > 9.8f)
 						{
-							grid[i][j+1].velocityY = 9.8f;
+							grid[i][j + 1].velocityY = 9.8f;
 						}
-						else {
-							grid[i][j+1].velocityY += 1.0f;
+						else
+						{
+							grid[i][j + 1].velocityY += 1.0f;
 						}
-						
-						
+					}
+					else if (grid[i][j + 1].material == 2)
+					{
+						// Apply downward movement
+						grid[i][j + 1].material = grid[i][j].material;
+						grid[i][j].material = 2;
+
+						// Apply gravity
+						if (grid[i][j + 1].velocityY > 9.8f)
+						{
+							grid[i][j + 1].velocityY = 9.8f;
+						}
+						else
+						{
+							grid[i][j + 1].velocityY += 1.0f;
+						}
 					}
 					else
 					{
 						float randomValue = (float)rand() / (float)RAND_MAX;
+						if (randomValue <= 0.5f)
+						{
+							randomValue = -1.0f;
+						}
+						else
+						{
+							randomValue = 1.0f;
+						}
+
 						bool canMoveLeft = (i > 0 && j + 1 < ROWS && grid[i - 1][j + 1].material == 0 && grid[i - 1][j].material == 0);
 						bool canMoveRight = (i < COLS - 1 && j + 1 < ROWS && grid[i + 1][j + 1].material == 0 && grid[i + 1][j].material == 0);
 
-						if (canMoveLeft && randomValue < 0.5f)
+						if (canMoveLeft || canMoveRight)
 						{
-							grid[i - 1][j + 1].material = grid[i][j].material;
-							grid[i][j].material = 0;
+							int newX = i + (int32_t)randomValue;
+							if (newX >= 0 && newX < COLS && j + 1 < ROWS && grid[newX][j].material == 0)
+							{
+								grid[newX][j + 1].material = grid[i][j].material;
+								grid[i][j].material = 0;
+							}
 						}
-						else if (canMoveRight && randomValue >= 0.5f)
+					}
+				}
+			}
+		}
+
+		// END SAND
+		// BEGIN WATER
+		for (int j = ROWS - 2; j >= 0; j--)
+		{
+			for (int i = 0; i < COLS; i++)
+			{
+				if (grid[i][j].material == 2)
+				{
+					if (grid[i][j + 1].material == 0)
+					{
+						// Apply downward movement
+						grid[i][j + 1].material = grid[i][j].material;
+						grid[i][j].material = 0;
+
+						// Apply gravity
+						if (grid[i][j + 1].velocityY > 9.8f)
 						{
-							grid[i + 1][j + 1].material = grid[i][j].material;
+							grid[i][j + 1].velocityY = 9.8f;
+						}
+						else
+						{
+							grid[i][j + 1].velocityY += 1.0f;
+						}
+					}
+
+					else
+					{
+						// Attempt horizontal movement
+						float randomValue = (float)rand() / (float)RAND_MAX;
+						int newX = i + (randomValue <= 0.5f ? -1 : 1);
+
+						// Check if newX is within bounds and the target cell is empty
+						if (newX >= 0 && newX < COLS && j + 1 < ROWS && grid[newX][j].material == 0)
+						{
+							grid[newX][j].material = grid[i][j].material;
 							grid[i][j].material = 0;
 						}
 					}
 				}
 			}
 		}
+		// END WATER
 		BeginDrawing();
 		ClearBackground(BLACK);
 		// Activate render texture
@@ -125,8 +196,8 @@ int main(int argc, char **argv)
 				// Start of a batch
 				int startJ = j;
 
-				// Find the end of the batch
-				while (j < ROWS && grid[i][j].material > 0)
+				// Find the end of the batch for material 1
+				while (j < ROWS && grid[i][j].material == 1)
 				{
 					j++;
 				}
@@ -134,8 +205,37 @@ int main(int argc, char **argv)
 				// End of batch (exclusive)
 				int endJ = j;
 
-				// Draw the batched rectangle
+				// Draw the batched rectangle for material 1
 				DrawRectangle(i, startJ, 1, endJ - startJ, (Color){201, 170, 127, 255});
+
+				// Start of a batch
+				startJ = j;
+
+				// Find the end of the batch for material 2
+				while (j < ROWS && grid[i][j].material == 2)
+				{
+					j++;
+				}
+
+				// End of batch (exclusive)
+				endJ = j;
+
+				// Draw the batched rectangle for material 2
+				DrawRectangle(i, startJ, 1, endJ - startJ, (Color){0, 0, 255, 255});
+				// Start of a batch
+				startJ = j;
+
+				// Find the end of the batch for material 3
+				while (j < ROWS && grid[i][j].material == 3)
+				{
+					j++;
+				}
+
+				// End of batch (exclusive)
+				endJ = j;
+
+				// Draw the batched rectangle for material 3
+				DrawRectangle(i, startJ, 1, endJ - startJ, (Color){51, 83, 69, 255});
 			}
 		}
 
@@ -143,20 +243,8 @@ int main(int argc, char **argv)
 		EndTextureMode();
 		DrawTexturePro(gridTexture.texture, (Rectangle){0, 0, (float)gridTexture.texture.width, (float)-gridTexture.texture.height}, (Rectangle){0, 0, (float)GetScreenWidth(), (float)GetScreenHeight()}, (Vector2){0, 0}, 0, WHITE);
 
-		// Draw sand blocks using CPU
-		/*for (int i = 0; i < COLS; i++)
-		{
-			for (int j = 0; j < ROWS; j++)
-			{
-				if (grid[i][j].material > 0)
-				{
-					DrawRectangle(i * BLOCK_SIZE, j * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE, (Color){201, 170, 127, 255});
-				}
-			}
-		}*/
-
 		// Update brush size with mouse wheel input
-		mscroll_brushSize += (int32_t)GetMouseWheelMove();
+		mscroll_brushSize += (int32_t)GetMouseWheelMove()*4;
 		if (mscroll_brushSize < 1)
 			mscroll_brushSize = 1;
 		else if (mscroll_brushSize > 50)
@@ -182,7 +270,71 @@ int main(int argc, char **argv)
 		#else*/
 		DrawTextEx(jetmono, TextFormat("Sand Blocks: %05d | Average FPS: %.2f | FPS: %05d ", sandBlockCount, (double)average_fps, (int)(1.0f / cur_dt)), (Vector2){20, 20}, 20, 1, BLACK);
 		// #endif
-		DrawText(TextFormat("Brush size: %d", mscroll_brushSize), 20, 44, 20, RED);
+		DrawText(TextFormat("Brush size: %d mode = %s", mscroll_brushSize, brushMode ? "true" : "false"), 20, 44, 20, RED);
+		DrawRectangle(15, 140, 200, 50, WHITE);
+		DrawRectangle(20, 145, 40, 40, (Color){201, 170, 127, 255});
+		DrawRectangle(65, 145, 40, 40, (Color){0, 0, 255, 255});
+		DrawRectangle(65 + 45, 145, 40, 40, (Color){51, 83, 69, 255});
+		if (IsKeyPressed(KEY_B))
+		{
+			brushMode = !brushMode;
+		}
+		
+		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+		{
+			int mx = GetMouseX();
+			int my = GetMouseY();
+			if (my > 145 && mx < 185)
+			{
+				if (mx > 20 && mx < 60)
+				{
+					material = 1;
+				}
+				else if (mx > 65 && mx < 65 + 40)
+				{
+					material = 2;
+				}
+				else if (mx > 65 + 45 && mx < 140)
+				{
+					material = 3;
+					printf("ROCK AND STONE\n");
+				}
+			}
+		}
+
+		if (IsMouseButtonDown(MOUSE_LEFT_BUTTON))
+		{
+			int mx = GetMouseX();
+			int my = GetMouseY();
+			if (mx > 15  && mx < 15+200 && my > 140 && my < 140+50)
+			{
+				
+			}else{
+			
+
+			int gridX = mx / BLOCK_SIZE;
+			int gridY = my / BLOCK_SIZE;
+
+			if (gridX >= 0 && gridX < COLS && gridY >= 0 && gridY < ROWS)
+			{
+				spawnSandBrush(grid, mx, my, mscroll_brushSize, material, brushMode);
+			}
+			}
+		}
+
+		if (IsMouseButtonDown(MOUSE_RIGHT_BUTTON))
+		{
+			int mx = GetMouseX();
+			int my = GetMouseY();
+
+			int gridX = mx / BLOCK_SIZE;
+			int gridY = my / BLOCK_SIZE;
+
+			if (gridX >= 0 && gridX < COLS && gridY >= 0 && gridY < ROWS)
+			{
+				spawnSandBrush(grid, mx, my, mscroll_brushSize, 0, brushMode);
+			}
+		}
 
 		// Display scroll hint message
 		if (!scroll_hint_message)
@@ -200,21 +352,6 @@ int main(int argc, char **argv)
 		if (IsKeyPressed(KEY_R))
 		{
 			memset(grid, 0, sizeof(grid));
-		}
-
-		// Spawn sand block brush if left mouse button is held down
-		if (IsMouseButtonDown(MOUSE_LEFT_BUTTON))
-		{
-			int mx = GetMouseX();
-			int my = GetMouseY();
-
-			int gridX = mx / BLOCK_SIZE;
-			int gridY = my / BLOCK_SIZE;
-
-			if (gridX >= 0 && gridX < COLS && gridY >= 0 && gridY < ROWS)
-			{
-				spawnSandBrush(grid, mx, my, mscroll_brushSize, 1);
-			}
 		}
 
 		EndDrawing();

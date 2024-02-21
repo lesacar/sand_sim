@@ -26,9 +26,11 @@ struct Cell {
     bool isFreeFalling;
     float velocityX;
     float velocityY;
+	int mass;
+	float spreadFactor;
 };
 
 typedef struct Cell Cell;
 
-void spawnSandBrush(Cell (*grid)[ROWS], int32_t mouseX, int32_t mouseY, int32_t brushSize, int32_t material);
+void spawnSandBrush(Cell (*grid)[ROWS], int32_t mouseX, int32_t mouseY, int32_t brushSize, int32_t material, bool brushMode);
 #endif /* SETUP_H */

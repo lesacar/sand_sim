@@ -1,6 +1,7 @@
 #include "setup.h"
 #include <raylib.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 int32_t setup_stuff(int32_t sc_wi, int32_t sc_he, const char *WindowTitle,
 					int32_t log_lvl, bool fullscreen)
@@ -188,6 +189,12 @@ void sand(Cell (*grid)[ROWS])
 bool tempWaterDebug = false;
 void updateWater(Cell (*grid)[ROWS])
 {
+	Cell(*grid_duplicate)[ROWS] = (Cell(*)[ROWS])malloc(sizeof(Cell) * COLS * ROWS);
+	if (grid_duplicate == NULL)
+	{
+		// Handle memory allocation failure
+		return;
+	}
 	for (int j = ROWS - 2; j >= 0; j--)
 	{ // Iterate from bottom to top
 		for (int i = COLS - 1; i >= 0; i--)

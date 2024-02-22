@@ -163,7 +163,7 @@ int main(int argc, char **argv)
 		// Display FPS and sand block count
 		DrawRectangle(15, 15, 580, 50, WHITE);
 		/*#ifdef WIN32
-		DrawText(TextFormat("Sand Blocks: %05d | Average FPS: %.2f | FPS: %05d ", sandBlockCount, (double)average_fps, (int)(1.0f / cur_dt)), 20, 20, 20, BLACK);
+		DrawText(TextFormat("Tiles: %05d | Average FPS: %.2f | FPS: %05d ", sandBlockCount, (double)average_fps, (int)(1.0f / cur_dt)), 20, 20, 20, BLACK);
 		#else*/
 		DrawTextEx(jetmono, TextFormat("Sand Blocks: %05d | Average FPS: %.2f | FPS: %05d ", sandBlockCount, (double)average_fps, (int)(1.0f / cur_dt)), (Vector2){20, 20}, 20, 1, BLACK);
 		// #endif
@@ -236,7 +236,7 @@ int main(int argc, char **argv)
 		if (!scroll_hint_message)
 		{
 			DrawText("Scroll with mouse wheel to increase/reduce brush size (max 50)", 20, 66, 20, YELLOW);
-			DrawText("Press R to reset simulation", 20, 88, 20, YELLOW);
+			DrawText("Press R to reset simulation, Press B to toggle BRUSH / CIRCLE draw mode", 20, 88, 20, YELLOW);
 			DrawText("Press H to hide this message", 20, 110, 20, YELLOW);
 			if (IsKeyPressed(KEY_H))
 			{

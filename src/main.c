@@ -141,11 +141,11 @@ int main(int argc, char **argv)
 		DrawTexturePro(gridTexture.texture, (Rectangle){0, 0, (float)gridTexture.texture.width, (float)-gridTexture.texture.height}, (Rectangle){0, 0, (float)GetScreenWidth(), (float)GetScreenHeight()}, (Vector2){0, 0}, 0, WHITE);
 
 		// Update brush size with mouse wheel input
-		mscroll_brushSize += (int32_t)GetMouseWheelMove() * 2;
+		mscroll_brushSize += (int32_t)GetMouseWheelMove() * 3;
 		if (mscroll_brushSize < 1)
 			mscroll_brushSize = 1;
-		else if (mscroll_brushSize > 50)
-			mscroll_brushSize = 50;
+		else if (mscroll_brushSize > 150)
+			mscroll_brushSize = 150;
 
 		// Count sand blocks for display
 		int sandBlockCount = 0;

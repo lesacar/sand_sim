@@ -192,57 +192,87 @@ void updateWater(Cell (*grid)[ROWS])
 	Cell(*grid_duplicate)[ROWS] = (Cell(*)[ROWS])malloc(sizeof(Cell) * COLS * ROWS);
 	if (grid_duplicate == NULL)
 	{
-		// Handle memory allocation failure
+		printf("Failed to malloc grid\n");
 		return;
 	}
+	memcpy(grid_duplicate, grid, sizeof(Cell) * COLS * ROWS);
+
 	for (int j = ROWS - 2; j >= 0; j--)
-	{ // Iterate from bottom to top
+	{
 		for (int i = COLS - 1; i >= 0; i--)
 		{
-			if (grid[i][j].material == 2)
+			if (grid_duplicate[i][j].material == 2)
 			{
-				grid[i][j].spreadFactor = 20;
-				if (grid[i][j + 1].material == 0)
+				if (grid_duplicate[i][j + 1].material == 0) // if nothing below
 				{
-					// Apply downward movement
-					grid[i][j + 1].material = grid[i][j].material;
-					grid[i][j].material = 0;
-
-					// Apply gravity
-					if (grid[i][j + 1].velocityY + 1.0f > 9.8f)
+					grid[i][j].isFreeFalling = true;
+					if (grid_duplicate[i][j].spreadFactor != 0)
 					{
-						grid[i][j + 1].velocityY = 9.8f;
+						grid[i][j].spreadFactor = grid_duplicate[i][j].spreadFactor; // Set spread factor for horizontal movement
 					}
 					else
 					{
-						grid[i][j + 1].velocityY += 1.0f;
+						grid[i][j].spreadFactor = 20; // Set default spread factor for downward movement
 					}
 				}
 				else
 				{
-					// Reset velocityY when encountering an obstacle
-					grid[i][j].velocityY = 0;
-
-					// Attempt horizontal movement
-					int direction = (i % 2 == 0 ? -1 : 1); // Alternate direction based on column index
-
-					int maxDistance = abs((int)grid[i][j].spreadFactor);
-					// Try to move within the bounds of spreadFactor
-					for (int distance = 1; distance <= maxDistance; distance++)
+					grid[i][j].isFreeFalling = false;
+					// If not falling, ensure the spread factor remains unchanged
+					if (!grid[i][j].isFreeFalling && grid_duplicate[i][j].spreadFactor != 0)
 					{
-						int newX = i + (direction * distance);
+						grid[i][j].spreadFactor = grid_duplicate[i][j].spreadFactor;
+					}
+				}
 
-						if (newX >= 0 && newX < COLS && j + 1 < ROWS &&
-							grid[newX][j].material == 0)
+				if (grid_duplicate[i][j].isFreeFalling)
+				{
+					// Apply downward movement
+					if (j + 1 < ROWS && grid_duplicate[i][j + 1].material == 0)
+					{
+						grid[i][j + 1].material = grid[i][j].material;
+						grid[i][j + 1].isFreeFalling = true;
+						grid[i][j].material = 0;
+						grid[i][j].isFreeFalling = false;
+						grid[i][j + 1].velocityY = grid_duplicate[i][j].velocityY + 1.0f;
+						if (grid[i][j + 1].velocityY > 9.8f)
 						{
-
-							grid[newX][j].material = grid[i][j].material;
-							grid[i][j].material = 0;
-							break; // Exit loop after moving
+							grid[i][j + 1].velocityY = 9.8f;
 						}
+					}
+				}
+				else
+				{
+					// Check for horizontal movement
+					int direction = 0;
+					if (grid_duplicate[i][j].spreadFactor < 0)
+					{
+						direction = -1; // Move left
+					}
+					else if (grid_duplicate[i][j].spreadFactor > 0)
+					{
+						direction = 1; // Move right
+					}
+					int newX = i + direction;
+
+					if (newX >= 0 && newX < COLS && j < ROWS &&
+						grid_duplicate[newX][j].material == 0)
+					{
+						// Move horizontally
+						grid[newX][j].material = grid_duplicate[i][j].material;
+						grid[newX][j].isFreeFalling = true;
+						grid[i][j].material = 0;
+						grid[i][j].isFreeFalling = false;
+						grid[newX][j].spreadFactor = direction; // Set spreadFactor of the new cell
+					}
+					else
+					{
+						// Reverse direction if obstacle encountered or edge reached
+						grid[i][j].spreadFactor *= -1; // Reverse direction
 					}
 				}
 			}
 		}
 	}
+	free(grid_duplicate);
 }

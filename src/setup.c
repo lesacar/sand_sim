@@ -1,7 +1,9 @@
 #include "setup.h"
 #include <raylib.h>
+#include <stdio.h>
 
-int32_t setup_stuff(int32_t sc_wi, int32_t sc_he, const char *WindowTitle, int32_t log_lvl, bool fullscreen)
+int32_t setup_stuff(int32_t sc_wi, int32_t sc_he, const char *WindowTitle,
+					int32_t log_lvl, bool fullscreen)
 {
 	SetTraceLogLevel(log_lvl);
 	if (fullscreen)
@@ -23,7 +25,8 @@ int32_t set_monitor_and_fps(int32_t monitor)
 
 // Function to spawn sand brush
 // Function to spawn sand brush
-void spawnSandBrush(Cell (*grid)[ROWS], int32_t mouseX, int32_t mouseY, int32_t brushSize, int32_t material, bool brushMode)
+void spawnSandBrush(Cell (*grid)[ROWS], int32_t mouseX, int32_t mouseY,
+					int32_t brushSize, int32_t material, bool brushMode)
 {
 	int startX = mouseX / BLOCK_SIZE - brushSize / 2;
 	int startY = mouseY / BLOCK_SIZE - brushSize / 2;
@@ -55,11 +58,13 @@ void spawnSandBrush(Cell (*grid)[ROWS], int32_t mouseX, int32_t mouseY, int32_t 
 				grid[i][j].velocityY = 0.0f;
 			}
 
-			if (i >= 0 && i < COLS && j >= 0 && j < ROWS && grid[i][j].material == 0)
+			if (i >= 0 && i < COLS && j >= 0 && j < ROWS &&
+				grid[i][j].material == 0)
 			{
 				if (brushMode)
 				{
-					if (brushSize == 1 || ((float)rand() / RAND_MAX > 0.8f && distance <= brushSize / 2))
+					if (brushSize == 1 ||
+						((float)rand() / RAND_MAX > 0.8f && distance <= brushSize / 2))
 					{
 						// Set material and properties
 						grid[i][j].material = material;
@@ -156,16 +161,77 @@ void sand(Cell (*grid)[ROWS])
 						randomValue = 1.0f;
 					}
 
-					bool canMoveLeft = (i > 0 && j + 1 < ROWS && grid[i - 1][j + 1].material == 0 && grid[i - 1][j].material == 0);
-					bool canMoveRight = (i < COLS - 1 && j + 1 < ROWS && grid[i + 1][j + 1].material == 0 && grid[i + 1][j].material == 0);
+					bool canMoveLeft =
+						(i > 0 && j + 1 < ROWS && grid[i - 1][j + 1].material == 0 &&
+						 grid[i - 1][j].material == 0);
+					bool canMoveRight = (i < COLS - 1 && j + 1 < ROWS &&
+										 grid[i + 1][j + 1].material == 0 &&
+										 grid[i + 1][j].material == 0);
 
 					if (canMoveLeft || canMoveRight)
 					{
 						int newX = i + (int32_t)randomValue;
-						if (newX >= 0 && newX < COLS && j + 1 < ROWS && grid[newX][j].material == 0)
+						if (newX >= 0 && newX < COLS && j + 1 < ROWS &&
+							grid[newX][j].material == 0)
 						{
 							grid[newX][j + 1].material = grid[i][j].material;
 							grid[i][j].material = 0;
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+// water.c
+bool tempWaterDebug = false;
+void updateWater(Cell (*grid)[ROWS])
+{
+	for (int j = ROWS - 2; j >= 0; j--)
+	{ // Iterate from bottom to top
+		for (int i = COLS - 1; i >= 0; i--)
+		{
+			if (grid[i][j].material == 2)
+			{
+				grid[i][j].spreadFactor = 20;
+				if (grid[i][j + 1].material == 0)
+				{
+					// Apply downward movement
+					grid[i][j + 1].material = grid[i][j].material;
+					grid[i][j].material = 0;
+
+					// Apply gravity
+					if (grid[i][j + 1].velocityY + 1.0f > 9.8f)
+					{
+						grid[i][j + 1].velocityY = 9.8f;
+					}
+					else
+					{
+						grid[i][j + 1].velocityY += 1.0f;
+					}
+				}
+				else
+				{
+					// Reset velocityY when encountering an obstacle
+					grid[i][j].velocityY = 0;
+
+					// Attempt horizontal movement
+					int direction = (i % 2 == 0 ? -1 : 1); // Alternate direction based on column index
+
+					int maxDistance = abs((int)grid[i][j].spreadFactor);
+					// Try to move within the bounds of spreadFactor
+					for (int distance = 1; distance <= maxDistance; distance++)
+					{
+						int newX = i + (direction * distance);
+
+						if (newX >= 0 && newX < COLS && j + 1 < ROWS &&
+							grid[newX][j].material == 0)
+						{
+
+							grid[newX][j].material = grid[i][j].material;
+							grid[i][j].material = 0;
+							break; // Exit loop after moving
 						}
 					}
 				}

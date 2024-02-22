@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -std=c99 -O3 -fopenmp
+CFLAGS = -Wall -Wextra -std=c99 -O3 -pthread
 RM = rm
 WARN = -Wall -Wextra -Wpedantic \
          -Wmissing-prototypes -Wstrict-prototypes -Wold-style-definition \

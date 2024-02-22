@@ -16,6 +16,14 @@
 #define COLS (SCREEN_WIDTH / BLOCK_SIZE)
 #define NUM_THREADS 4
 
+enum mats
+{
+	Empty,
+	Sand,
+	Water,
+	Stone
+};
+
 typedef struct
 {
 	uint8_t material;	// 8 bits

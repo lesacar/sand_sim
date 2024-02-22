@@ -196,7 +196,6 @@ void updateWater(Cell (*grid)[ROWS])
 		return;
 	}
 	memcpy(grid_duplicate, grid, sizeof(Cell) * COLS * ROWS);
-
 	for (int j = ROWS - 2; j >= 0; j--)
 	{
 		for (int i = COLS - 1; i >= 0; i--)
@@ -224,7 +223,6 @@ void updateWater(Cell (*grid)[ROWS])
 						grid[i][j].spreadFactor = grid_duplicate[i][j].spreadFactor;
 					}
 				}
-
 				if (grid_duplicate[i][j].isFreeFalling)
 				{
 					// Apply downward movement
@@ -254,7 +252,6 @@ void updateWater(Cell (*grid)[ROWS])
 						direction = 1; // Move right
 					}
 					int newX = i + direction;
-
 					if (newX >= 0 && newX < COLS && j < ROWS &&
 						grid_duplicate[newX][j].material == 0)
 					{

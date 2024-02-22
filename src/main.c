@@ -25,6 +25,7 @@ int main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}
 	set_monitor_and_fps(current_monitor);
+	Shader bloomShader = LoadShader(0, "resources/shaders/glsl330/bloom.fs");
 
 	// Variables for brush size and scroll hint message
 	int32_t mscroll_brushSize = 1;
@@ -59,6 +60,7 @@ int main(int argc, char **argv)
 		BeginDrawing();
 		ClearBackground(BLACK);
 		// Activate render texture
+		BeginShaderMode(bloomShader);
 		BeginTextureMode(gridTexture);
 		ClearBackground(BLACK);
 		for (int i = 0; i < COLS; i++)
@@ -126,7 +128,7 @@ int main(int argc, char **argv)
 		// End drawing to render texture
 		EndTextureMode();
 		DrawTexturePro(gridTexture.texture, (Rectangle){0, 0, (float)gridTexture.texture.width, (float)-gridTexture.texture.height}, (Rectangle){0, 0, (float)GetScreenWidth(), (float)GetScreenHeight()}, (Vector2){0, 0}, 0, WHITE);
-
+		EndShaderMode();
 		// Update brush size with mouse wheel input
 		mscroll_brushSize += (int32_t)GetMouseWheelMove() * 3;
 		if (mscroll_brushSize < 1)
@@ -253,6 +255,8 @@ int main(int argc, char **argv)
 			frame_counter = 0;
 		};
 	}
+	UnloadShader(bloomShader);
 	UnloadRenderTexture(gridTexture);
+	CloseWindow();
 	return 0;
 }

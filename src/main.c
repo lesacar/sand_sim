@@ -25,7 +25,8 @@ int main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}
 	set_monitor_and_fps(current_monitor);
-	Shader bloomShader = LoadShader(0, "resources/shaders/glsl330/bloom.fs");
+	SetConfigFlags(FLAG_MSAA_4X_HINT);
+	Shader bloomShader = LoadShader(0, "src/shaders/bloom.fs");
 
 	// Variables for brush size and scroll hint message
 	int32_t mscroll_brushSize = 1;

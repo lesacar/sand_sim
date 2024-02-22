@@ -10,7 +10,8 @@ int main(int argc, char **argv)
 {
 	int32_t material = 0;
 	bool brushMode = true;
-	// Initialize grid and random seed
+	// enum mats mat;
+	//  Initialize grid and random seed
 	Cell grid[COLS][ROWS] = {0};
 	memset(grid, 0, sizeof(grid));
 
@@ -66,7 +67,7 @@ int main(int argc, char **argv)
 			while (j < ROWS)
 			{
 				// Find the first non-empty cell
-				while (j < ROWS && grid[i][j].material == 0)
+				while (j < ROWS && grid[i][j].material == Empty)
 				{
 					j++;
 				}
@@ -80,7 +81,7 @@ int main(int argc, char **argv)
 				int startJ = j;
 
 				// Find the end of the batch for material 1
-				while (j < ROWS && grid[i][j].material == 1)
+				while (j < ROWS && grid[i][j].material == Sand)
 				{
 					j++;
 				}
@@ -95,7 +96,7 @@ int main(int argc, char **argv)
 				startJ = j;
 
 				// Find the end of the batch for material 2
-				while (j < ROWS && grid[i][j].material == 2)
+				while (j < ROWS && grid[i][j].material == Water)
 				{
 					j++;
 				}
@@ -109,7 +110,7 @@ int main(int argc, char **argv)
 				startJ = j;
 
 				// Find the end of the batch for material 3
-				while (j < ROWS && grid[i][j].material == 3)
+				while (j < ROWS && grid[i][j].material == Stone)
 				{
 					j++;
 				}
@@ -134,14 +135,14 @@ int main(int argc, char **argv)
 			mscroll_brushSize = 150;
 
 		// Count sand blocks for display
-		int sandBlockCount = 0;
+		int tileCount = 0;
 		for (int i = 0; i < COLS; i++)
 		{
 			for (int j = 0; j < ROWS; j++)
 			{
-				if (grid[i][j].material > 0)
+				if (grid[i][j].material > Empty)
 				{
-					sandBlockCount++;
+					tileCount++;
 				}
 			}
 		}
@@ -149,9 +150,9 @@ int main(int argc, char **argv)
 		// Display FPS and sand block count
 		DrawRectangle(15, 15, 580, 50, WHITE);
 		/*#ifdef WIN32
-		DrawText(TextFormat("Tiles: %05d | Average FPS: %.2f | FPS: %05d ", sandBlockCount, (double)average_fps, (int)(1.0f / cur_dt)), 20, 20, 20, BLACK);
+		DrawText(TextFormat("Tiles: %05d | Average FPS: %.2f | FPS: %05d ", tileCount, (double)average_fps, (int)(1.0f / cur_dt)), 20, 20, 20, BLACK);
 		#else*/
-		DrawTextEx(jetmono, TextFormat("Sand Blocks: %05d | Average FPS: %.2f | FPS: %05d ", sandBlockCount, (double)average_fps, (int)(1.0f / cur_dt)), (Vector2){20, 20}, 20, 1, BLACK);
+		DrawTextEx(jetmono, TextFormat("Sand Blocks: %05d | Average FPS: %.2f | FPS: %05d ", tileCount, (double)average_fps, (int)(1.0f / cur_dt)), (Vector2){20, 20}, 20, 1, BLACK);
 		// #endif
 		DrawText(TextFormat("Brush size: %d mode = %s", mscroll_brushSize, brushMode ? "true" : "false"), 20, 44, 20, RED);
 		DrawRectangle(15, 140, 200, 50, WHITE);
@@ -171,15 +172,15 @@ int main(int argc, char **argv)
 			{
 				if (mx > 20 && mx < 60)
 				{
-					material = 1;
+					material = Sand;
 				}
 				else if (mx > 65 && mx < 65 + 40)
 				{
-					material = 2;
+					material = Water;
 				}
 				else if (mx > 65 + 45 && mx < 140)
 				{
-					material = 3;
+					material = Stone;
 				}
 			}
 		}

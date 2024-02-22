@@ -25,7 +25,6 @@ int32_t set_monitor_and_fps(int32_t monitor)
 }
 
 // Function to spawn sand brush
-// Function to spawn sand brush
 void spawnSandBrush(Cell (*grid)[ROWS], int32_t mouseX, int32_t mouseY,
 					int32_t brushSize, int32_t material, bool brushMode)
 {
@@ -47,7 +46,7 @@ void spawnSandBrush(Cell (*grid)[ROWS], int32_t mouseX, int32_t mouseY,
 			float distance = sqrt(pow(i - centerX, 2) + pow(j - centerY, 2));
 
 			// Check if the cell is within the grid bounds and is empty
-			if (i >= 0 && i < COLS && j >= 0 && j < ROWS && material == 0)
+			if (i >= 0 && i < COLS && j >= 0 && j < ROWS && material == Empty)
 			{
 				grid[i][j].friction = 0.0f;
 				grid[i][j].isFreeFalling = false;
@@ -69,16 +68,16 @@ void spawnSandBrush(Cell (*grid)[ROWS], int32_t mouseX, int32_t mouseY,
 					{
 						// Set material and properties
 						grid[i][j].material = material;
-						if (material == 1)
+						if (material == Sand)
 						{
 							grid[i][j].friction = 0.95f;
 						}
-						else if (material == 2)
+						else if (material == Water)
 						{
 							grid[i][j].friction = 0.0f;
 							grid[i][j].spreadFactor = 5.0f;
 						}
-						else if (material == 3)
+						else if (material == Stone)
 						{
 							grid[i][j].friction = 0.0f;
 							grid[i][j].spreadFactor = 0.0f;
@@ -91,16 +90,16 @@ void spawnSandBrush(Cell (*grid)[ROWS], int32_t mouseX, int32_t mouseY,
 					{
 						// Set material and properties
 						grid[i][j].material = material;
-						if (material == 1)
+						if (material == Sand)
 						{
 							grid[i][j].friction = 0.95f;
 						}
-						else if (material == 2)
+						else if (material == Water)
 						{
 							grid[i][j].friction = 0.0f;
 							grid[i][j].spreadFactor = 5.0f;
 						}
-						else if (material == 3)
+						else if (material == Stone)
 						{
 							grid[i][j].friction = 0.0f;
 							grid[i][j].spreadFactor = 0.0f;

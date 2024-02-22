@@ -1,4 +1,5 @@
 # Particle simulation in C and raylib
+*linux raylib is in ./static ; windows raylib is in ./static/windows*
 Early development stages, currently supports 
 - Opens on the monitor passed by -m N (monitor number) and spawns a window on that monitor, using that monitor's refresh rate
 - 3 materials allow for various physics simulations

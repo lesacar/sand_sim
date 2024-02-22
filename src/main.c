@@ -48,7 +48,7 @@ int main(int argc, char **argv)
 		printf("Failed to create grid texture\n");
 		exit(EXIT_FAILURE);
 	}
-	//	SetTargetFPS(0);
+	// SetTargetFPS(0);
 
 	while (!WindowShouldClose())
 	{
@@ -58,12 +58,16 @@ int main(int argc, char **argv)
 		fps_counter += cur_dt;
 		sand(grid);
 		updateWater(grid);
+
 		BeginDrawing();
 		ClearBackground(BLACK);
 		// Activate render texture
-		BeginShaderMode(bloomShader);
+		// BeginShaderMode(bloomShader);
 		BeginTextureMode(gridTexture);
+
 		ClearBackground(BLACK);
+
+		// uniform vec4 colDiffuse;
 		for (int i = 0; i < COLS; i++)
 		{
 			int j = 0;
@@ -89,7 +93,6 @@ int main(int argc, char **argv)
 					j++;
 				}
 
-				// End of batch (exclusive)
 				int endJ = j;
 
 				// Draw the batched rectangle for material 1
@@ -129,8 +132,9 @@ int main(int argc, char **argv)
 		// End drawing to render texture
 		EndTextureMode();
 		DrawTexturePro(gridTexture.texture, (Rectangle){0, 0, (float)gridTexture.texture.width, (float)-gridTexture.texture.height}, (Rectangle){0, 0, (float)GetScreenWidth(), (float)GetScreenHeight()}, (Vector2){0, 0}, 0, WHITE);
-		EndShaderMode();
-		// Update brush size with mouse wheel input
+		// EndShaderMode();
+
+		//  Update brush size with mouse wheel input
 		mscroll_brushSize += (int32_t)GetMouseWheelMove() * 3;
 		if (mscroll_brushSize < 1)
 			mscroll_brushSize = 1;

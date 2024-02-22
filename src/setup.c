@@ -113,18 +113,25 @@ void spawnSandBrush(Cell (*grid)[ROWS], int32_t mouseX, int32_t mouseY,
 
 void sand(Cell (*grid)[ROWS])
 {
+	Cell(*grid_duplicate)[ROWS] = (Cell(*)[ROWS])malloc(sizeof(Cell) * COLS * ROWS);
+	if (grid_duplicate == NULL)
+	{
+		printf("Failed to malloc grid\n");
+		return;
+	}
+	memcpy(grid_duplicate, grid, sizeof(Cell) * COLS * ROWS);
 	for (int j = ROWS - 2; j >= 0; j--)
 	{
 		for (int i = 0; i < COLS; i++)
 		{
-			if (grid[i][j].material == 1)
+			if (grid_duplicate[i][j].material == Sand)
 			{
-				if (grid[i][j + 1].material == 0)
+				if (grid_duplicate[i][j + 1].material == Empty)
 				{
 					grid[i][j + 1].material = grid[i][j].material;
-					grid[i][j].material = 0;
+					grid[i][j].material = Empty;
 
-					if (grid[i][j + 1].velocityY > 9.8f)
+					if (grid[i][j + 1].velocityY + 1.0f > 9.8f)
 					{
 						grid[i][j + 1].velocityY = 9.8f;
 					}
@@ -133,11 +140,11 @@ void sand(Cell (*grid)[ROWS])
 						grid[i][j + 1].velocityY += 1.0f;
 					}
 				}
-				else if (grid[i][j + 1].material == 2)
+				else if (grid_duplicate[i][j + 1].material == Water)
 				{
 					// Apply downward movement
-					grid[i][j + 1].material = grid[i][j].material;
-					grid[i][j].material = 2;
+					grid[i][j + 1].material = Sand;
+					grid[i][j].material = Water;
 
 					// Apply gravity
 					if (grid[i][j + 1].velocityY > 9.8f)
@@ -160,32 +167,35 @@ void sand(Cell (*grid)[ROWS])
 					{
 						randomValue = 1.0f;
 					}
-
 					bool canMoveLeft =
-						(i > 0 && j + 1 < ROWS && grid[i - 1][j + 1].material == 0 &&
-						 grid[i - 1][j].material == 0);
+						(i > 0 && j + 1 < ROWS && grid[i - 1][j + 1].material == Empty &&
+						 grid[i - 1][j].material == Empty);
 					bool canMoveRight = (i < COLS - 1 && j + 1 < ROWS &&
-										 grid[i + 1][j + 1].material == 0 &&
-										 grid[i + 1][j].material == 0);
+										 grid[i + 1][j + 1].material == Empty &&
+										 grid[i + 1][j].material == Empty);
 
 					if (canMoveLeft || canMoveRight)
 					{
 						int newX = i + (int32_t)randomValue;
 						if (newX >= 0 && newX < COLS && j + 1 < ROWS &&
-							grid[newX][j].material == 0)
+							grid[newX][j].material == Empty)
 						{
-							grid[newX][j + 1].material = grid[i][j].material;
-							grid[i][j].material = 0;
+							// Check if the target position is already occupied
+							if (grid[newX][j + 1].material == Empty)
+							{
+								// Move the current sand particle to the new position
+								grid[newX][j + 1].material = Sand;
+								grid[i][j].material = Empty;
+							}
 						}
 					}
 				}
 			}
 		}
 	}
+	free(grid_duplicate);
 }
 
-// water.c
-bool tempWaterDebug = false;
 void updateWater(Cell (*grid)[ROWS])
 {
 	Cell(*grid_duplicate)[ROWS] = (Cell(*)[ROWS])malloc(sizeof(Cell) * COLS * ROWS);
@@ -195,76 +205,46 @@ void updateWater(Cell (*grid)[ROWS])
 		return;
 	}
 	memcpy(grid_duplicate, grid, sizeof(Cell) * COLS * ROWS);
+
 	for (int j = ROWS - 2; j >= 0; j--)
 	{
-		for (int i = COLS - 1; i >= 0; i--)
+		for (int i = 0; i < COLS; i++)
 		{
-			if (grid_duplicate[i][j].material == 2)
+			if (grid_duplicate[i][j].material == Water)
 			{
-				if (grid_duplicate[i][j + 1].material == 0) // if nothing below
-				{
-					grid[i][j].isFreeFalling = true;
-					if (grid_duplicate[i][j].spreadFactor != 0)
-					{
-						grid[i][j].spreadFactor = grid_duplicate[i][j].spreadFactor; // Set spread factor for horizontal movement
-					}
-					else
-					{
-						grid[i][j].spreadFactor = 20; // Set default spread factor for downward movement
-					}
-				}
-				else
-				{
-					grid[i][j].isFreeFalling = false;
-					// If not falling, ensure the spread factor remains unchanged
-					if (!grid[i][j].isFreeFalling && grid_duplicate[i][j].spreadFactor != 0)
-					{
-						grid[i][j].spreadFactor = grid_duplicate[i][j].spreadFactor;
-					}
-				}
-				if (grid_duplicate[i][j].isFreeFalling)
+				if (grid_duplicate[i][j + 1].material == Empty)
 				{
 					// Apply downward movement
-					if (j + 1 < ROWS && grid_duplicate[i][j + 1].material == 0)
+					grid[i][j + 1].material = grid[i][j].material;
+					grid[i][j].material = Empty;
+
+					// Apply gravity
+					if (grid[i][j + 1].velocityY > 9.8f)
 					{
-						grid[i][j + 1].material = grid[i][j].material;
-						grid[i][j + 1].isFreeFalling = true;
-						grid[i][j].material = 0;
-						grid[i][j].isFreeFalling = false;
-						grid[i][j + 1].velocityY = grid_duplicate[i][j].velocityY + 1.0f;
-						if (grid[i][j + 1].velocityY > 9.8f)
-						{
-							grid[i][j + 1].velocityY = 9.8f;
-						}
+						grid[i][j + 1].velocityY = 9.8f;
+					}
+					else
+					{
+						grid[i][j + 1].velocityY += 1.0f;
 					}
 				}
 				else
 				{
-					// Check for horizontal movement
-					int direction = 0;
-					if (grid_duplicate[i][j].spreadFactor < 0)
+					// Attempt horizontal movement
+					float randomValue = (float)rand() / (float)RAND_MAX;
+					int newX = i + (randomValue <= 0.5f ? -1 : 1);
+
+					// Check if newX is within bounds and the target cell is empty
+					if (newX >= 0 && newX < COLS && j + 1 < ROWS && grid[newX][j].material == Empty && grid_duplicate[newX][j].material == Empty)
 					{
-						direction = -1; // Move left
-					}
-					else if (grid_duplicate[i][j].spreadFactor > 0)
-					{
-						direction = 1; // Move right
-					}
-					int newX = i + direction;
-					if (newX >= 0 && newX < COLS && j < ROWS &&
-						grid_duplicate[newX][j].material == 0)
-					{
-						// Move horizontally
-						grid[newX][j].material = grid_duplicate[i][j].material;
-						grid[newX][j].isFreeFalling = true;
-						grid[i][j].material = 0;
-						grid[i][j].isFreeFalling = false;
-						grid[newX][j].spreadFactor = direction; // Set spreadFactor of the new cell
-					}
-					else
-					{
-						// Reverse direction if obstacle encountered or edge reached
-						grid[i][j].spreadFactor *= -1; // Reverse direction
+
+						// Check if the target cell is not already occupied by another water particle
+						if (grid[newX][j + 1].material == Empty && grid[newX][j + 1].material == Empty)
+						{
+							printf("TEST\n");
+							grid[newX][j + 1].material = grid[i][j].material;
+							grid[i][j].material = Empty;
+						}
 					}
 				}
 			}

@@ -239,7 +239,7 @@ void updateWater(Cell (*grid)[ROWS])
 					for (int32_t k = 0; k < abs((int32_t)grid[i][j].spreadFactor); k++)
 					{
 						int nextX = newX + direction;
-						if (grid_duplicate[nextX][j + 1].material == Empty &&
+						if (grid_duplicate[nextX][j + 1].material == Empty && nextX + i < COLS &&
 							(j + 1 >= ROWS || grid[nextX][j + 1].material == Empty) && grid_duplicate[nextX][j].material == Empty &&
 							(j >= ROWS || grid[nextX][j].material == Empty))
 						{

@@ -213,7 +213,7 @@ void updateWater(Cell (*grid)[ROWS])
 			if (grid_duplicate[i][j].material == Water)
 			{
 				grid[i][j].spreadFactor = 5.0f;
-				if (grid_duplicate[i][j + 1].material == Empty && grid[i][j + 1].material == Empty)
+				if (j + 1 < ROWS && grid_duplicate[i][j + 1].material == Empty && grid[i][j + 1].material == Empty)
 				{
 					// Apply downward movement
 					grid[i][j + 1].material = grid[i][j].material;

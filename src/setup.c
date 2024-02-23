@@ -212,7 +212,7 @@ void updateWater(Cell (*grid)[ROWS])
 		{
 			if (grid_duplicate[i][j].material == Water)
 			{
-				if (grid_duplicate[i][j + 1].material == Empty)
+				if (grid_duplicate[i][j + 1].material == Empty && grid[i][j + 1].material == Empty)
 				{
 					// Apply downward movement
 					grid[i][j + 1].material = grid[i][j].material;
@@ -230,6 +230,7 @@ void updateWater(Cell (*grid)[ROWS])
 				}
 				else
 				{
+
 					// Attempt horizontal movement
 					float randomValue = (float)rand() / (float)RAND_MAX;
 					int newX = i + (randomValue <= 0.5f ? -1 : 1);
@@ -237,12 +238,11 @@ void updateWater(Cell (*grid)[ROWS])
 					// Check if newX is within bounds and the target cell is empty
 					if (newX >= 0 && newX < COLS && j + 1 < ROWS && grid[newX][j].material == Empty && grid_duplicate[newX][j].material == Empty)
 					{
-
-						// Check if the target cell is not already occupied by another water particle
-						if (grid[newX][j + 1].material == Empty && grid[newX][j + 1].material == Empty)
+						//  Check if the target cell is not already occupied by another water particle
+						// if (grid[newX][j].material == Empty && grid[newX][j].material == Empty)
+						if (grid_duplicate[newX][j].material == Empty && grid[newX][j].material == Empty)
 						{
-							printf("TEST\n");
-							grid[newX][j + 1].material = grid[i][j].material;
+							grid[newX][j].material = grid[i][j].material;
 							grid[i][j].material = Empty;
 						}
 					}

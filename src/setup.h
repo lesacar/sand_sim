@@ -26,6 +26,12 @@ enum mats
 
 typedef struct
 {
+	Vector2 position;
+	Color color;
+} Vertex;
+
+typedef struct
+{
 	uint8_t material;	// 8 bits
 	float friction;		// 32 bits
 	bool isFreeFalling; // 8 bits ?

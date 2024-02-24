@@ -74,7 +74,7 @@ int main(int argc, char **argv)
 			int j = 0;
 			while (j < ROWS)
 			{
-				// Find the first non-empty cell
+				// Find the start of the batch
 				while (j < ROWS && grid[i][j].material == Empty)
 				{
 					j++;
@@ -85,48 +85,35 @@ int main(int argc, char **argv)
 					break; // No more non-empty cells in this column
 				}
 
-				// Start of a batch
-				int startJ = j;
+				// Determine the material of the current batch
+				int32_t currentMaterial = grid[i][j].material;
 
-				// Find the end of the batch for material 1
-				while (j < ROWS && grid[i][j].material == Sand)
+				// Find the end of the batch for the current material
+				int startJ = j;
+				while (j < ROWS && grid[i][j].material == currentMaterial)
 				{
 					j++;
 				}
-
 				int endJ = j;
 
-				// Draw the batched rectangle for material 1
-				DrawRectangle(i, startJ, 1, endJ - startJ, (Color){201, 170, 127, 255});
-
-				// Start of a batch
-				startJ = j;
-
-				// Find the end of the batch for material 2
-				while (j < ROWS && grid[i][j].material == Water)
+				// Draw the batched rectangle based on the material
+				Color color;
+				switch (currentMaterial)
 				{
-					j++;
+				case Sand:
+					color = (Color){201, 170, 127, 255};
+					break;
+				case Water:
+					color = (Color){0, 0, 255, 255};
+					break;
+				case Stone:
+					color = (Color){51, 83, 69, 255};
+					break;
+				default:
+					// Handle other materials if necessary
+					break;
 				}
-
-				// End of batch (exclusive)
-				endJ = j;
-
-				// Draw the batched rectangle for material 2
-				DrawRectangle(i, startJ, 1, endJ - startJ, (Color){0, 0, 255, 255});
-				// Start of a batch
-				startJ = j;
-
-				// Find the end of the batch for material 3
-				while (j < ROWS && grid[i][j].material == Stone)
-				{
-					j++;
-				}
-
-				// End of batch (exclusive)
-				endJ = j;
-
-				// Draw the batched rectangle for material 3
-				DrawRectangle(i, startJ, 1, endJ - startJ, (Color){51, 83, 69, 255});
+				DrawRectangle(i, startJ, 1, endJ - startJ, color);
 			}
 		}
 

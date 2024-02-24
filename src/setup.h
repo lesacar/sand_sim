@@ -19,6 +19,15 @@
 #define COLS (SCREEN_WIDTH / BLOCK_SIZE)
 #define NUM_THREADS 4
 
+#define COLOR_SAND \
+	(Color) { 201, 170, 127, 255 }
+#define COLOR_WATER \
+	(Color) { 0, 0, 255, 255 }
+#define COLOR_STONE \
+	(Color) { 51, 83, 69, 255 }
+#define NOCOLOR \
+	(Color) { 0, 0, 0, 0 }
+
 typedef enum
 {
 	Empty,
@@ -44,7 +53,8 @@ typedef struct
 	float velocityY;	// 32 bits
 	int32_t mass;		// 32 bits
 	float spreadFactor; // 32 bits
-} Cell;					// 176 bits
+	Color color;		// 32 bits
+} Cell;					// 208 bits
 
 // Function prototype
 int32_t setup_stuff(int32_t sc_wi, int32_t sc_he, const char *WindowTitle, int32_t log_lvl, bool fullscreen);

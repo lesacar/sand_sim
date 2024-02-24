@@ -75,10 +75,11 @@ void spawnSandBrush(Cell (*grid)[ROWS], int32_t mouseX, int32_t mouseY,
 				grid[i][j].spreadFactor = 0.0f;
 				grid[i][j].velocityX = 0.0f;
 				grid[i][j].velocityY = 0.0f;
+				grid[i][j].color = NOCOLOR;
 			}
 
 			if (i >= 0 && i < COLS && j >= 0 && j < ROWS &&
-				grid[i][j].material == 0)
+				grid[i][j].material == Empty)
 			{
 				if (brushMode)
 				{
@@ -90,16 +91,19 @@ void spawnSandBrush(Cell (*grid)[ROWS], int32_t mouseX, int32_t mouseY,
 						if (material == Sand)
 						{
 							grid[i][j].friction = 0.95f;
+							grid[i][j].color = (Color){201, 170, 127, 255};
 						}
 						else if (material == Water)
 						{
 							grid[i][j].friction = 0.0f;
 							grid[i][j].spreadFactor = 5.0f;
+							grid[i][j].color = (Color){0, 0, 255, 255};
 						}
 						else if (material == Stone)
 						{
 							grid[i][j].friction = 0.0f;
 							grid[i][j].spreadFactor = 0.0f;
+							grid[i][j].color = (Color){51, 83, 69, 255};
 						}
 					}
 				}
@@ -112,16 +116,19 @@ void spawnSandBrush(Cell (*grid)[ROWS], int32_t mouseX, int32_t mouseY,
 						if (material == Sand)
 						{
 							grid[i][j].friction = 0.95f;
+							grid[i][j].color = (Color){201, 170, 127, 255};
 						}
 						else if (material == Water)
 						{
 							grid[i][j].friction = 0.0f;
 							grid[i][j].spreadFactor = 5.0f;
+							grid[i][j].color = (Color){0, 0, 255, 255};
 						}
 						else if (material == Stone)
 						{
 							grid[i][j].friction = 0.0f;
 							grid[i][j].spreadFactor = 0.0f;
+							grid[i][j].color = (Color){51, 83, 69, 255};
 						}
 					}
 				}
@@ -142,6 +149,8 @@ void sand(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS])
 				{
 					grid[i][j + 1].material = grid[i][j].material;
 					grid[i][j].material = Empty;
+					grid[i][j + 1].color = grid[i][j].color;
+					grid[i][j].color = NOCOLOR;
 
 					if (grid[i][j + 1].velocityY + 1.0f > 9.8f)
 					{
@@ -157,6 +166,8 @@ void sand(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS])
 					// Apply downward movement
 					grid[i][j + 1].material = Sand;
 					grid[i][j].material = Water;
+					grid[i][j + 1].color = COLOR_SAND;
+					grid[i][j].color = COLOR_WATER;
 
 					// Apply gravity
 					if (grid[i][j + 1].velocityY > 9.8f)
@@ -198,6 +209,8 @@ void sand(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS])
 								// Move the current sand particle to the new position
 								grid[newX][j + 1].material = Sand;
 								grid[i][j].material = Empty;
+								grid[newX][j + 1].color = COLOR_SAND;
+								grid[i][j].color = NOCOLOR;
 							}
 						}
 					}
@@ -225,6 +238,8 @@ void updateWater(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS])
 					// Apply downward movement
 					grid[i][j + 1].material = grid[i][j].material;
 					grid[i][j].material = Empty;
+					grid[i][j + 1].color = grid[i][j].color;
+					grid[i][j].color = NOCOLOR;
 
 					// Apply gravity
 					if (grid[i][j + 1].velocityY > 9.8f)
@@ -258,6 +273,8 @@ void updateWater(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS])
 							{
 								grid[nextX][j + 1].material = grid[i][j].material;
 								grid[i][j].material = Empty;
+								grid[nextX][j + 1].color = grid[i][j].color;
+								grid[i][j].color = NOCOLOR;
 							}
 
 							else if (nextX >= 0 && nextX < COLS && grid[nextX][j].material != Empty)
@@ -285,6 +302,8 @@ void updateWater(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS])
 							{
 								grid[newX][j].material = grid[i][j].material;
 								grid[i][j].material = Empty;
+								grid[newX][j].color = grid[i][j].color;
+								grid[i][j].color = NOCOLOR;
 							}
 						}
 						++apfC;

@@ -198,6 +198,8 @@ void sand(Cell (*grid)[ROWS])
 
 void updateWater(Cell (*grid)[ROWS])
 {
+	int apf = 3;
+	int apfC = 0;
 	Cell(*grid_duplicate)[ROWS] = (Cell(*)[ROWS])malloc(sizeof(Cell) * COLS * ROWS);
 	if (grid_duplicate == NULL)
 	{
@@ -210,9 +212,10 @@ void updateWater(Cell (*grid)[ROWS])
 	{
 		for (int i = 0; i < COLS; i++)
 		{
+			grid[i][j].spreadFactor = 5.0f;
 			if (grid_duplicate[i][j].material == Water)
 			{
-				grid[i][j].spreadFactor = 7.0f;
+
 				if (j + 1 < ROWS && grid_duplicate[i][j + 1].material == Empty && grid[i][j + 1].material == Empty)
 				{
 					// Apply downward movement
@@ -231,49 +234,58 @@ void updateWater(Cell (*grid)[ROWS])
 				}
 				else
 				{
-					// Attempt horizontal movement
-					float randomValue = (float)rand() / (float)RAND_MAX;
-					int direction = (randomValue <= 0.5f ? -1 : 1);
-					int newX = i;
-					grid[i][j].spreadFactor = (rand() % (int32_t)grid[i][j].spreadFactor);
-					for (int32_t k = 0; k < abs((int32_t)grid[i][j].spreadFactor); k++)
-					{
-						int nextX = newX + direction;
-						if (grid_duplicate[nextX][j + 1].material == Empty && nextX + i < COLS &&
-							(j + 1 >= ROWS || grid[nextX][j + 1].material == Empty) && grid_duplicate[nextX][j].material == Empty &&
-							(j >= ROWS || grid[nextX][j].material == Empty))
-						{
-							grid[nextX][j + 1].material = grid[i][j].material;
-							grid[i][j].material = Empty;
-						}
-
-						else if (nextX >= 0 && nextX < COLS && grid[nextX][j].material != Empty)
-						{
-							// Stop horizontal movement if an obstacle is encountered
-							break;
-						}
-						else
-						{
-							// Update newX if the next position is valid and empty
-							newX = nextX;
-						}
-					}
-
-					// printf("%d:%d ", newX, i);
-
-					// printf("%d:%d:%f  ", newX, i, grid[i][j].spreadFactor);
-					// Check if newX is within bounds and the target cell is empty
-					if (newX >= 0 && newX < COLS && j + 1 < ROWS && grid[newX][j].material == Empty && grid_duplicate[newX][j].material == Empty)
+					int tempFactor = (int32_t)grid[i][j].spreadFactor;
+					while (apfC < apf)
 					{
 
-						//  Check if the target cell is not already occupied by another water particle
-						// if (grid[newX][j].material == Empty && grid[newX][j].material == Empty)
-						if (grid_duplicate[newX][j].material == Empty && grid[newX][j].material == Empty)
+						// Attempt horizontal movement
+						float randomValue = (float)rand() / (float)RAND_MAX;
+						int direction = (randomValue <= 0.5f ? -1 : 1);
+						int newX = i;
+
+						// printf("%d\n", tempFactor);
+						grid[i][j].spreadFactor = (float)(rand() % tempFactor);
+						for (int32_t k = 0; k < abs((int32_t)grid[i][j].spreadFactor); k++)
 						{
-							grid[newX][j].material = grid[i][j].material;
-							grid[i][j].material = Empty;
+							int nextX = newX + direction;
+							if (grid_duplicate[nextX][j + 1].material == Empty && nextX + i < COLS &&
+								(j + 1 >= ROWS || grid[nextX][j + 1].material == Empty) && grid_duplicate[nextX][j].material == Empty &&
+								(j >= ROWS || grid[nextX][j].material == Empty))
+							{
+								grid[nextX][j + 1].material = grid[i][j].material;
+								grid[i][j].material = Empty;
+							}
+
+							else if (nextX >= 0 && nextX < COLS && grid[nextX][j].material != Empty)
+							{
+								// Stop horizontal movement if an obstacle is encountered
+								break;
+							}
+							else
+							{
+								// Update newX if the next position is valid and empty
+								newX = nextX;
+							}
 						}
+
+						// printf("%d:%d ", newX, i);
+
+						// printf("%d:%d:%f  ", newX, i, grid[i][j].spreadFactor);
+						// Check if newX is within bounds and the target cell is empty
+						if (newX >= 0 && newX < COLS && j + 1 < ROWS && grid[newX][j].material == Empty && grid_duplicate[newX][j].material == Empty)
+						{
+
+							//  Check if the target cell is not already occupied by another water particle
+							// if (grid[newX][j].material == Empty && grid[newX][j].material == Empty)
+							if (grid_duplicate[newX][j].material == Empty && grid[newX][j].material == Empty)
+							{
+								grid[newX][j].material = grid[i][j].material;
+								grid[i][j].material = Empty;
+							}
+						}
+						++apfC;
 					}
+					apfC = 0;
 				}
 			}
 		}

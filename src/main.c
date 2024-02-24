@@ -49,8 +49,6 @@ int main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}
 	// SetTargetFPS(0);
-	int apf = 5;
-	int apfC = 0;
 
 	while (!WindowShouldClose())
 	{
@@ -58,15 +56,9 @@ int main(int argc, char **argv)
 								 // Update frame counters
 		frame_counter++;
 		fps_counter += cur_dt;
-
-		while (apfC < apf)
-		{
-			sand(grid);
-			updateWater(grid);
-			++apfC;
-		}
-		apfC = 0;
 		// updateWater(grid);
+		sand(grid);
+		updateWater(grid);
 
 		BeginDrawing();
 		ClearBackground(BLACK);

@@ -24,6 +24,25 @@ int32_t set_monitor_and_fps(int32_t monitor)
 	return 0;
 }
 
+static uint32_t xorshift_state = 123456789;
+
+// XORShift random number generator function
+uint32_t xorshift()
+{
+	uint32_t x = xorshift_state;
+	x ^= x << 13;
+	x ^= x >> 17;
+	x ^= x << 5;
+	xorshift_state = x;
+	return x;
+}
+
+// Faster random number generator function
+float fastRand()
+{
+	return (float)xorshift() / (float)UINT32_MAX;
+}
+
 // Function to spawn sand brush
 void spawnSandBrush(Cell (*grid)[ROWS], int32_t mouseX, int32_t mouseY,
 					int32_t brushSize, int32_t material, bool brushMode)
@@ -151,7 +170,7 @@ void sand(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS])
 				}
 				else
 				{
-					float randomValue = (float)rand() / (float)RAND_MAX;
+					float randomValue = fastRand();
 					if (randomValue <= 0.5f)
 					{
 						randomValue = -1.0f;
@@ -224,7 +243,7 @@ void updateWater(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS])
 					{
 
 						// Attempt horizontal movement
-						float randomValue = (float)rand() / (float)RAND_MAX;
+						float randomValue = fastRand();
 						int direction = (randomValue <= 0.5f ? -1 : 1);
 						int newX = i;
 

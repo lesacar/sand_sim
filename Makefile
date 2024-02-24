@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c99 -O3 -pthread -mrdrnd
+CFLAGS = -Wall -Wextra -std=c99 -pthread
 RM = rm
 WARN = -Wall -Wextra -Wpedantic \
          -Wmissing-prototypes -Wstrict-prototypes -Wold-style-definition \
@@ -58,3 +58,9 @@ win: TARGET = $(BUILD_DIR)/main.exe
 win: OBJ = $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(SRC))
 
 win: $(TARGET)
+
+debug: CFLAGS += -g
+debug: $(TARGET)
+
+release: CFLAGS += -O3 -flto
+release: $(TARGET)

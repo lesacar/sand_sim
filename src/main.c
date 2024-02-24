@@ -70,55 +70,18 @@ int main(int argc, char **argv)
 		// Activate render texture
 		// BeginShaderMode(bloomShader);
 		BeginTextureMode(gridTexture);
-
 		ClearBackground(BLACK);
 
 		// uniform vec4 colDiffuse;
 		for (int i = 0; i < COLS; i++)
 		{
-			int j = 0;
-			while (j < ROWS)
+			for (int j = 0; j < ROWS; j++)
 			{
-				// Find the start of the batch
-				while (j < ROWS && grid[i][j].material == Empty)
+				if (grid[i][j].material != Empty)
 				{
-					j++;
+					Color color = grid[i][j].color;
+					DrawRectangle(i, j, 1, 1, color);
 				}
-
-				if (j == ROWS)
-				{
-					break; // No more non-empty cells in this column
-				}
-
-				// Determine the material of the current batch
-				int32_t currentMaterial = grid[i][j].material;
-
-				// Find the end of the batch for the current material
-				int startJ = j;
-				while (j < ROWS && grid[i][j].material == currentMaterial)
-				{
-					j++;
-				}
-				int endJ = j;
-
-				// Draw the batched rectangle based on the material
-				Color color;
-				switch (currentMaterial)
-				{
-				case Sand:
-					color = (Color){201, 170, 127, 255};
-					break;
-				case Water:
-					color = (Color){0, 0, 255, 255};
-					break;
-				case Stone:
-					color = (Color){51, 83, 69, 255};
-					break;
-				default:
-					// Handle other materials if necessary
-					break;
-				}
-				DrawRectangle(i, startJ, 1, endJ - startJ, color);
 			}
 		}
 

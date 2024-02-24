@@ -49,8 +49,8 @@ typedef struct
 // Function prototype
 int32_t setup_stuff(int32_t sc_wi, int32_t sc_he, const char *WindowTitle, int32_t log_lvl, bool fullscreen);
 int32_t set_monitor_and_fps(int32_t monitor);
-void sand(Cell (*grid)[ROWS]);
-void updateWater(Cell (*grid)[ROWS]);
+void sand(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS]);
+void updateWater(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS]);
 
 void spawnSandBrush(Cell (*grid)[ROWS], int32_t mouseX, int32_t mouseY, int32_t brushSize, int32_t material, bool brushMode);
 #endif /* SETUP_H */

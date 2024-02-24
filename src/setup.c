@@ -111,15 +111,8 @@ void spawnSandBrush(Cell (*grid)[ROWS], int32_t mouseX, int32_t mouseY,
 	}
 }
 
-void sand(Cell (*grid)[ROWS])
+void sand(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS])
 {
-	Cell(*grid_duplicate)[ROWS] = (Cell(*)[ROWS])malloc(sizeof(Cell) * COLS * ROWS);
-	if (grid_duplicate == NULL)
-	{
-		printf("Failed to malloc grid\n");
-		return;
-	}
-	memcpy(grid_duplicate, grid, sizeof(Cell) * COLS * ROWS);
 	for (int j = ROWS - 2; j >= 0; j--)
 	{
 		for (int i = 0; i < COLS; i++)
@@ -193,20 +186,12 @@ void sand(Cell (*grid)[ROWS])
 			}
 		}
 	}
-	free(grid_duplicate);
 }
 
-void updateWater(Cell (*grid)[ROWS])
+void updateWater(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS])
 {
 	int apf = 1;
 	int apfC = 0;
-	Cell(*grid_duplicate)[ROWS] = (Cell(*)[ROWS])malloc(sizeof(Cell) * COLS * ROWS);
-	if (grid_duplicate == NULL)
-	{
-		printf("Failed to malloc grid\n");
-		return;
-	}
-	memcpy(grid_duplicate, grid, sizeof(Cell) * COLS * ROWS);
 
 	for (int j = ROWS - 2; j >= 0; j--)
 	{
@@ -234,7 +219,7 @@ void updateWater(Cell (*grid)[ROWS])
 				}
 				else
 				{
-					int tempFactor = (int32_t)grid[i][j].spreadFactor;
+					// int tempFactor = (int32_t)grid[i][j].spreadFactor;
 					while (apfC < apf)
 					{
 
@@ -244,11 +229,11 @@ void updateWater(Cell (*grid)[ROWS])
 						int newX = i;
 
 						// printf("%d\n", tempFactor);
-						grid[i][j].spreadFactor = (float)(rand() % tempFactor);
+						// grid[i][j].spreadFactor = (float)(rand() % tempFactor);
 						for (int32_t k = 0; k < abs((int32_t)grid[i][j].spreadFactor); k++)
 						{
 							int nextX = newX + direction;
-							if (grid_duplicate[nextX][j + 1].material == Empty && nextX + i < COLS && nextX > 0 &&
+							if ((j + 1 < ROWS || grid_duplicate[nextX][j + 1].material == Empty) && nextX + i < COLS && nextX > 0 &&
 								(j + 1 >= ROWS || grid[nextX][j + 1].material == Empty) && grid_duplicate[nextX][j].material == Empty &&
 								(j >= ROWS || grid[nextX][j].material == Empty))
 							{
@@ -290,5 +275,4 @@ void updateWater(Cell (*grid)[ROWS])
 			}
 		}
 	}
-	free(grid_duplicate);
 }

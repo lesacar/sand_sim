@@ -48,17 +48,22 @@ int main(int argc, char **argv)
 		printf("Failed to create grid texture\n");
 		exit(EXIT_FAILURE);
 	}
-	// SetTargetFPS(0);
-
+	SetTargetFPS(0);
+	Cell(*grid_duplicate)[ROWS] = (Cell(*)[ROWS])malloc(sizeof(Cell) * COLS * ROWS);
+	if (grid_duplicate == NULL)
+	{
+		printf("Failed to malloc grid\n");
+		return -1;
+	}
 	while (!WindowShouldClose())
 	{
 		cur_dt = GetFrameTime(); // Get frame time
 								 // Update frame counters
 		frame_counter++;
 		fps_counter += cur_dt;
-		// updateWater(grid);
-		sand(grid);
-		updateWater(grid);
+		memcpy(grid_duplicate, grid, sizeof(Cell) * COLS * ROWS);
+		sand(grid, grid_duplicate);
+		updateWater(grid, grid_duplicate);
 
 		BeginDrawing();
 		ClearBackground(BLACK);
@@ -250,6 +255,7 @@ int main(int argc, char **argv)
 	}
 	UnloadShader(bloomShader);
 	UnloadRenderTexture(gridTexture);
+	free(grid_duplicate);
 	CloseWindow();
 	return 0;
 }

@@ -8,6 +8,9 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <math.h>
+#include <omp.h>
+#include <immintrin.h>
+#include <raylib.h>
 
 #define SCREEN_WIDTH 1440
 #define SCREEN_HEIGHT 720
@@ -16,19 +19,21 @@
 #define COLS (SCREEN_WIDTH / BLOCK_SIZE)
 #define NUM_THREADS 4
 
-enum mats
+typedef enum
 {
 	Empty,
 	Sand,
 	Water,
 	Stone
-};
+} MaterialTypes;
 
 typedef struct
 {
-	Vector2 position;
+	int startRow;
+	int endRow;
+	int column;
 	Color color;
-} Vertex;
+} Batch;
 
 typedef struct
 {
@@ -40,15 +45,6 @@ typedef struct
 	int32_t mass;		// 32 bits
 	float spreadFactor; // 32 bits
 } Cell;					// 176 bits
-// typedef struct Cell Cell;
-
-typedef struct
-{
-	int thread_id;
-	Cell (*grid)[ROWS];
-} ThreadData;
-
-extern bool tempWaterDebug;
 
 // Function prototype
 int32_t setup_stuff(int32_t sc_wi, int32_t sc_he, const char *WindowTitle, int32_t log_lvl, bool fullscreen);

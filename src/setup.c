@@ -19,9 +19,9 @@ int32_t setup_stuff(int32_t sc_wi, int32_t sc_he, const char *WindowTitle,
 int32_t set_monitor_and_fps(int32_t monitor)
 {
 	SetWindowMonitor(monitor - 1);
-	const int32_t initial_fps = GetMonitorRefreshRate(monitor - 1);
+	const int32_t initial_fps = GetMonitorRefreshRate(monitor - 1) + 10;
 	SetTargetFPS(initial_fps);
-	return 0;
+	return initial_fps;
 }
 
 static uint32_t xorshift_state = 123456789;

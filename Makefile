@@ -63,4 +63,5 @@ debug: CFLAGS += -g
 debug: $(TARGET)
 
 release: CFLAGS += -O3 -flto
+release: clean
 release: $(TARGET)

@@ -8,6 +8,7 @@
 
 int main(int argc, char **argv)
 {
+	bool toggle_fps_cap = true;
 	int32_t material = 0;
 	bool brushMode = true;
 	// enum mats mat;
@@ -24,12 +25,12 @@ int main(int argc, char **argv)
 	{
 		exit(EXIT_FAILURE);
 	}
-	set_monitor_and_fps(current_monitor);
+	printf("TARGET FPS: %d\n", set_monitor_and_fps(current_monitor));
 	SetConfigFlags(FLAG_MSAA_4X_HINT);
 	Shader bloomShader = LoadShader(0, "src/shaders/bloom.fs");
 
 	// Variables for brush size and scroll hint message
-	int32_t mscroll_brushSize = 1;
+	int32_t mscroll_brushSize = 10;
 	bool scroll_hint_message = false;
 
 	float cur_dt = 0;
@@ -37,7 +38,6 @@ int main(int argc, char **argv)
 	float fps_counter = 0.0f;
 	int frame_counter = 0;
 	float average_fps = 0.0f;
-	SetConfigFlags(FLAG_MSAA_4X_HINT);
 	// Font jetmono = LoadFontEx("./src/fonts/JetBrainsMonoNLNerdFont-Regular.ttf", 20, defaultCodepoints, 1);
 	Font jetmono = LoadFontEx("./src/fonts/JetBrainsMonoNLNerdFont-Regular.ttf", 20, 0, 251);
 
@@ -48,7 +48,7 @@ int main(int argc, char **argv)
 		printf("Failed to create grid texture\n");
 		exit(EXIT_FAILURE);
 	}
-	SetTargetFPS(0);
+	// SetTargetFPS(0);
 	Cell(*grid_duplicate)[ROWS] = (Cell(*)[ROWS])malloc(sizeof(Cell) * COLS * ROWS);
 	if (grid_duplicate == NULL)
 	{
@@ -187,10 +187,23 @@ int main(int argc, char **argv)
 		{
 			DrawText("Scroll with mouse wheel to increase/reduce brush size (max 50)", 20, 66, 20, YELLOW);
 			DrawText("Press R to reset simulation, Press B to toggle BRUSH / CIRCLE draw mode", 20, 88, 20, YELLOW);
-			DrawText("Press H to hide this message", 20, 110, 20, YELLOW);
+			DrawText("Press K to toggle fps cap", 20, 110, 20, YELLOW);
+			DrawText("Press H to hide this message", 20, 132, 20, YELLOW); // vertical offset by 22 between texts
 			if (IsKeyPressed(KEY_H))
 			{
 				scroll_hint_message = true;
+			}
+			
+		}
+		if (IsKeyPressed(KEY_K))
+		{
+			if (toggle_fps_cap) {
+				SetTargetFPS(GetMonitorRefreshRate(GetCurrentMonitor()) + 10);
+				toggle_fps_cap = !toggle_fps_cap;
+			}
+			else {
+				SetTargetFPS(0);
+				toggle_fps_cap = !toggle_fps_cap;
 			}
 		}
 

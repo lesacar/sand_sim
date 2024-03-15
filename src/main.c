@@ -15,9 +15,6 @@ int main(int argc, char **argv)
 	//  Initialize grid and random seed
 	Cell grid[COLS][ROWS] = {0};
 	memset(grid, 0, sizeof(grid));
-
-	srand((uint32_t)time(NULL));
-
 	// Setup window and display settings
 	setup_stuff(SCREEN_WIDTH, SCREEN_HEIGHT, "RAYtitle", LOG_INFO, false);
 	int32_t current_monitor = handle_arguments(argc, argv);
@@ -198,7 +195,7 @@ int main(int argc, char **argv)
 		if (IsKeyPressed(KEY_K))
 		{
 			if (toggle_fps_cap) {
-				SetTargetFPS(GetMonitorRefreshRate(GetCurrentMonitor()) + 10);
+				SetTargetFPS(30);
 				toggle_fps_cap = !toggle_fps_cap;
 			}
 			else {

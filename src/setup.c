@@ -192,10 +192,10 @@ void sand(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS])
 					}
 					bool canMoveLeft =
 						(i > 0 && j + 1 < ROWS && grid[i - 1][j + 1].material == Empty &&
-						 grid[i - 1][j].material == Empty);
+						grid[i - 1][j].material == Empty);
 					bool canMoveRight = (i < COLS - 1 && j + 1 < ROWS &&
-										 grid[i + 1][j + 1].material == Empty &&
-										 grid[i + 1][j].material == Empty);
+						grid[i + 1][j + 1].material == Empty &&
+						grid[i + 1][j].material == Empty);
 
 					if (canMoveLeft || canMoveRight)
 					{
@@ -220,97 +220,108 @@ void sand(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS])
 	}
 }
 
+void updateWaterReverse(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS])
+{
+	return;
+}
+
 void updateWater(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS])
 {
-	int apf = 1;
-	int apfC = 0;
+    int apf = 1;
+    int apfC = 0;
 
-	for (int j = ROWS - 2; j >= 0; j--)
-	{
-		for (int i = 0; i < COLS; i++)
-		{
-			grid[i][j].spreadFactor = 5.0f;
-			if (grid_duplicate[i][j].material == Water)
-			{
+    for (int j = ROWS - 2; j >= 0; j--)
+    {
+        // Shuffle the order in which cells are processed within each row
+        int order[COLS];
+        for (int i = 0; i < COLS; i++)
+        {
+            order[i] = i;
+        }
 
-				if (j + 1 < ROWS && grid_duplicate[i][j + 1].material == Empty && grid[i][j + 1].material == Empty)
-				{
-					// Apply downward movement
-					grid[i][j + 1].material = grid[i][j].material;
-					grid[i][j].material = Empty;
-					grid[i][j + 1].color = grid[i][j].color;
-					grid[i][j].color = NOCOLOR;
+        // Shuffle the order array using Fisher-Yates shuffle algorithm
+        for (int i = COLS - 1; i > 0; i--)
+        {
+            int randomIndex = rand() % (i + 1);
+            int temp = order[i];
+            order[i] = order[randomIndex];
+            order[randomIndex] = temp;
+        }
 
-					// Apply gravity
-					if (grid[i][j + 1].velocityY > 9.8f)
-					{
-						grid[i][j + 1].velocityY = 9.8f;
-					}
-					else
-					{
-						grid[i][j + 1].velocityY += 1.0f;
-					}
-				}
-				else
-				{
-					// int tempFactor = (int32_t)grid[i][j].spreadFactor;
-					while (apfC < apf)
-					{
+        // Process cells in the shuffled order
+        for (int i = 0; i < COLS; i++)
+        {
+            int index = order[i];
+            grid[index][j].spreadFactor = 5.0f;
 
-						// Attempt horizontal movement
-						float randomValue = fastRand();
-						int direction = (randomValue <= 0.5f ? -1 : 1);
-						int newX = i;
+            if (grid_duplicate[index][j].material == Water)
+            {
+                if (j + 1 < ROWS && grid_duplicate[index][j + 1].material == Empty && grid[index][j + 1].material == Empty)
+                {
+                    // Apply downward movement
+                    grid[index][j + 1].material = grid[index][j].material;
+                    grid[index][j].material = Empty;
+                    grid[index][j + 1].color = grid[index][j].color;
+                    grid[index][j].color = NOCOLOR;
 
-						// printf("%d\n", tempFactor);
-						// grid[i][j].spreadFactor = (float)(rand() % tempFactor);
-						for (int32_t k = 0; k < abs((int32_t)grid[i][j].spreadFactor); k++)
-						{
-							int nextX = newX + direction;
-							if ((j + 1 < ROWS || grid_duplicate[nextX][j + 1].material == Empty) && nextX < COLS && nextX > 0 &&
-								(j + 1 >= ROWS || grid[nextX][j + 1].material == Empty) && grid_duplicate[nextX][j].material == Empty &&
-								(j >= ROWS || grid[nextX][j].material == Empty))
-							{
-								grid[nextX][j + 1].material = grid[i][j].material;
-								grid[i][j].material = Empty;
-								grid[nextX][j + 1].color = grid[i][j].color;
-								grid[i][j].color = NOCOLOR;
-							}
+                    // Apply gravity
+                    if (grid[index][j + 1].velocityY > 9.8f)
+                    {
+                        grid[index][j + 1].velocityY = 9.8f;
+                    }
+                    else
+                    {
+                        grid[index][j + 1].velocityY += 1.0f;
+                    }
+                }
+                else
+                {
+                    while (apfC < apf)
+                    {
+                        float randomValue = fastRand();
+                        int direction = (randomValue <= 0.5f ? -1 : 1);
+                        int newX = index;
 
-							else if (nextX >= 0 && nextX < COLS && grid[nextX][j].material != Empty)
-							{
-								// Stop horizontal movement if an obstacle is encountered
-								break;
-							}
-							else
-							{
-								// Update newX if the next position is valid and empty
-								newX = nextX;
-							}
-						}
+                        for (int32_t k = 0; k < abs((int32_t)grid[index][j].spreadFactor); k++)
+                        {
+                            int nextX = newX + direction;
+                            if ((j + 1 < ROWS || grid_duplicate[nextX][j + 1].material == Empty) && nextX < COLS && nextX > 0 &&
+                                (j + 1 >= ROWS || grid[nextX][j + 1].material == Empty) && grid_duplicate[nextX][j].material == Empty &&
+                                (j >= ROWS || grid[nextX][j].material == Empty))
+                            {
+                                grid[nextX][j + 1].material = grid[index][j].material;
+                                grid[index][j].material = Empty;
+                                grid[nextX][j + 1].color = grid[index][j].color;
+                                grid[index][j].color = NOCOLOR;
+                            }
+                            else if (nextX >= 0 && nextX < COLS && grid[nextX][j].material != Empty)
+                            {
+                                // Stop horizontal movement if an obstacle is encountered
+                                break;
+                            }
+                            else
+                            {
+                                // Update newX if the next position is valid and empty
+                                newX = nextX;
+                            }
+                        }
 
-						// printf("%d:%d ", newX, i);
-
-						// printf("%d:%d:%f  ", newX, i, grid[i][j].spreadFactor);
-						// Check if newX is within bounds and the target cell is empty
-						if (newX >= 0 && newX < COLS && j + 1 < ROWS && grid[newX][j].material == Empty && grid_duplicate[newX][j].material == Empty)
-						{
-
-							//  Check if the target cell is not already occupied by another water particle
-							// if (grid[newX][j].material == Empty && grid[newX][j].material == Empty)
-							if (grid_duplicate[newX][j].material == Empty && grid[newX][j].material == Empty)
-							{
-								grid[newX][j].material = grid[i][j].material;
-								grid[i][j].material = Empty;
-								grid[newX][j].color = grid[i][j].color;
-								grid[i][j].color = NOCOLOR;
-							}
-						}
-						++apfC;
-					}
-					apfC = 0;
-				}
-			}
-		}
-	}
+                        if (newX >= 0 && newX < COLS && j + 1 < ROWS && grid[newX][j].material == Empty && grid_duplicate[newX][j].material == Empty)
+                        {
+                            if (grid_duplicate[newX][j].material == Empty && grid[newX][j].material == Empty)
+                            {
+                                grid[newX][j].material = grid[index][j].material;
+                                grid[index][j].material = Empty;
+                                grid[newX][j].color = grid[index][j].color;
+                                grid[index][j].color = NOCOLOR;
+                            }
+                        }
+                        ++apfC;
+                    }
+                    apfC = 0;
+                }
+            }
+        }
+    }
 }
+

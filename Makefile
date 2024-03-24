@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c99 -fopenmp
+CFLAGS = -Wall -Wextra -std=c99 -fopenmp -march=native
 RM = rm
 WARN = -Wall -Wextra -Wpedantic \
          -Wmissing-prototypes -Wstrict-prototypes -Wold-style-definition \
@@ -34,7 +34,7 @@ all: $(TARGET)
 
 $(TARGET): $(OBJ)
 	@mkdir -p $(BUILD_DIR)
-	$(CC) $(INCLUDE) $(CFLAGS) $^ -o $@ $(LDFLAGS) 
+	$(CC) $(WARN) $(INCLUDE) $(CFLAGS) $^ -o $@ $(LDFLAGS) 
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
 	@mkdir -p $(dir $@)
@@ -51,7 +51,7 @@ check: $(TARGET)
 clean:
 	$(RM) -rf $(BUILD_DIR) $(OBJ_DIR) windows_obj
 
-win: CC = x86_64-w64-mingw32-gcc -D WIN32
+win: CC = x86_64-w64-mingw32-gcc -D WIN32 -O3
 win: LDFLAGS = -L./static/windows -lraylib -lm -lopengl32 -lgdi32 -lwinmm
 win: INCLUDE = -I./static/windows/include/
 win: TARGET = $(BUILD_DIR)/main.exe
@@ -62,6 +62,6 @@ win: $(TARGET)
 debug: CFLAGS += -g
 debug: $(TARGET)
 
-release: CFLAGS += -O3 -flto
+release: CFLAGS += -O3
 release: clean
 release: $(TARGET)

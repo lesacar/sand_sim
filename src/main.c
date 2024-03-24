@@ -1,3 +1,6 @@
+// TODO: When sand is falling through water, sometimes the water will randomly consume a 1 tile wide sand pillar and replace it with water, visually you don't notice it, and the tile count stays the same but sand gets replaced by water, possibly missing if material == sand somewhere
+
+
 #include <stdio.h>
 #include <raylib.h>
 #include <stdlib.h>
@@ -45,7 +48,7 @@ int main(int argc, char **argv)
 		printf("Failed to create grid texture\n");
 		exit(EXIT_FAILURE);
 	}
-	// SetTargetFPS(0);
+	SetTargetFPS(60);
 	Cell(*grid_duplicate)[ROWS] = (Cell(*)[ROWS])malloc(sizeof(Cell) * COLS * ROWS);
 	if (grid_duplicate == NULL)
 	{
@@ -60,6 +63,7 @@ int main(int argc, char **argv)
 		fps_counter += cur_dt;
 		memcpy(grid_duplicate, grid, sizeof(Cell) * COLS * ROWS);
 		sand(grid, grid_duplicate);
+		memcpy(grid_duplicate, grid, sizeof(Cell) * COLS * ROWS);
 		updateWater(grid, grid_duplicate);
 
 		BeginDrawing();
@@ -100,7 +104,7 @@ int main(int argc, char **argv)
 		{
 			for (int j = 0; j < ROWS; j++)
 			{
-				if (grid[i][j].material > Empty)
+				if (grid[i][j].material != Empty) // TODO: check material > Empty; instead of sand only
 				{
 					tileCount++;
 				}
@@ -112,7 +116,7 @@ int main(int argc, char **argv)
 		/*#ifdef WIN32
 		DrawText(TextFormat("Tiles: %05d | Average FPS: %.2f | FPS: %05d ", tileCount, (double)average_fps, (int)(1.0f / cur_dt)), 20, 20, 20, BLACK);
 		#else*/
-		DrawTextEx(jetmono, TextFormat("Sand Blocks: %05d | Average FPS: %.2f | FPS: %05d ", tileCount, (double)average_fps, (int)(1.0f / cur_dt)), (Vector2){20, 20}, 20, 1, BLACK);
+		DrawTextEx(jetmono, TextFormat("Tiles on screen: %05d | Average FPS: %.2f | FPS: %05d ", tileCount, (double)average_fps, (int)(1.0f / cur_dt)), (Vector2){20, 20}, 20, 1, BLACK);
 		// #endif
 		DrawText(TextFormat("Brush size: %d mode = %s", mscroll_brushSize, brushMode ? "true" : "false"), 20, 44, 20, RED);
 		DrawRectangle(15, 140, 200, 50, WHITE);

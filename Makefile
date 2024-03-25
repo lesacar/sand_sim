@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c99 -fopenmp -march=native
+CFLAGS = -Wall -Wextra -std=c99 -fopenmp
 RM = rm
 WARN = -Wall -Wextra -Wpedantic \
          -Wmissing-prototypes -Wstrict-prototypes -Wold-style-definition \

@@ -16,8 +16,10 @@ int main(int argc, char **argv)
 	bool brushMode = true;
 	// enum mats mat;
 	//  Initialize grid and random seed
-	Cell grid[COLS][ROWS] = {0};
-	memset(grid, 0, sizeof(grid));
+	// Cell grid[COLS][ROWS] = {0}; // Stack allocacio'
+	Cell(*grid)[ROWS] = (Cell(*)[ROWS])malloc(sizeof(Cell) * COLS * ROWS);
+	
+	memset(grid, 0, sizeof(Cell) * COLS * ROWS);
 	// Setup window and display settings
 	setup_stuff(SCREEN_WIDTH, SCREEN_HEIGHT, "RAYtitle", LOG_INFO, false);
 	int32_t current_monitor = handle_arguments(argc, argv);
@@ -57,6 +59,7 @@ int main(int argc, char **argv)
 	}
 	while (!WindowShouldClose())
 	{
+		rand_color_mat(rand() % sizeof(MaterialTypes));
 		cur_dt = GetFrameTime(); // Get frame time
 								 // Update frame counters
 		frame_counter++;
@@ -123,6 +126,10 @@ int main(int argc, char **argv)
 		DrawRectangle(20, 145, 40, 40, (Color){201, 170, 127, 255});
 		DrawRectangle(65, 145, 40, 40, (Color){0, 0, 255, 255});
 		DrawRectangle(65 + 45, 145, 40, 40, (Color){51, 83, 69, 255});
+		DrawText(TextFormat("M:%d\nC:%u,%u,%u\n", grid[GetMouseX()/BLOCK_SIZE][GetMouseY()/BLOCK_SIZE].material,
+		   grid[GetMouseX()/BLOCK_SIZE][GetMouseY()/BLOCK_SIZE].color.r,
+		   grid[GetMouseX()/BLOCK_SIZE][GetMouseY()/BLOCK_SIZE].color.g,
+		   grid[GetMouseX()/BLOCK_SIZE][GetMouseY()/BLOCK_SIZE].color.b), SCREEN_WIDTH-100,20,16,WHITE);
 		if (IsKeyPressed(KEY_B))
 		{
 			brushMode = !brushMode;
@@ -211,7 +218,8 @@ int main(int argc, char **argv)
 		// Reset simulation if R key is pressed
 		if (IsKeyPressed(KEY_R))
 		{
-			memset(grid, 0, sizeof(grid));
+			memset(grid, 0, sizeof(Cell) * COLS * ROWS);
+
 		}
 
 		EndDrawing();

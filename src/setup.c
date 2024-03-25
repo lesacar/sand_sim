@@ -16,8 +16,7 @@ int32_t setup_stuff(int32_t sc_wi, int32_t sc_he, const char *WindowTitle,
 	return 0;
 }
 
-int32_t set_monitor_and_fps(int32_t monitor)
-{
+int32_t set_monitor_and_fps(int32_t monitor) {
 	SetWindowMonitor(monitor - 1);
 	const int32_t initial_fps = GetMonitorRefreshRate(monitor - 1) + 10;
 	SetTargetFPS(initial_fps);
@@ -27,8 +26,7 @@ int32_t set_monitor_and_fps(int32_t monitor)
 static uint32_t xorshift_state = 123456789;
 
 // XORShift random number generator function
-uint32_t xorshift()
-{
+uint32_t xorshift() {
 	uint32_t x = xorshift_state;
 	x ^= x << 13;
 	x ^= x >> 17;
@@ -38,12 +36,12 @@ uint32_t xorshift()
 }
 
 // Faster random number generator function
-float fastRand()
-{
+float fastRand() {
 	return (float)xorshift() / (float)UINT32_MAX;
 }
 
-Color rand_color_mat(int32_t material) {
+#pragma GCC diagnostic ignored "-Wconversion"
+Color rand_color_mat(uint32_t material) {
 	Color temp_color = NOCOLOR;
 	int32_t randR,randG,randB = 0;
 	randR = (rand() % 40) - 20;
@@ -51,12 +49,19 @@ Color rand_color_mat(int32_t material) {
 	randB = (rand() % 40) - 20;
 	switch (material) {
 		case Sand:
+			randR = (rand() % 40) - 20;
+			randG = (rand() % 40) - 20;
+			randB = (rand() % 30) - 15;
 			temp_color = (Color){201 + randR, 170 + randG, 127 + randB, 255};  // 201,170,127,255
 		break;
 		case Water:
-			temp_color = (Color){0,0,235 + randB, 255}; // 0,0,255,255
+			randB = (rand() % 100);
+			temp_color = (Color){0,0,155 + randB, 255}; // 0,0,255,255
 		break;
 		case Stone:
+			randR = (rand() % 40) - 20;
+			randG = (rand() % 40) - 20;
+			randB = (rand() % 30) - 15;
 			temp_color = (Color){51 + randR, 83 + randG, 69 + randB, 255}; // 51,83,69,255
 		break;
 		default:
@@ -65,10 +70,11 @@ Color rand_color_mat(int32_t material) {
 	}
 	return temp_color;
 }
+#pragma GCC diagnostic warning "-Wconversion"
 
 // Function to spawn sand brush
 void spawnSandBrush(Cell (*grid)[ROWS], int32_t mouseX, int32_t mouseY,
-					int32_t brushSize, int32_t material, bool brushMode)
+					int32_t brushSize, uint32_t material, bool brushMode)
 {
 	int startX = mouseX / BLOCK_SIZE - brushSize / 2;
 	int startY = mouseY / BLOCK_SIZE - brushSize / 2;
@@ -85,7 +91,7 @@ void spawnSandBrush(Cell (*grid)[ROWS], int32_t mouseX, int32_t mouseY,
 	{
 		for (int j = startY; j < startY + brushSize; j++)
 		{
-			float distance = sqrt(pow(i - centerX, 2) + pow(j - centerY, 2));
+			float distance = (float)sqrt(pow(i - centerX, 2) + pow(j - centerY, 2));
 
 			// Check if the cell is within the grid bounds and is empty
 			if (i >= 0 && i < COLS && j >= 0 && j < ROWS && material == Empty)
@@ -107,7 +113,7 @@ void spawnSandBrush(Cell (*grid)[ROWS], int32_t mouseX, int32_t mouseY,
 				if (brushMode)
 				{
 					if (brushSize == 1 ||
-						((float)rand() / RAND_MAX > 0.8f && distance <= brushSize / 2))
+						((float)rand() / (float)RAND_MAX > 0.8f && distance <= brushSize / 2))
 					/* (fastRand() > 0.1f && distance <= brushSize / 2)) */ // Faster but looks ugly 
 					{
 						// Set material and properties
@@ -302,7 +308,7 @@ void updateWater(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS])
 							}
 						}
 
-						// Move water to the determined target position
+						// Move water to the determined target position 
 						if (targetY > j && grid_duplicate[index][targetY].material == Empty && grid[index][targetY].material == Empty)
 						{
 							// Move water from the current position to the target position
@@ -314,8 +320,7 @@ void updateWater(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS])
 							grid[index][j].color = NOCOLOR;
 						}
 					} 
-					else if (j + 1 < ROWS && grid[index][j+1].material == Empty && grid_duplicate[index][j+1].material == Empty && grid[index][j].material == Water
-						&& grid[index][j].material == Water)
+					else if (j + 1 < ROWS && grid[index][j+1].material == Empty && grid_duplicate[index][j+1].material == Empty && grid[index][j].material == Water)
 					{
 						grid[index][j+1].material = Water;
 						grid[index][j+1].color = grid[index][j].color;

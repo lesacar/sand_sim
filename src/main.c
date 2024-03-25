@@ -1,6 +1,3 @@
-// TODO: When sand is falling through water, sometimes the water will randomly consume a 1 tile wide sand pillar and replace it with water, visually you don't notice it, and the tile count stays the same but sand gets replaced by water, possibly missing if material == sand somewhere
-
-
 #include <stdio.h>
 #include <raylib.h>
 #include <stdlib.h>
@@ -11,8 +8,10 @@
 
 int main(int argc, char **argv)
 {
+	bool pause = false;
+	printf("%zu\n", sizeof(Cell));
 	bool toggle_fps_cap = true;
-	int32_t material = 0;
+	uint32_t material = 0;
 	bool brushMode = true;
 	// enum mats mat;
 	//  Initialize grid and random seed
@@ -57,23 +56,26 @@ int main(int argc, char **argv)
 		printf("Failed to malloc grid\n");
 		return -1;
 	}
+
+	int32_t	tileCount = 0;
 	while (!WindowShouldClose())
 	{
-		rand_color_mat(rand() % sizeof(MaterialTypes));
 		cur_dt = GetFrameTime(); // Get frame time
 								 // Update frame counters
 		frame_counter++;
 		fps_counter += cur_dt;
-		memcpy(grid_duplicate, grid, sizeof(Cell) * COLS * ROWS);
-		sand(grid, grid_duplicate);
-		memcpy(grid_duplicate, grid, sizeof(Cell) * COLS * ROWS);
-		updateWater(grid, grid_duplicate);
+		if (!pause) {
+			memcpy(grid_duplicate, grid, sizeof(Cell) * COLS * ROWS);
+			sand(grid, grid_duplicate);
+			memcpy(grid_duplicate, grid, sizeof(Cell) * COLS * ROWS);
+			updateWater(grid, grid_duplicate);
+		}
 
 		BeginDrawing();
 		ClearBackground(BLACK);
 		// Activate render texture
 		// BeginShaderMode(bloomShader);
-		BeginTextureMode(gridTexture);
+			BeginTextureMode(gridTexture);
 		ClearBackground(BLACK);
 
 		// uniform vec4 colDiffuse;
@@ -102,18 +104,19 @@ int main(int argc, char **argv)
 			mscroll_brushSize = 150;
 
 		// Count sand blocks for display
-		int tileCount = 0;
-		for (int i = 0; i < COLS; i++)
-		{
-			for (int j = 0; j < ROWS; j++)
+		if (!pause) {
+			tileCount = 0;
+			for (int i = 0; i < COLS; i++)
 			{
-				if (grid[i][j].material != Empty) // TODO: check material > Empty; instead of sand only
+				for (int j = 0; j < ROWS; j++)
 				{
-					tileCount++;
+					if (grid[i][j].material != Empty) // TODO: check material > Empty; instead of sand only
+					{
+						tileCount++;
+					}
 				}
 			}
 		}
-
 		// Display FPS and sand block count
 		DrawRectangle(15, 15, 580, 50, WHITE);
 		/*#ifdef WIN32
@@ -130,9 +133,11 @@ int main(int argc, char **argv)
 		   grid[GetMouseX()/BLOCK_SIZE][GetMouseY()/BLOCK_SIZE].color.r,
 		   grid[GetMouseX()/BLOCK_SIZE][GetMouseY()/BLOCK_SIZE].color.g,
 		   grid[GetMouseX()/BLOCK_SIZE][GetMouseY()/BLOCK_SIZE].color.b), SCREEN_WIDTH-100,20,16,WHITE);
-		if (IsKeyPressed(KEY_B))
-		{
+		if (IsKeyPressed(KEY_B)) {
 			brushMode = !brushMode;
+		}
+		if(IsKeyPressed(KEY_SPACE)) {
+			pause = !pause;
 		}
 
 		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))

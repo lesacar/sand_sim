@@ -15,7 +15,7 @@ WARN = -Wall -Wextra -Wpedantic \
          -Wformat=2 -Wimplicit-int -Wmissing-include-dirs \
          -Wundef -Wpointer-sign \
          -Wwrite-strings -Waddress \
-         -Wlogical-op -Waggregate-return \
+         -Wlogical-op \
          -Wconversion -Wsign-compare \
          -Wtype-limits
 

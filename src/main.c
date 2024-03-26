@@ -68,6 +68,8 @@ int main(int argc, char **argv)
 			memcpy(grid_duplicate, grid, sizeof(Cell) * COLS * ROWS);
 			sand(grid, grid_duplicate);
 			memcpy(grid_duplicate, grid, sizeof(Cell) * COLS * ROWS);
+			updateSteam(grid, grid_duplicate);
+			memcpy(grid_duplicate, grid, sizeof(Cell) * COLS * ROWS);
 			updateWater(grid, grid_duplicate);
 		}
 
@@ -157,6 +159,10 @@ int main(int argc, char **argv)
 				else if (mx > 65 + 45 && mx < 140)
 				{
 					material = Stone;
+				}
+				else if (mx > 65 + 90 && mx < 140 + 45)
+				{
+					material = Steam;
 				}
 			}
 		}

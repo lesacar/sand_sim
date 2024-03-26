@@ -33,7 +33,8 @@ typedef enum
 	Empty,
 	Sand,
 	Water,
-	Stone
+	Stone,
+	Steam
 } MaterialTypes;
 
 typedef struct
@@ -61,6 +62,7 @@ int32_t setup_stuff(int32_t sc_wi, int32_t sc_he, const char *WindowTitle, int32
 int32_t set_monitor_and_fps(int32_t monitor);
 void sand(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS]);
 void updateWater(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS]);
+void updateSteam(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS]);
 void spawnSandBrush(Cell (*grid)[ROWS], int32_t mouseX, int32_t mouseY, int32_t brushSize, uint32_t material, bool brushMode);
 Color rand_color_mat(uint32_t material);
 

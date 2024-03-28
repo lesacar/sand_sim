@@ -82,6 +82,10 @@ Color rand_color_mat(uint32_t material) {
 void spawnSandBrush(Cell (*grid)[ROWS], int32_t mouseX, int32_t mouseY,
 					int32_t brushSize, uint32_t material, bool brushMode)
 {
+	if (GetMouseX() > SCREEN_WIDTH || GetMouseY() > SCREEN_HEIGHT)
+	{
+		return;
+	}
 	int startX = mouseX / BLOCK_SIZE - brushSize / 2;
 	int startY = mouseY / BLOCK_SIZE - brushSize / 2;
 

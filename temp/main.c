@@ -11,6 +11,7 @@ int main()
 		BeginDrawing();
 		ClearBackground(BLACK);
 		DrawText(TextFormat("%d",GetFPS()), 10, 10, 20, WHITE);
+		DrawText(TextFormat("%d",GetMouseX()), 10, 40, 20, WHITE);
 		EndDrawing();
 	}
 }

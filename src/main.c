@@ -2,32 +2,77 @@
 #include <raylib.h>
 #include <stdlib.h>
 #include <time.h>
-#include <math.h>
+#include <unistd.h>
+#include <pthread.h>
 #include "arg_handler.h"
 #include "setup.h"
 
+bool update_should_stop = false;
+
+typedef struct {
+    Cell (*grid)[ROWS];
+    Cell (*grid_duplicate)[ROWS];
+    pthread_mutex_t* grid_mutex;
+    pthread_mutex_t* grid_duplicate_mutex;
+} UpdateData;
+
+void* update_worker(void* data) {
+    UpdateData* update_data = (UpdateData*)data;
+    Cell (*grid)[ROWS] = update_data->grid;
+    Cell (*grid_duplicate)[ROWS] = update_data->grid_duplicate;
+    pthread_mutex_t* grid_mutex = update_data->grid_mutex;
+    pthread_mutex_t* grid_duplicate_mutex = update_data->grid_duplicate_mutex;
+    
+    while (!update_should_stop) {
+        // Lock mutexes before modifying grid and grid_duplicate
+        pthread_mutex_lock(grid_mutex);
+        pthread_mutex_lock(grid_duplicate_mutex);
+
+        // Execute updates
+        memcpy(*grid_duplicate, *grid, sizeof(Cell) * COLS * ROWS);
+        sand(grid, grid_duplicate);
+        memcpy(grid_duplicate, grid, sizeof(Cell) * COLS * ROWS);
+        updateSteam(grid, grid_duplicate);
+        memcpy(grid_duplicate, grid, sizeof(Cell) * COLS * ROWS);
+        updateWater(grid, grid_duplicate);
+        
+        // Unlock mutexes after updates
+        pthread_mutex_unlock(grid_mutex);
+        pthread_mutex_unlock(grid_duplicate_mutex);
+        
+        // Sleep for 1/60th of a second to maintain 60 updates per second
+        usleep(1000000 / 60);
+    }
+    
+    // Cleanup and exit thread
+    pthread_exit(NULL);
+	return NULL;
+}
+
 int main(int argc, char **argv)
 {
-	bool pause = false;
-	printf("%zu\n", sizeof(Cell));
-	bool toggle_fps_cap = true;
-	uint32_t material = 0;
-	bool brushMode = true;
-	// enum mats mat;
-	//  Initialize grid and random seed
-	// Cell grid[COLS][ROWS] = {0}; // Stack allocacio'
-	Cell(*grid)[ROWS] = (Cell(*)[ROWS])malloc(sizeof(Cell) * COLS * ROWS);
-	
-	memset(grid, 0, sizeof(Cell) * COLS * ROWS);
 	// Setup window and display settings
-	setup_stuff(SCREEN_WIDTH, SCREEN_HEIGHT, "RAYtitle", LOG_INFO, false);
+	setup_stuff(SCREEN_WIDTH, SCREEN_HEIGHT, "sand_sim", LOG_INFO, false);
 	int32_t current_monitor = handle_arguments(argc, argv);
 	if (current_monitor < 0)
 	{
 		exit(EXIT_FAILURE);
 	}
+	pthread_mutex_t grid_mutex = PTHREAD_MUTEX_INITIALIZER;
+    pthread_mutex_t grid_duplicate_mutex = PTHREAD_MUTEX_INITIALIZER;
+	BeginDrawing();
+	ClearBackground(BLACK);
+	EndDrawing();
+	bool pause = false;
+	printf("%zu\n", sizeof(Cell));
+	bool toggle_fps_cap = true;
+	uint32_t material = 0;
+	bool brushMode = true;
+	
+	Cell(*grid)[ROWS] = (Cell(*)[ROWS])malloc(sizeof(Cell) * COLS * ROWS);
+	memset(grid, 0, sizeof(Cell) * COLS * ROWS);
 	printf("TARGET FPS: %d\n", set_monitor_and_fps(current_monitor));
-	SetConfigFlags(FLAG_MSAA_4X_HINT);
+	// SetConfigFlags(FLAG_MSAA_4X_HINT);
 	Shader bloomShader = LoadShader(0, "src/shaders/bloom.fs");
 
 	// Variables for brush size and scroll hint message
@@ -58,20 +103,25 @@ int main(int argc, char **argv)
 	}
 
 	int32_t	tileCount = 0;
+
+	pthread_t update_thread;
+    UpdateData update_data = { grid, grid_duplicate, &grid_mutex, &grid_duplicate_mutex };
+    pthread_create(&update_thread, NULL, update_worker, (void*)&update_data);
 	while (!WindowShouldClose())
 	{
 		cur_dt = GetFrameTime(); // Get frame time
-								 // Update frame counters
+		pthread_mutex_t grid_mutex = PTHREAD_MUTEX_INITIALIZER;
+		pthread_mutex_t grid_duplicate_mutex = PTHREAD_MUTEX_INITIALIZER;
 		frame_counter++;
 		fps_counter += cur_dt;
-		if (!pause) {
+		/*if (!pause) {
 			memcpy(grid_duplicate, grid, sizeof(Cell) * COLS * ROWS);
 			sand(grid, grid_duplicate);
 			memcpy(grid_duplicate, grid, sizeof(Cell) * COLS * ROWS);
 			updateSteam(grid, grid_duplicate);
 			memcpy(grid_duplicate, grid, sizeof(Cell) * COLS * ROWS);
 			updateWater(grid, grid_duplicate);
-		}
+		}*/
 
 		BeginDrawing();
 		ClearBackground(BLACK);
@@ -131,10 +181,14 @@ int main(int argc, char **argv)
 		DrawRectangle(20, 145, 40, 40, (Color){201, 170, 127, 255});
 		DrawRectangle(65, 145, 40, 40, (Color){0, 0, 255, 255});
 		DrawRectangle(65 + 45, 145, 40, 40, (Color){51, 83, 69, 255});
-		DrawText(TextFormat("M:%d\nC:%u,%u,%u\n", grid[GetMouseX()/BLOCK_SIZE][GetMouseY()/BLOCK_SIZE].material,
-		   grid[GetMouseX()/BLOCK_SIZE][GetMouseY()/BLOCK_SIZE].color.r,
-		   grid[GetMouseX()/BLOCK_SIZE][GetMouseY()/BLOCK_SIZE].color.g,
-		   grid[GetMouseX()/BLOCK_SIZE][GetMouseY()/BLOCK_SIZE].color.b), SCREEN_WIDTH-100,20,16,WHITE);
+		int temp_draw_mouse_x = GetMouseX();
+		int temp_draw_mouse_y = GetMouseY();
+		if (temp_draw_mouse_x / BLOCK_SIZE > COLS) { temp_draw_mouse_x = COLS;}
+		if (temp_draw_mouse_x / BLOCK_SIZE > ROWS) { temp_draw_mouse_y = ROWS;}
+		DrawText(TextFormat("M:%d\nC:%u,%u,%u\n", grid[temp_draw_mouse_x/BLOCK_SIZE][temp_draw_mouse_y/BLOCK_SIZE].material,
+		   grid[temp_draw_mouse_x/BLOCK_SIZE][temp_draw_mouse_y/BLOCK_SIZE].color.r,
+		   grid[temp_draw_mouse_x/BLOCK_SIZE][temp_draw_mouse_y/BLOCK_SIZE].color.g,
+		   grid[temp_draw_mouse_x/BLOCK_SIZE][temp_draw_mouse_y/BLOCK_SIZE].color.b), SCREEN_WIDTH-100,20,16,WHITE);
 		if (IsKeyPressed(KEY_B)) {
 			brushMode = !brushMode;
 		}
@@ -217,7 +271,7 @@ int main(int argc, char **argv)
 		if (IsKeyPressed(KEY_K))
 		{
 			if (toggle_fps_cap) {
-				SetTargetFPS(30);
+				SetTargetFPS(5);
 				toggle_fps_cap = !toggle_fps_cap;
 			}
 			else {
@@ -248,7 +302,10 @@ int main(int argc, char **argv)
 			fps_counter = 0.0f;
 			frame_counter = 0;
 		};
+		pthread_mutex_unlock(&grid_mutex);
+        pthread_mutex_unlock(&grid_duplicate_mutex);
 	}
+	update_should_stop = true;
 	UnloadShader(bloomShader);
 	UnloadRenderTexture(gridTexture);
 	free(grid_duplicate);

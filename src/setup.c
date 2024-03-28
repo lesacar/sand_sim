@@ -3,6 +3,107 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+
+// Define a special ConfigData object for error state
+static const ConfigData ERROR_CONFIG = { .is_cfg_read = false, .cfg_file_size = -1, .cfg_buffer = NULL, .fps = 60, .brush_size = 10, .brush_mode=true};
+
+ConfigData parse_config_file(const char *cfg_file) {
+    ConfigData config = { .is_cfg_read = false, .cfg_file_size = 0, .cfg_buffer = NULL, .fps = 60, .brush_size = 10, .brush_mode=true };
+	
+	FILE *cfg_f = fopen(cfg_file, "rb");
+    if (cfg_f == NULL) {
+        fprintf(stderr, "Error opening file %s: %s\nUsing defaults...\n", cfg_file, strerror(errno));
+        return ERROR_CONFIG;
+    }
+
+    fseek(cfg_f, 0, SEEK_END);
+    config.cfg_file_size = ftell(cfg_f);
+    fseek(cfg_f, 0, SEEK_SET);
+
+    if (config.cfg_file_size > MAX_CFG_SIZE) {
+        fprintf(stderr, "Error: File %s size exceeds maximum buffer size of 64KB\n", cfg_file);
+        fclose(cfg_f);
+        return ERROR_CONFIG;
+    }
+
+    config.cfg_buffer = (char *)malloc(config.cfg_file_size + 1); // +1 for null terminator
+    if (config.cfg_buffer == NULL) {
+        fprintf(stderr, "Error allocating memory: %s\n", strerror(errno));
+        fclose(cfg_f);
+        return ERROR_CONFIG;
+    }
+
+    size_t bytes_read = fread(config.cfg_buffer, 1, config.cfg_file_size, cfg_f);
+    if (bytes_read != (size_t)config.cfg_file_size) {
+        fprintf(stderr, "Error reading file %s: %s\n", cfg_file, strerror(errno));
+        fclose(cfg_f);
+        free(config.cfg_buffer);
+        return ERROR_CONFIG;
+    }
+    // Null-terminate the buffer
+    config.cfg_buffer[config.cfg_file_size] = '\0';
+
+    fclose(cfg_f);
+    config.is_cfg_read = true;
+	config.fps = 60;
+    config.brush_mode = false;
+    config.brush_size = 10;
+
+    // Parse the configuration data from the buffer
+    // Example: parse_fps(&config); parse_brush_mode(&config); parse_brush_size(&config);
+
+    return config;
+}
+
+// Function to reload configuration file and update ConfigData struct
+char *reload_config_file(const char *cfg_file, ConfigData *config) {
+    free(config->cfg_buffer);
+    *config = parse_config_file(cfg_file);
+    return (config->is_cfg_read) ? config->cfg_buffer : NULL;
+}
+
+void parse_config_variables(const char *cfg_buffer, ConfigData *config) {
+    char *token;
+    char *line;
+    char *saveptr;
+
+    // Make a copy of the buffer since strtok modifies the string
+    char *buffer_copy = strdup(cfg_buffer);
+
+    // Tokenize each line of the buffer
+    line = strtok_r(buffer_copy, "\n", &saveptr);
+    while (line != NULL) {
+        // Tokenize each variable and its value
+        token = strtok(line, "=");
+        if (token != NULL) {
+            // Extract variable name
+            char *variable = token;
+
+            // Extract variable value
+            token = strtok(NULL, "=");
+            if (token != NULL) {
+                char *value = token;
+
+                // Compare variable names and update corresponding config fields
+                if (strcmp(variable, "fps") == 0) {
+                    config->fps = atoi(value);
+                } else if (strcmp(variable, "brush_mode") == 0) {
+                    config->brush_mode = (strcmp(value, "true") == 0);
+                } else if (strcmp(variable, "brush_size") == 0) {
+                    config->brush_size = atoi(value);
+                }
+                // Add more conditions for additional variables as needed
+            }
+        }
+        // Move to the next line
+        line = strtok_r(NULL, "\n", &saveptr);
+    }
+
+    // Free the copy of the buffer
+    free(buffer_copy);
+}
+
+
 int32_t setup_stuff(int32_t sc_wi, int32_t sc_he, const char *WindowTitle,
 					int32_t log_lvl, bool fullscreen)
 {

@@ -18,6 +18,8 @@
 #define ROWS (SCREEN_HEIGHT / BLOCK_SIZE)
 #define COLS (SCREEN_WIDTH / BLOCK_SIZE)
 #define NUM_THREADS 4
+#define MAX_CFG_SIZE 64*1024
+#define MAX_CFG_LINE 100
 
 #define COLOR_SAND \
 	(Color) { 201, 170, 127, 255 }
@@ -27,6 +29,22 @@
 	(Color) { 51, 83, 69, 255 }
 #define NOCOLOR \
 	(Color) { 0, 0, 0, 0 }
+
+typedef struct {
+    bool is_cfg_read;
+    int64_t cfg_file_size;
+    char *cfg_buffer;
+    int fps;
+    bool brush_mode;
+    int brush_size;
+} ConfigData;
+
+// Function to parse configuration file into ConfigData struct
+ConfigData parse_config_file(const char *cfg_file);
+
+// Function to reload configuration file and update ConfigData struct
+char *reload_config_file(const char *cfg_file, ConfigData *config);
+void parse_config_variables(const char *cfg_buffer, ConfigData *config);
 
 typedef enum
 {

@@ -1,3 +1,5 @@
 dbg/
 build/
 callgrind*
+sim.cfg
+temp*

@@ -11,6 +11,35 @@ bool update_should_stop = false;
 int updates_per_second = 0;
 int32_t displayed_ups;
 
+void UpdateScreenImage(Cell grid[COLS][ROWS], Image* screenImage) {
+    // Calculate the scaled dimensions of the grid
+    int scaledWidth = COLS * BLOCK_SIZE;
+    int scaledHeight = ROWS * BLOCK_SIZE;
+
+    // Resize the screen image to match the scaled grid dimensions
+    *screenImage = GenImageColor(scaledWidth, scaledHeight, BLACK);
+
+    // Cast data pointer to Color*
+    Color* imageData = (Color*)screenImage->data;
+
+    // Load grid data into the screen image, scaling by BLOCK_SIZE
+    for (int i = 0; i < COLS; i++) {
+        for (int j = 0; j < ROWS; j++) {
+            Color color = grid[i][j].color; // Assuming grid contains color information
+            // Set color for the entire block
+            for (int x = 0; x < BLOCK_SIZE; x++) {
+                for (int y = 0; y < BLOCK_SIZE; y++) {
+                    // Calculate the coordinates in the scaled image
+                    int scaledX = i * BLOCK_SIZE + x;
+                    int scaledY = j * BLOCK_SIZE + y;
+                    // Set pixel color in the scaled image
+                    imageData[scaledY * scaledWidth + scaledX] = color;
+                }
+            }
+        }
+    }
+}
+
 typedef struct {
     Cell (*grid)[ROWS];
     Cell (*grid_duplicate)[ROWS];
@@ -95,6 +124,7 @@ int main(int argc, char **argv)
     BeginDrawing();
     ClearBackground(BLACK);
     EndDrawing();
+	Image image; // = GenImageColor(SCREEN_WIDTH,SCREEN_HEIGHT,PINK);
 	pthread_mutex_t grid_mutex = PTHREAD_MUTEX_INITIALIZER;
     pthread_mutex_t grid_duplicate_mutex = PTHREAD_MUTEX_INITIALIZER;
 	const char *cfg_file = "sim.cfg";
@@ -118,12 +148,6 @@ int main(int argc, char **argv)
     float average_fps = 0.0f;
     Font jetmono = LoadFontEx("./src/fonts/JetBrainsMonoNLNerdFont-Regular.ttf", 20, 0, 251);
 
-    RenderTexture2D gridTexture = LoadRenderTexture(COLS, ROWS);
-    if (gridTexture.id == 0)
-    {
-        printf("Failed to create grid texture\n");
-        exit(EXIT_FAILURE);
-    }
     SetTargetFPS(config.fps);
     Cell(*grid_duplicate)[ROWS] = (Cell(*)[ROWS])malloc(sizeof(Cell) * COLS * ROWS);
     if (grid_duplicate == NULL)
@@ -137,18 +161,23 @@ int main(int argc, char **argv)
     pthread_t update_thread;
     UpdateData update_data = { grid, grid_duplicate, &grid_mutex, &grid_duplicate_mutex };
     pthread_create(&update_thread, NULL, update_worker, (void*)&update_data);
+	image.format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
+	image.width=SCREEN_WIDTH;
+	image.height=SCREEN_HEIGHT;
+	Texture2D screenTex = LoadTextureFromImage(image);
     while (!WindowShouldClose())
     {
         cur_dt = GetFrameTime(); // Get frame time
         frame_counter++;
         fps_counter += cur_dt;
-
+		
+		UpdateScreenImage(grid, &image);
+		UpdateTexture(screenTex, image.data);
         BeginDrawing();
         ClearBackground(BLACK);
-        BeginTextureMode(gridTexture);
-        ClearBackground(BLACK);
+		DrawTexture(screenTex,0,0,WHITE);
 
-        for (int i = 0; i < COLS; i++)
+        /* for (int i = 0; i < COLS; i++)
         {
             for (int j = 0; j < ROWS; j++)
             {
@@ -158,10 +187,8 @@ int main(int argc, char **argv)
                     DrawRectangle(i, j, 1, 1, color);
                 }
             }
-        }
+        } */
 
-        EndTextureMode();
-        DrawTexturePro(gridTexture.texture, (Rectangle){0, 0, (float)gridTexture.texture.width, (float)-gridTexture.texture.height}, (Rectangle){0, 0, (float)GetScreenWidth(), (float)GetScreenHeight()}, (Vector2){0, 0}, 0, WHITE);
 
         // Update brush size with mouse wheel input
         config.brush_size += (int32_t)GetMouseWheelMove() * 3;
@@ -327,6 +354,7 @@ int main(int argc, char **argv)
             updates_per_second = 0;
         };
     }
+	UnloadImage(image);
     // Set the flag to stop the update thread
     update_should_stop = true;
 
@@ -335,7 +363,7 @@ int main(int argc, char **argv)
 
     // Cleanup
     UnloadShader(bloomShader);
-    UnloadRenderTexture(gridTexture);
+	UnloadTexture(screenTex);
     free(grid_duplicate);
 	free(config.cfg_buffer);
     CloseWindow();

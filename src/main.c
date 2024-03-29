@@ -41,7 +41,7 @@ void* update_worker(void* data) {
         pthread_mutex_lock(grid_duplicate_mutex);
 
         // Execute updates
-        memcpy(*grid_duplicate, *grid, sizeof(Cell) * COLS * ROWS);
+        memcpy(grid_duplicate, grid, sizeof(Cell) * COLS * ROWS);
         sand(grid, grid_duplicate);
         memcpy(grid_duplicate, grid, sizeof(Cell) * COLS * ROWS);
         updateSteam(grid, grid_duplicate);
@@ -102,17 +102,14 @@ int main(int argc, char **argv)
 	if (config.is_cfg_read) {
 		parse_config_variables(config.cfg_buffer, &config);
         printf("File contents:\n%s\n", config.cfg_buffer);
-		printf("CFG: fps: %d | brush_size = %d | brush_mode = %d\n",config.fps, config.brush_size, config.brush_mode);
+		printf("CFG: Tutorial shown: %s fps: %d | brush_size = %d | brush_mode = %s\n", tf_str(config.tutorial_shown),config.fps, config.brush_size, tf_str(config.brush_mode));
     }
 
     uint32_t material = 0;
     
     Cell(*grid)[ROWS] = (Cell(*)[ROWS])malloc(sizeof(Cell) * COLS * ROWS);
     memset(grid, 0, sizeof(Cell) * COLS * ROWS);
-    printf("TARGET FPS: %d\n", set_monitor_and_fps(current_monitor));
     Shader bloomShader = LoadShader(0, "src/shaders/bloom.fs");
-
-    bool scroll_hint_message = false;
 
     float cur_dt = 0;
     float second_counter = 0.0f;
@@ -198,12 +195,22 @@ int main(int argc, char **argv)
         int temp_draw_mouse_x = GetMouseX();
         int temp_draw_mouse_y = GetMouseY();
         if (temp_draw_mouse_x / BLOCK_SIZE > COLS) { temp_draw_mouse_x = COLS;}
-        if (temp_draw_mouse_x / BLOCK_SIZE > ROWS) { temp_draw_mouse_y = ROWS;}
-        DrawText(TextFormat("M:%d\nC:%u,%u,%u\n", grid[temp_draw_mouse_x/BLOCK_SIZE][temp_draw_mouse_y/BLOCK_SIZE].material,
-           grid[temp_draw_mouse_x/BLOCK_SIZE][temp_draw_mouse_y/BLOCK_SIZE].color.r,
-           grid[temp_draw_mouse_x/BLOCK_SIZE][temp_draw_mouse_y/BLOCK_SIZE].color.g,
-           grid[temp_draw_mouse_x/BLOCK_SIZE][temp_draw_mouse_y/BLOCK_SIZE].color.b), SCREEN_WIDTH-100,45,16,WHITE);
-		DrawTextEx(jetmono, TextFormat("UPS on #2: %d",displayed_ups), (Vector2){SCREEN_WIDTH-125,20},20,0,WHITE);
+        if (temp_draw_mouse_y / BLOCK_SIZE > ROWS) { temp_draw_mouse_y = ROWS;}
+		int temp_ind_i = temp_draw_mouse_x / BLOCK_SIZE;
+		int temp_ind_j = temp_draw_mouse_y / BLOCK_SIZE;
+        DrawTextEx(jetmono, TextFormat("M:%d\nC:%u,%u,%u\nFR:%f\nvX:%.1f,vY:%.1f\nFALL:%s\nSF:%f\nMASS:%d\n",
+			grid[temp_ind_i][temp_ind_j].material,
+			grid[temp_ind_i][temp_ind_j].color.r,
+			grid[temp_ind_i][temp_ind_j].color.g,
+			grid[temp_ind_i][temp_ind_j].color.b,
+			grid[temp_ind_i][temp_ind_j].friction,
+			grid[temp_ind_i][temp_ind_j].velocityX,
+			grid[temp_ind_i][temp_ind_j].velocityY,
+			tf_str(grid[temp_ind_i][temp_ind_j].isFreeFalling),
+			grid[temp_ind_i][temp_ind_j].spreadFactor,
+			grid[temp_ind_i][temp_ind_j].mass),
+			(Vector2){SCREEN_WIDTH-150,65},20,0,WHITE);
+		DrawTextEx(jetmono, TextFormat("UPS on #2: %d\nmx:%d my:%d i:%d j:%d\n",displayed_ups,temp_draw_mouse_x, temp_draw_mouse_y, (temp_draw_mouse_x/BLOCK_SIZE),(temp_draw_mouse_y/BLOCK_SIZE)), (Vector2){SCREEN_WIDTH-235,20},20,0,WHITE);
         if (IsKeyPressed(KEY_B)) {
             config.brush_mode = !config.brush_mode;
         }
@@ -274,7 +281,7 @@ int main(int argc, char **argv)
             }
         }
 
-        if (!scroll_hint_message)
+        if (!config.tutorial_shown)
         {
             DrawText("Scroll with mouse wheel to increase/reduce brush size (max 50)", 20, 66, 20, YELLOW);
             DrawText("Press R to reset simulation, Press B to toggle BRUSH / CIRCLE draw mode", 20, 88, 20, YELLOW);
@@ -282,7 +289,7 @@ int main(int argc, char **argv)
             DrawText("Press H to hide this message", 20, 132, 20, YELLOW);
             if (IsKeyPressed(KEY_H))
             {
-                scroll_hint_message = true;
+                config.tutorial_shown = true;
             }
             
         }

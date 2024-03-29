@@ -37,6 +37,8 @@ typedef struct {
     int fps;
     bool brush_mode;
     int brush_size;
+	bool tutorial_shown;
+	bool read_map;
 } ConfigData;
 
 // Function to parse configuration file into ConfigData struct
@@ -83,5 +85,6 @@ void updateWater(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS]);
 void updateSteam(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS]);
 void spawnSandBrush(Cell (*grid)[ROWS], int32_t mouseX, int32_t mouseY, int32_t brushSize, uint32_t material, bool brushMode);
 Color rand_color_mat(uint32_t material);
+char* tf_str(bool test);
 
 #endif /* SETUP_H */

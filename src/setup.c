@@ -4,8 +4,15 @@
 #include <stdlib.h>
 
 
+char* tf_str(bool test) {
+	if (test) {
+		return "true";
+	}
+	return "false";
+}
+
 // Define a special ConfigData object for error state
-static const ConfigData ERROR_CONFIG = { .is_cfg_read = false, .cfg_file_size = -1, .cfg_buffer = NULL, .fps = 60, .brush_size = 10, .brush_mode=true};
+static const ConfigData ERROR_CONFIG = { .is_cfg_read = false, .cfg_file_size = -1, .cfg_buffer = NULL, .fps = 60, .brush_size = 10, .brush_mode=true, .tutorial_shown=false, .read_map=false };
 
 ConfigData parse_config_file(const char *cfg_file) {
     ConfigData config = { .is_cfg_read = false, .cfg_file_size = 0, .cfg_buffer = NULL, .fps = 60, .brush_size = 10, .brush_mode=true };
@@ -91,7 +98,11 @@ void parse_config_variables(const char *cfg_buffer, ConfigData *config) {
                     config->brush_mode = (strcmp(value, "true") == 0);
                 } else if (strcmp(variable, "brush_size") == 0) {
                     config->brush_size = atoi(value);
-                }
+                } else if (strcmp(variable, "tutorial_shown") == 0) {
+					config->tutorial_shown = (strcmp(value, "true") == 0);
+				} else if (strcmp(variable, "read_map") == 0) {
+					config->read_map = (strcmp(value, "true") == 0);
+				}
                 // Add more conditions for additional variables as needed
             }
         }
@@ -211,7 +222,6 @@ void spawnSandBrush(Cell (*grid)[ROWS], int32_t mouseX, int32_t mouseY,
 				grid[i][j].isFreeFalling = false;
 				grid[i][j].mass = 0;
 				grid[i][j].material = 0;
-				grid[i][j].spreadFactor = 0;
 				grid[i][j].spreadFactor = 0.0f;
 				grid[i][j].velocityX = 0.0f;
 				grid[i][j].velocityY = 0.0f;
@@ -277,6 +287,12 @@ void spawnSandBrush(Cell (*grid)[ROWS], int32_t mouseX, int32_t mouseY,
 							grid[i][j].spreadFactor = 0.0f;
 							grid[i][j].color = rand_color_mat(Stone);
 						}
+						else if (material == Steam)
+						{
+							grid[i][j].friction = 0.0f;
+							grid[i][j].spreadFactor = 5.0f;
+							grid[i][j].color = rand_color_mat(Steam);
+						}
 					}
 				}
 			}
@@ -317,7 +333,7 @@ void sand(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS])
 					grid[i][j].color = grid_duplicate[i][j+1].color;
 
 					// Apply gravity
-					if (grid[i][j + 1].velocityY > 9.8f)
+					if (grid[i][j + 1].velocityY +1 > 9.8f)
 					{
 						grid[i][j + 1].velocityY = 9.8f;
 					}
@@ -392,10 +408,10 @@ void updateWater(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS])
 		for (int i = 0; i < COLS; i++)
 		{
 			int index = order[i];
-			grid[index][j].spreadFactor = 5.0f;
 
 			if (grid_duplicate[index][j].material == Water)
 			{
+				grid[index][j].spreadFactor = 5.0f;
 				if (j + 1 < ROWS && grid_duplicate[index][j + 1].material == Empty && grid[index][j + 1].material == Empty)
 				{
 					if (j + (int32_t)grid_duplicate[index][j].spreadFactor < ROWS)
@@ -449,7 +465,7 @@ void updateWater(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS])
 
 
 					// Apply downward movement
-					if (grid[index][j + 1].velocityY > 9.8f)
+					if (grid[index][j + 1].velocityY +1 > 9.8f)
 					{
 						grid[index][j + 1].velocityY = 9.8f;
 					}
@@ -530,6 +546,7 @@ void updateSteam(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS])
 			int index = order[i];
 			if (grid_duplicate[index][j].material == Steam)
 			{
+				grid[index][j].spreadFactor = 5.0f;
 				if (grid_duplicate[index][j - 1].material == Empty)
 				{
 					grid[index][j - 1].material = grid[index][j].material;
@@ -537,32 +554,32 @@ void updateSteam(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS])
 					grid[index][j - 1].color = grid[index][j].color;
 					grid[index][j].color = NOCOLOR;
 
-					/* if (grid[i][j + 1].velocityY + 1.0f > 9.8f)
+					if (grid[index][j - 1].velocityY + 1.0f > 9.8f)
 					{
-						grid[i][j + 1].velocityY = 9.8f;
+						grid[index][j - 1].velocityY = 9.8f;
 					}
 					else
 					{
-						grid[i][j + 1].velocityY += 1.0f;
-					} */
+						grid[index][j - 1].velocityY += 1.0f;
+					}
 				}
 				else if (grid_duplicate[index][j - 1].material == Water)
 				{
 					// Apply downward movement
 					grid[index][j - 1].material = Steam;
 					grid[index][j].material = Water;
-					grid[index][j - 1].color = grid_duplicate[index][j].color;
-					grid[index][j].color = grid_duplicate[index][j-1].color;
+					grid[index][j - 1].color = grid[index][j].color;
+					grid[index][j].color = grid[index][j-1].color;
 
 					// Apply gravity
-					/* if (grid[i][j + 1].velocityY > 9.8f)
+					if (grid[index][j - 1].velocityY > 9.8f)
 					{
-						grid[i][j + 1].velocityY = 9.8f;
+						grid[index][j - 1].velocityY = 9.8f;
 					}
 					else
 					{
-						grid[i][j + 1].velocityY += 1.0f;
-					} */
+						grid[index][j - 1].velocityY += 1.0f;
+					}
 				}
 				else
 				{

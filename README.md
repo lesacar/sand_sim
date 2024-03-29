@@ -1,8 +1,10 @@
 ![bloom](https://github.com/lesacar/sand_sim/assets/69954403/5f8338fd-d150-450a-9fc1-1dc35bd2c6a8)
 *A sand_sim (physim) simulation running with bloom enabled*
 # Particle simulation in C and raylib
-*linux raylib is in ./static ; windows raylib is in ./static/windows*
-***The binary must be ran from the root git directory as ./build/physim, otherwise resources will not load***
+## I recommend creating a sim.cfg file, and at least putting "fps=60" in there, to save on resources, otherwise it will eat your CPU/GPU and run at 500 fps
+## The binary must be ran from the root git directory as ./build/physim, otherwise resources will not load
+
+*linux raylib is precompiled and in ./static ; windows raylib is in ./static/windows*
 ### Controls are in controls.txt
 - Press SPACE to pause
 - Press 's' to toggle bloom shader on or off

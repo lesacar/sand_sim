@@ -8,7 +8,7 @@ Early development stages, currently supports
  |    |\
  |    |---physim(.exe)\
  |\
- |-sim.cfg\
+ |-sim.cfg
 
 - Press SPACE to pause
 ### 4 materials allow for various physics simulations

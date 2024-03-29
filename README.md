@@ -23,6 +23,7 @@ plemented floating through solid objects
 - brush_size=20
 - brush_mode=true
 - tutorial_shown=true
+There is an example config in src/
 The brush_size is the size of the circle when placing tiles, brush mode is whether you want a full circle, or random ms-paint brush-like placement. tutorial_shown=true hides the yellow text in the top left
 
 ![physim](https://github.com/lesacar/sand_sim/assets/69954403/51cfbcb8-542a-4df6-81f0-1e4b2af80afe)

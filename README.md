@@ -1,3 +1,5 @@
+![bloom](https://github.com/lesacar/sand_sim/assets/69954403/5f8338fd-d150-450a-9fc1-1dc35bd2c6a8)
+*A sand_sim (physim) simulation running with bloom enabled*
 # Particle simulation in C and raylib
 *linux raylib is in ./static ; windows raylib is in ./static/windows*
 ***The binary must be ran from the root git directory as ./build/physim, otherwise resources will not load***

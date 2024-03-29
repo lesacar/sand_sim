@@ -3,3 +3,4 @@ Press R to reset simulation
 Press B to toggle BRUSH / CIRCLE draw mode
 Press SPACE to pause/resume
 Press H to hide this message
+Press S to toggle bloom shader

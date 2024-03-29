@@ -40,6 +40,7 @@ typedef struct {
     bool brush_mode;
     int brush_size;
 	bool read_map;
+	bool wants_shader;
 } ConfigData;
 
 // Function to parse configuration file into ConfigData struct

@@ -51,7 +51,7 @@ const char* str_mat(uint32_t material) {
 }
 
 // Define a special ConfigData object for error state
-static const ConfigData ERROR_CONFIG = { .is_cfg_read = false, .cfg_file_size = -1, .cfg_buffer = NULL, .fps = 60, .brush_size = 10, .brush_mode=true, .read_map=false };
+static const ConfigData ERROR_CONFIG = { .is_cfg_read = false, .cfg_file_size = -1, .cfg_buffer = NULL, .fps = 60, .brush_size = 10, .brush_mode=true, .read_map=false, .wants_shader=false };
 
 ConfigData parse_config_file(const char *cfg_file) {
     ConfigData config = { .is_cfg_read = false, .cfg_file_size = 0, .cfg_buffer = NULL, .fps = 60, .brush_size = 10, .brush_mode=true };
@@ -140,7 +140,10 @@ void parse_config_variables(const char *cfg_buffer, ConfigData *config) {
 				} else if (strcmp(variable, "read_map") == 0) {
 					config->read_map = (strcmp(value, "true") == 0);
 				}
-                // Add more conditions for additional variables as needed
+                else if (strcmp(variable, "wants_shader") == 0) {
+					config->wants_shader = (strcmp(value, "true") == 0);
+				}
+				// Add more conditions for additional variables as needed
             }
         }
         // Move to the next line

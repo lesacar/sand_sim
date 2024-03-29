@@ -2,7 +2,8 @@
 *linux raylib is in ./static ; windows raylib is in ./static/windows*
 ***The binary must be ran from the root git directory as ./build/physim, otherwise resources will not load***
 ### Controls are in controls.txt
-
+- Press SPACE to pause
+- Press 's' to toggle bloom shader on or off
 Early development stages, currently supports 
 - config file **"sim.cfg"** which should be a directory above physim(.exe)\
  |-build\
@@ -11,7 +12,6 @@ Early development stages, currently supports
  |\
  |-sim.cfg
 
-- Press SPACE to pause
 ### 4 materials allow for various physics simulations
 - Sand; falls into a pyramid
 - Stone; stationary, not affected by anything

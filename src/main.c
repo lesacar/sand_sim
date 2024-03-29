@@ -177,7 +177,12 @@ int main(int argc, char **argv)
 		UpdateTexture(screenTex, image.data);
         BeginDrawing();
         ClearBackground(BLACK);
+		if (config.wants_shader) {
+			BeginShaderMode(bloomShader); }
 		DrawTexture(screenTex,0,0,WHITE);
+		if (config.wants_shader) {
+			EndShaderMode();
+		}
 
         /* for (int i = 0; i < COLS; i++)
         {
@@ -256,6 +261,9 @@ int main(int argc, char **argv)
 		DrawTextEx(jetmono, TextFormat("UPS on #2: %d\nmx:%d my:%d i:%d j:%d\n",displayed_ups,GetMouse_X_safe(), GetMouse_Y_safe(), temp_draw_mouse_x,temp_draw_mouse_y), (Vector2){SCREEN_WIDTH-235,20},20,0,WHITE);
         if (IsKeyPressed(KEY_B)) {
             config.brush_mode = !config.brush_mode;
+        }
+		if (IsKeyPressed(KEY_S)) {
+            config.wants_shader = !config.wants_shader;
         }
         if(IsKeyPressed(KEY_SPACE)) {
 			if (update_should_stop == true) {

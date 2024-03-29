@@ -3,7 +3,7 @@
 ***The binary must be ran from the root git directory as ./build/physim, otherwise resources will not load***
 
 Early development stages, currently supports 
-- config file **"sim.cfg"** which should be a directory above physim(.exe)
+- config file **"sim.cfg"** which should be a directory above physim(.exe)\
  |-build\
  |    |\
  |    |---physim(.exe)\

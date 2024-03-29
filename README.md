@@ -4,11 +4,11 @@
 
 Early development stages, currently supports 
 - config file **"sim.cfg"** which should be a directory above physim(.exe)
- |-build
- |    |
- |    |---physim(.exe)
- |
- |-sim.cfg
+ |-build\
+ |    |\
+ |    |---physim(.exe)\
+ |\
+ |-sim.cfg\
 
 - Press SPACE to pause
 ### 4 materials allow for various physics simulations

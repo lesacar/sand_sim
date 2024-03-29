@@ -3,16 +3,55 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+const char *MaterialTypeStrings[] = {
+    "Empty",
+    "Sand",
+    "Water",
+    "Stone",
+    "Steam"
+};
 
-char* tf_str(bool test) {
+int32_t GetMouse_X_safe() {
+	int ret = GetMouseX();
+	int sw = GetScreenWidth();
+	if (ret > sw)
+	{
+		return sw;
+	}
+	else if (ret < 0)
+	{
+		return 0;
+	}
+	return ret;
+}
+
+int32_t GetMouse_Y_safe() {
+	int ret = GetMouseY();
+	int sh = GetScreenHeight();
+	if (ret > sh)
+	{
+		return sh;
+	}
+	else if (ret < 0)
+	{
+		return 0;
+	}
+	return ret;
+}
+
+const char* tf_str(bool test) {
 	if (test) {
 		return "true";
 	}
 	return "false";
 }
 
+const char* str_mat(uint32_t material) {
+	return MaterialTypeStrings[material];
+}
+
 // Define a special ConfigData object for error state
-static const ConfigData ERROR_CONFIG = { .is_cfg_read = false, .cfg_file_size = -1, .cfg_buffer = NULL, .fps = 60, .brush_size = 10, .brush_mode=true, .tutorial_shown=false, .read_map=false };
+static const ConfigData ERROR_CONFIG = { .is_cfg_read = false, .cfg_file_size = -1, .cfg_buffer = NULL, .fps = 60, .brush_size = 10, .brush_mode=true, .read_map=false };
 
 ConfigData parse_config_file(const char *cfg_file) {
     ConfigData config = { .is_cfg_read = false, .cfg_file_size = 0, .cfg_buffer = NULL, .fps = 60, .brush_size = 10, .brush_mode=true };
@@ -98,8 +137,6 @@ void parse_config_variables(const char *cfg_buffer, ConfigData *config) {
                     config->brush_mode = (strcmp(value, "true") == 0);
                 } else if (strcmp(variable, "brush_size") == 0) {
                     config->brush_size = atoi(value);
-                } else if (strcmp(variable, "tutorial_shown") == 0) {
-					config->tutorial_shown = (strcmp(value, "true") == 0);
 				} else if (strcmp(variable, "read_map") == 0) {
 					config->read_map = (strcmp(value, "true") == 0);
 				}
@@ -194,7 +231,7 @@ Color rand_color_mat(uint32_t material) {
 void spawnSandBrush(Cell (*grid)[ROWS], int32_t mouseX, int32_t mouseY,
 					int32_t brushSize, uint32_t material, bool brushMode)
 {
-	if (GetMouseX() > SCREEN_WIDTH || GetMouseY() > SCREEN_HEIGHT)
+	if (GetMouse_X_safe() > SCREEN_WIDTH || GetMouse_Y_safe() > SCREEN_HEIGHT)
 	{
 		return;
 	}
@@ -568,8 +605,11 @@ void updateSteam(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS])
 					// Apply downward movement
 					grid[index][j - 1].material = Steam;
 					grid[index][j].material = Water;
+					Color tempcolor = grid[index][j-1].color;
 					grid[index][j - 1].color = grid[index][j].color;
-					grid[index][j].color = grid[index][j-1].color;
+					grid[index][j].color = tempcolor;
+					
+					
 
 					// Apply gravity
 					if (grid[index][j - 1].velocityY > 9.8f)

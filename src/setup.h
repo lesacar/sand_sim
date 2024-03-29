@@ -27,6 +27,8 @@
 	(Color) { 0, 0, 255, 255 }
 #define COLOR_STONE \
 	(Color) { 51, 83, 69, 255 }
+#define COLOR_STEAM \
+	(Color) { 42, 71, 94, 255 }
 #define NOCOLOR \
 	(Color) { 0, 0, 0, 0 }
 
@@ -37,7 +39,6 @@ typedef struct {
     int fps;
     bool brush_mode;
     int brush_size;
-	bool tutorial_shown;
 	bool read_map;
 } ConfigData;
 
@@ -57,13 +58,7 @@ typedef enum
 	Steam
 } MaterialTypes;
 
-typedef struct
-{
-	int startRow;
-	int endRow;
-	int column;
-	Color color;
-} Batch;
+extern const char *MaterialTypeStrings[];
 
 typedef struct
 {
@@ -85,6 +80,9 @@ void updateWater(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS]);
 void updateSteam(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS]);
 void spawnSandBrush(Cell (*grid)[ROWS], int32_t mouseX, int32_t mouseY, int32_t brushSize, uint32_t material, bool brushMode);
 Color rand_color_mat(uint32_t material);
-char* tf_str(bool test);
+const char* tf_str(bool test);
+const char* str_mat(uint32_t material);
+int32_t GetMouse_X_safe();
+int32_t GetMouse_Y_safe();
 
 #endif /* SETUP_H */

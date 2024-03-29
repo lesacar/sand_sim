@@ -1,0 +1,5 @@
+Scroll with mouse wheel to increase/reduce brush size (max 150)
+Press R to reset simulation
+Press B to toggle BRUSH / CIRCLE draw mode
+Press SPACE to pause/resume
+Press H to hide this message

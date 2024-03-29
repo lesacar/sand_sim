@@ -11,13 +11,11 @@ bool update_should_stop = false;
 int updates_per_second = 0;
 int32_t displayed_ups;
 
-void UpdateScreenImage(Cell grid[COLS][ROWS], Image* screenImage) {
+void UpdateScreenImage(Cell (*grid)[ROWS], Image* screenImage) {
     // Calculate the scaled dimensions of the grid
-    int scaledWidth = COLS * BLOCK_SIZE;
-    int scaledHeight = ROWS * BLOCK_SIZE;
 
     // Resize the screen image to match the scaled grid dimensions
-    *screenImage = GenImageColor(scaledWidth, scaledHeight, BLACK);
+    // *screenImage = GenImageColor(scaledWidth, scaledHeight, BLACK);
 
     // Cast data pointer to Color*
     Color* imageData = (Color*)screenImage->data;
@@ -33,7 +31,7 @@ void UpdateScreenImage(Cell grid[COLS][ROWS], Image* screenImage) {
                     int scaledX = i * BLOCK_SIZE + x;
                     int scaledY = j * BLOCK_SIZE + y;
                     // Set pixel color in the scaled image
-                    imageData[scaledY * scaledWidth + scaledX] = color;
+                    imageData[scaledY * SCREEN_WIDTH + scaledX] = color;
                 }
             }
         }
@@ -124,7 +122,11 @@ int main(int argc, char **argv)
     BeginDrawing();
     ClearBackground(BLACK);
     EndDrawing();
-	Image image; // = GenImageColor(SCREEN_WIDTH,SCREEN_HEIGHT,PINK);
+    int32_t selector_xval = 20; // x coordinate of the first tile's top left corner
+    int32_t selector_yval = 75; // y coordinate of the first tile's top left corner
+    int32_t selector_offset = 45; // how far away each icon is in the selector (subtract selector_tsize, ex. selector_offset=45; selector_tsize=40; REAL offset = 45-40 = 5)
+    int32_t selector_tsize = 40; // size of icon in selector
+	Image image = GenImageColor(SCREEN_WIDTH,SCREEN_HEIGHT,PINK);
 	pthread_mutex_t grid_mutex = PTHREAD_MUTEX_INITIALIZER;
     pthread_mutex_t grid_duplicate_mutex = PTHREAD_MUTEX_INITIALIZER;
 	const char *cfg_file = "sim.cfg";
@@ -132,7 +134,7 @@ int main(int argc, char **argv)
 	if (config.is_cfg_read) {
 		parse_config_variables(config.cfg_buffer, &config);
         printf("File contents:\n%s\n", config.cfg_buffer);
-		printf("CFG: Tutorial shown: %s fps: %d | brush_size = %d | brush_mode = %s\n", tf_str(config.tutorial_shown),config.fps, config.brush_size, tf_str(config.brush_mode));
+		printf("CFG: Target fps: %d | brush_size = %d | brush_mode = %s\n", config.fps, config.brush_size, tf_str(config.brush_mode));
     }
 
     uint32_t material = 0;
@@ -211,33 +213,47 @@ int main(int argc, char **argv)
             }
         }
 
-        DrawRectangle(15, 15, 580, 50, WHITE);
-        DrawTextEx(jetmono, TextFormat("Tiles on screen: %05d | Average FPS: %.2f | FPS: %05d ", tileCount, (double)average_fps, (int)(1.0f / cur_dt)), (Vector2){20, 20}, 20, 1, BLACK);
+        // DrawRectangle(15, 15, 580, 50, WHITE);
+        DrawTextEx(jetmono, TextFormat("Tiles on screen: %05d | Average FPS: %.2f | FPS: %05d ", tileCount, (double)average_fps, (int)(1.0f / cur_dt)), (Vector2){20, 20}, 20, 1, WHITE);
         DrawText(TextFormat("Brush size: %d mode = %s", config.brush_size, config.brush_mode ? "true" : "false"), 20, 44, 20, RED);
-        DrawRectangle(15, 140, 200, 50, WHITE);
-        DrawRectangle(20, 145, 40, 40, (Color){201, 170, 127, 255});
-        DrawRectangle(65, 145, 40, 40, (Color){0, 0, 255, 255});
-        DrawRectangle(65 + 45, 145, 40, 40, (Color){51, 83, 69, 255});
+        DrawRectangle(selector_xval-5, selector_yval-5, selector_tsize*sizeof(MaterialTypes)+5*sizeof(MaterialTypes)+5, selector_tsize+10, WHITE);
+        DrawRectangle(selector_xval+selector_offset*0, selector_yval, selector_tsize, selector_tsize, COLOR_SAND);
+        DrawRectangle(selector_xval+selector_offset*1, selector_yval, selector_tsize, selector_tsize, COLOR_WATER);
+        DrawRectangle(selector_xval+selector_offset*2, selector_yval, selector_tsize, selector_tsize, COLOR_STONE);
+        DrawRectangle(selector_xval+selector_offset*3, selector_yval, selector_tsize, selector_tsize, COLOR_STEAM);
 
-        int temp_draw_mouse_x = GetMouseX();
-        int temp_draw_mouse_y = GetMouseY();
-        if (temp_draw_mouse_x / BLOCK_SIZE > COLS) { temp_draw_mouse_x = COLS;}
-        if (temp_draw_mouse_y / BLOCK_SIZE > ROWS) { temp_draw_mouse_y = ROWS;}
-		int temp_ind_i = temp_draw_mouse_x / BLOCK_SIZE;
-		int temp_ind_j = temp_draw_mouse_y / BLOCK_SIZE;
-        DrawTextEx(jetmono, TextFormat("M:%d\nC:%u,%u,%u\nFR:%f\nvX:%.1f,vY:%.1f\nFALL:%s\nSF:%f\nMASS:%d\n",
-			grid[temp_ind_i][temp_ind_j].material,
-			grid[temp_ind_i][temp_ind_j].color.r,
-			grid[temp_ind_i][temp_ind_j].color.g,
-			grid[temp_ind_i][temp_ind_j].color.b,
-			grid[temp_ind_i][temp_ind_j].friction,
-			grid[temp_ind_i][temp_ind_j].velocityX,
-			grid[temp_ind_i][temp_ind_j].velocityY,
-			tf_str(grid[temp_ind_i][temp_ind_j].isFreeFalling),
-			grid[temp_ind_i][temp_ind_j].spreadFactor,
-			grid[temp_ind_i][temp_ind_j].mass),
+        int temp_draw_mouse_x = GetMouse_X_safe()/ BLOCK_SIZE;
+        if (temp_draw_mouse_x < 0)
+        {
+            temp_draw_mouse_x = 0;
+        } else if (temp_draw_mouse_x >= COLS)
+        {
+            temp_draw_mouse_x = COLS-1;
+        }
+        int temp_draw_mouse_y = GetMouse_Y_safe()/BLOCK_SIZE;
+        if (temp_draw_mouse_y < 0)
+        {
+            temp_draw_mouse_y = 0;
+        } else if (temp_draw_mouse_y >= ROWS)
+        {
+            temp_draw_mouse_y = ROWS-1;
+        }
+        
+        
+        
+        DrawTextEx(jetmono, TextFormat("M:%s\nC:%u,%u,%u\nFR:%f\nvX:%.1f,vY:%.1f\nFALL:%s\nSF:%f\nMASS:%d\n",
+			str_mat(grid[temp_draw_mouse_x][temp_draw_mouse_y].material),
+			(uint8_t)grid[temp_draw_mouse_x][temp_draw_mouse_y].color.r,
+			(uint8_t)grid[temp_draw_mouse_x][temp_draw_mouse_y].color.g,
+			(uint8_t)grid[temp_draw_mouse_x][temp_draw_mouse_y].color.b,
+			grid[temp_draw_mouse_x][temp_draw_mouse_y].friction,
+			grid[temp_draw_mouse_x][temp_draw_mouse_y].velocityX,
+			grid[temp_draw_mouse_x][temp_draw_mouse_y].velocityY,
+			tf_str(grid[temp_draw_mouse_x][temp_draw_mouse_y].isFreeFalling),
+			grid[temp_draw_mouse_x][temp_draw_mouse_y].spreadFactor,
+			grid[temp_draw_mouse_x][temp_draw_mouse_y].mass),
 			(Vector2){SCREEN_WIDTH-150,65},20,0,WHITE);
-		DrawTextEx(jetmono, TextFormat("UPS on #2: %d\nmx:%d my:%d i:%d j:%d\n",displayed_ups,temp_draw_mouse_x, temp_draw_mouse_y, (temp_draw_mouse_x/BLOCK_SIZE),(temp_draw_mouse_y/BLOCK_SIZE)), (Vector2){SCREEN_WIDTH-235,20},20,0,WHITE);
+		DrawTextEx(jetmono, TextFormat("UPS on #2: %d\nmx:%d my:%d i:%d j:%d\n",displayed_ups,GetMouse_X_safe(), GetMouse_Y_safe(), temp_draw_mouse_x,temp_draw_mouse_y), (Vector2){SCREEN_WIDTH-235,20},20,0,WHITE);
         if (IsKeyPressed(KEY_B)) {
             config.brush_mode = !config.brush_mode;
         }
@@ -251,23 +267,23 @@ int main(int argc, char **argv)
 
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
         {
-            int mx = GetMouseX();
-            int my = GetMouseY();
-            if (my > 145 && my < 185)
+            int mx = GetMouse_X_safe();
+            int my = GetMouse_Y_safe();
+            if (my > selector_yval && my < selector_yval+selector_tsize)
             {
-                if (mx > 20 && mx < 60)
+                if (mx > selector_xval+selector_offset*0 && mx < selector_xval+selector_offset*1)
                 {
                     material = Sand;
                 }
-                else if (mx > 65 && mx < 65 + 40)
+                else if (mx > selector_xval+selector_offset*1 && mx < selector_xval+selector_offset*2)
                 {
                     material = Water;
                 }
-                else if (mx > 65 + 45 && mx < 140)
+                else if (mx > selector_xval+selector_offset*2 && mx < selector_xval+selector_offset*3)
                 {
                     material = Stone;
                 }
-                else if (mx > 65 + 90 && mx < 140 + 45)
+                else if (mx > selector_xval+selector_offset*3 && mx < selector_xval+selector_offset*4)
                 {
                     material = Steam;
                 }
@@ -276,9 +292,9 @@ int main(int argc, char **argv)
 
         if (IsMouseButtonDown(MOUSE_LEFT_BUTTON))
         {
-            int mx = GetMouseX();
-            int my = GetMouseY();
-            if (mx > 15 && mx < 15 + 200 && my > 140 && my < 140 + 50)
+            int32_t mx = GetMouse_X_safe();
+            int32_t my = GetMouse_Y_safe();
+            if (mx > (int32_t)(selector_xval-5) && mx < (int32_t)(selector_tsize*sizeof(MaterialTypes)+5*sizeof(MaterialTypes)+selector_xval) && my > selector_yval-5 && my < selector_yval+selector_tsize+5)
             {
             }
             else
@@ -296,8 +312,8 @@ int main(int argc, char **argv)
 
         if (IsMouseButtonDown(MOUSE_RIGHT_BUTTON))
         {
-            int mx = GetMouseX();
-            int my = GetMouseY();
+            int mx = GetMouse_X_safe();
+            int my = GetMouse_Y_safe();
 
             int gridX = mx / BLOCK_SIZE;
             int gridY = my / BLOCK_SIZE;
@@ -306,19 +322,6 @@ int main(int argc, char **argv)
             {
                 spawnSandBrush(grid, mx, my, config.brush_size, 0, config.brush_mode);
             }
-        }
-
-        if (!config.tutorial_shown)
-        {
-            DrawText("Scroll with mouse wheel to increase/reduce brush size (max 50)", 20, 66, 20, YELLOW);
-            DrawText("Press R to reset simulation, Press B to toggle BRUSH / CIRCLE draw mode", 20, 88, 20, YELLOW);
-            DrawText("Press K to toggle fps cap", 20, 110, 20, YELLOW);
-            DrawText("Press H to hide this message", 20, 132, 20, YELLOW);
-            if (IsKeyPressed(KEY_H))
-            {
-                config.tutorial_shown = true;
-            }
-            
         }
 
         if (IsKeyPressed(KEY_R))
@@ -332,7 +335,7 @@ int main(int argc, char **argv)
 				parse_config_variables(config.cfg_buffer, &config);
 				SetTargetFPS(config.fps);
 			}
-			printf("CFG(%d): fps: %d | brush_size = %d | brush_mode = %d\n",config.is_cfg_read, config.fps, config.brush_size, config.brush_mode);
+			printf("CFG(%d): fps: %d | brush_size = %d | brush_mode = %d | M:%s\n",config.is_cfg_read, config.fps, config.brush_size, config.brush_mode, str_mat(Water));
 		}
         EndDrawing();
         second_counter += cur_dt;

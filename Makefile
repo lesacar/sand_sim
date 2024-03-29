@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c99 -pthread
+CFLAGS = -Wall -Wextra -pthread
 RM = rm
 WARN = -Wall -Wextra -Wpedantic \
          -Wmissing-prototypes -Wstrict-prototypes -Wold-style-definition \
@@ -51,13 +51,20 @@ check: $(TARGET)
 clean:
 	$(RM) -rf $(BUILD_DIR) $(OBJ_DIR) windows_obj
 
-win: CC = x86_64-w64-mingw32-gcc -D WIN32 -O3
+win: CC = x86_64-w64-mingw32-gcc -D WIN32
 win: LDFLAGS = -L./static/windows -lraylib -lm -lopengl32 -lgdi32 -lwinmm -static
 win: INCLUDE = -I./static/windows/include/
 win: TARGET = $(BUILD_DIR)/main.exe
 win: OBJ = $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(SRC))
-
 win: $(TARGET)
+
+winrel: CFLAGS += -O3
+winrel: clean
+winrel: win
+
+windbg: CFLAGS += -g
+windbg: win
+
 
 debug: CFLAGS += -g
 debug: $(TARGET)

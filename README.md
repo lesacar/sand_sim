@@ -8,7 +8,6 @@
 ### Controls are in controls.txt
 - Press SPACE to pause
 - Press 's' to toggle bloom shader on or off
-Early development stages, currently supports 
 - config file **"sim.cfg"** which should be a directory above physim(.exe)\
  |-build\
  |    |\

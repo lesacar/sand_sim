@@ -9,7 +9,9 @@ const char *MaterialTypeStrings[] = {
     "Sand",
     "Water",
     "Stone",
-    "Steam"
+    "Steam",
+	"Spawner",
+	"Void",
 };
 
 void swapTile(Cell* first, Cell* second) {
@@ -102,9 +104,6 @@ ConfigData parse_config_file(const char *cfg_file) {
 	config.fps = 60;
     config.brush_mode = false;
     config.brush_size = 10;
-
-    // Parse the configuration data from the buffer
-    // Example: parse_fps(&config); parse_brush_mode(&config); parse_brush_size(&config);
 
     return config;
 }
@@ -200,7 +199,6 @@ float fastRand() {
 	return (float)xorshift() / (float)UINT32_MAX;
 }
 
-#pragma GCC diagnostic ignored "-Wconversion"
 Color rand_color_mat(uint32_t material) {
 	Color temp_color = NOCOLOR;
 	int32_t randR,randG,randB = 0;
@@ -230,21 +228,40 @@ Color rand_color_mat(uint32_t material) {
 			randB = (rand() % 20) - 10;
 			temp_color = (Color){42 + randR, 71 + randG, 94 + randB, 255};
 		break;
+		case Spawner:
+			temp_color = WHITE;
+			break;
+		case VoidTile:
+			temp_color = PURPLE;
+			break;
 		default:
 			temp_color = (Color){0,0,0,0};
 		break;
 	}
 	return temp_color;
 }
-#pragma GCC diagnostic warning "-Wconversion"
 
 // Function to spawn sand brush
 void spawnSandBrush(Cell (*grid)[ROWS], int32_t mouseX, int32_t mouseY,
-					int32_t brushSize, uint32_t material, bool brushMode)
+					int32_t brushSize, uint32_t material, uint32_t w_material ,bool brushMode)
 {
 	if (GetMouse_X_safe() > SCREEN_WIDTH || GetMouse_Y_safe() > SCREEN_HEIGHT)
 	{
 		return;
+	}
+	if ((material == Spawner || material == VoidTile) && grid[mouseX][mouseY].material == Empty) {
+		if (material == Spawner)
+		{
+			grid[mouseX][mouseY].material = Spawner;
+			grid[mouseX][mouseY].w_material = w_material;
+			grid[mouseX][mouseY].color = rand_color_mat(Spawner);
+		}
+		else if (material == VoidTile)
+		{
+			grid[mouseX][mouseY].w_material = w_material;
+			grid[mouseX][mouseY].material = VoidTile;
+			grid[mouseX][mouseY].color = rand_color_mat(VoidTile);
+		}
 	}
 	int startX = mouseX / BLOCK_SIZE - brushSize / 2;
 	int startY = mouseY / BLOCK_SIZE - brushSize / 2;
@@ -310,6 +327,7 @@ void spawnSandBrush(Cell (*grid)[ROWS], int32_t mouseX, int32_t mouseY,
 							grid[i][j].spreadFactor = 5.0f;
 							grid[i][j].color = rand_color_mat(Steam);
 						}
+						
 					}
 				}
 				else

@@ -167,6 +167,7 @@ int main(int argc, char **argv)
 	image.width=SCREEN_WIDTH;
 	image.height=SCREEN_HEIGHT;
 	Texture2D screenTex = LoadTextureFromImage(image);
+	uint32_t w_material = Water;
     while (!WindowShouldClose())
     {
         cur_dt = GetFrameTime(); // Get frame time
@@ -221,11 +222,12 @@ int main(int argc, char **argv)
         // DrawRectangle(15, 15, 580, 50, WHITE);
         DrawTextEx(jetmono, TextFormat("Tiles on screen: %05d | Average FPS: %.2f | FPS: %05d ", tileCount, (double)average_fps, (int)(1.0f / cur_dt)), (Vector2){20, 20}, 20, 1, WHITE);
         DrawText(TextFormat("Brush size: %d mode = %s", config.brush_size, config.brush_mode ? "true" : "false"), 20, 44, 20, RED);
-        DrawRectangle(selector_xval-5, selector_yval-5, selector_tsize*sizeof(MaterialTypes)+5*sizeof(MaterialTypes)+5, selector_tsize+10, WHITE);
-        DrawRectangle(selector_xval+selector_offset*0, selector_yval, selector_tsize, selector_tsize, COLOR_SAND);
-        DrawRectangle(selector_xval+selector_offset*1, selector_yval, selector_tsize, selector_tsize, COLOR_WATER);
-        DrawRectangle(selector_xval+selector_offset*2, selector_yval, selector_tsize, selector_tsize, COLOR_STONE);
-        DrawRectangle(selector_xval+selector_offset*3, selector_yval, selector_tsize, selector_tsize, COLOR_STEAM);
+        DrawRectangle(selector_xval-5, selector_yval-5, selector_tsize*MatCount+5*MatCount+5, selector_tsize+10, WHITE);
+        DrawRectangle(selector_xval+selector_offset*Empty, selector_yval, selector_tsize, selector_tsize, (Color){0,0,0,255});
+        DrawRectangle(selector_xval+selector_offset*Sand, selector_yval, selector_tsize, selector_tsize, COLOR_SAND);
+        DrawRectangle(selector_xval+selector_offset*Water, selector_yval, selector_tsize, selector_tsize, COLOR_WATER);
+        DrawRectangle(selector_xval+selector_offset*Stone, selector_yval, selector_tsize, selector_tsize, COLOR_STONE);
+        DrawRectangle(selector_xval+selector_offset*Steam, selector_yval, selector_tsize, selector_tsize, COLOR_STEAM);
 
         int temp_draw_mouse_x = GetMouse_X_safe()/ BLOCK_SIZE;
         if (temp_draw_mouse_x < 0)
@@ -277,32 +279,44 @@ int main(int argc, char **argv)
         {
             int mx = GetMouse_X_safe();
             int my = GetMouse_Y_safe();
-            if (my > selector_yval && my < selector_yval+selector_tsize)
-            {
-                if (mx > selector_xval+selector_offset*0 && mx < selector_xval+selector_offset*1)
-                {
-                    material = Sand;
-                }
-                else if (mx > selector_xval+selector_offset*1 && mx < selector_xval+selector_offset*2)
-                {
-                    material = Water;
-                }
-                else if (mx > selector_xval+selector_offset*2 && mx < selector_xval+selector_offset*3)
-                {
-                    material = Stone;
-                }
-                else if (mx > selector_xval+selector_offset*3 && mx < selector_xval+selector_offset*4)
-                {
-                    material = Steam;
-                }
-            }
-        }
+			if (my > selector_yval && my < selector_yval+selector_tsize)
+			{
+				if (mx > selector_xval+selector_offset*Empty && mx < selector_xval+selector_offset*Sand)
+				{
+					material = Empty;
+				}
+				else if (mx > selector_xval+selector_offset*Sand && mx < selector_xval+selector_offset*Water)
+				{
+					material = Sand;
+				}
+				else if (mx > selector_xval+selector_offset*Water && mx < selector_xval+selector_offset*Stone)
+				{
+					material = Water;
+				}
+				else if (mx > selector_xval+selector_offset*Stone && mx < selector_xval+selector_offset*Steam)
+				{
+					material = Stone;
+				}
+				else if (mx > selector_xval+selector_offset*Steam && mx < selector_xval+selector_offset*Spawner)
+				{
+					material = Steam;
+				}
+				else if (mx > selector_xval+selector_offset*Spawner && mx < selector_xval+selector_offset*VoidTile)
+				{
+					material = Spawner;
+				}
+				else if (mx > selector_xval+selector_offset*VoidTile && mx < selector_xval+selector_offset*MatCount)
+				{
+					material = VoidTile;
+				}
+			}
+		}
 
         if (IsMouseButtonDown(MOUSE_LEFT_BUTTON))
         {
             int32_t mx = GetMouse_X_safe();
             int32_t my = GetMouse_Y_safe();
-            if (mx > (int32_t)(selector_xval-5) && mx < (int32_t)(selector_tsize*sizeof(MaterialTypes)+5*sizeof(MaterialTypes)+selector_xval) && my > selector_yval-5 && my < selector_yval+selector_tsize+5)
+            if (mx > (int32_t)(selector_xval-5) && mx < (int32_t)(selector_tsize*MatCount+5*MatCount+selector_xval) && my > selector_yval-5 && my < selector_yval+selector_tsize+5)
             {
             }
             else
@@ -313,7 +327,7 @@ int main(int argc, char **argv)
 
                 if (gridX >= 0 && gridX < COLS && gridY >= 0 && gridY < ROWS)
                 {
-                    spawnSandBrush(grid, mx, my, config.brush_size, material, config.brush_mode);
+                    spawnSandBrush(grid, mx, my, config.brush_size, material, w_material,config.brush_mode);
                 }
             }
         }
@@ -328,7 +342,7 @@ int main(int argc, char **argv)
 
             if (gridX >= 0 && gridX < COLS && gridY >= 0 && gridY < ROWS)
             {
-                spawnSandBrush(grid, mx, my, config.brush_size, 0, config.brush_mode);
+                spawnSandBrush(grid, mx, my, config.brush_size, 0, w_material, config.brush_mode);
             }
         }
 

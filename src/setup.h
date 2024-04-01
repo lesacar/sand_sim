@@ -56,7 +56,10 @@ typedef enum
 	Sand,
 	Water,
 	Stone,
-	Steam
+	Steam,
+	Spawner,
+	VoidTile,
+	MatCount // !! THIS VALUE SHOULD ALWAYS BE THE LAST ENUM ELEMENT 
 } MaterialTypes;
 
 extern const char *MaterialTypeStrings[];
@@ -64,6 +67,7 @@ extern const char *MaterialTypeStrings[];
 typedef struct
 {
 	uint32_t material;	// 32 bits
+	uint32_t w_material; // 32 bits
 	float friction;		// 32 bits
 	bool isFreeFalling; // 8 bits ?
 	float velocityX;	// 32 bits
@@ -79,7 +83,9 @@ int32_t set_monitor_and_fps(int32_t monitor);
 void sand(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS]);
 void updateWater(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS]);
 void updateSteam(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS]);
-void spawnSandBrush(Cell (*grid)[ROWS], int32_t mouseX, int32_t mouseY, int32_t brushSize, uint32_t material, bool brushMode);
+void updateSpawner(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS]);
+void updateVoidTile(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS]);
+void spawnSandBrush(Cell (*grid)[ROWS], int32_t mouseX, int32_t mouseY, int32_t brushSize, uint32_t material, uint32_t w_material, bool brushMode);
 Color rand_color_mat(uint32_t material);
 const char* tf_str(bool test);
 const char* str_mat(uint32_t material);

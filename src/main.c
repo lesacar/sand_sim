@@ -71,6 +71,10 @@ void* update_worker(void* data) {
         memcpy(grid_duplicate, grid, sizeof(Cell) * COLS * ROWS);
         sand(grid, grid_duplicate);
         memcpy(grid_duplicate, grid, sizeof(Cell) * COLS * ROWS);
+        updateSpawner(grid, grid_duplicate);
+        memcpy(grid_duplicate, grid, sizeof(Cell) * COLS * ROWS);
+        updateVoidTile(grid, grid_duplicate);
+        memcpy(grid_duplicate, grid, sizeof(Cell) * COLS * ROWS);
         updateSteam(grid, grid_duplicate);
         memcpy(grid_duplicate, grid, sizeof(Cell) * COLS * ROWS);
         updateWater(grid, grid_duplicate);
@@ -261,12 +265,13 @@ int main(int argc, char **argv)
         
         
         
-        DrawTextEx(jetmono, TextFormat("M:%s\nC:%u,%u,%u\nFR:%f\nvX:%.1f,vY:%.1f\nFALL:%s\nSF:%f\nMASS:%d\n",
+        DrawTextEx(jetmono, TextFormat("M:%s\nC:%u,%u,%u\nwM:%s\nFR:%f\nvX:%.1f,vY:%.1f\nFALL:%s\nSF:%f\nMASS:%d\n",
 			str_mat(grid[temp_draw_mouse_x][temp_draw_mouse_y].material),
 			(uint8_t)grid[temp_draw_mouse_x][temp_draw_mouse_y].color.r,
 			(uint8_t)grid[temp_draw_mouse_x][temp_draw_mouse_y].color.g,
 			(uint8_t)grid[temp_draw_mouse_x][temp_draw_mouse_y].color.b,
-			grid[temp_draw_mouse_x][temp_draw_mouse_y].friction,
+			str_mat(grid[temp_draw_mouse_x][temp_draw_mouse_y].w_material),
+            grid[temp_draw_mouse_x][temp_draw_mouse_y].friction,
 			grid[temp_draw_mouse_x][temp_draw_mouse_y].velocityX,
 			grid[temp_draw_mouse_x][temp_draw_mouse_y].velocityY,
 			tf_str(grid[temp_draw_mouse_x][temp_draw_mouse_y].isFreeFalling),

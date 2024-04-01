@@ -734,3 +734,55 @@ void updateSteam(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS])
 	}
 }
 
+void updateSpawner(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS]) {
+    for (int j = ROWS - 2; j >= 0; j--) {
+        for (int i = 0; i < COLS; i++) {
+            if (grid_duplicate[i][j].material == Spawner) {
+                int32_t radius = 1;
+                for (int k = -radius; k <= radius; k++) {
+                    for (int l = -radius; l <= radius; l++) {
+                        int newI = i + k;
+                        int newJ = j + l;
+                        if (newI >= 0 && newI < COLS && newJ >= 0 && newJ < ROWS) {
+                            if (grid[newI][newJ].material == Empty && (float)rand()/RAND_MAX > 0.8f) {
+                                grid[newI][newJ].material = grid[i][j].w_material;
+                                // Assuming rand_color_mat() returns a Color
+                                grid[newI][newJ].color = rand_color_mat(Water);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+void updateVoidTile(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS]) {
+	    for (int j = ROWS - 2; j >= 0; j--) {
+        for (int i = 0; i < COLS; i++) {
+            if (grid_duplicate[i][j].material == VoidTile) {
+                int32_t radius = 3;
+                for (int k = -radius; k <= radius; k++) {
+                    for (int l = -radius; l <= radius; l++) {
+                        int newI = i + k;
+                        int newJ = j + l;
+						if (newI == i && newJ == j)
+						{
+							continue;
+						}
+                        if (newI >= 0 && newI < COLS && newJ >= 0 && newJ < ROWS) {
+                            if (grid[newI][newJ].material != Empty && grid[newI][newJ].material != VoidTile) {
+								memset(&grid[newI][newJ], 0, sizeof(Cell));
+                                // Assuming rand_color_mat() returns a Color
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+	

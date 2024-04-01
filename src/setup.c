@@ -2,6 +2,7 @@
 #include <raylib.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <strings.h>
 
 const char *MaterialTypeStrings[] = {
     "Empty",
@@ -10,6 +11,13 @@ const char *MaterialTypeStrings[] = {
     "Stone",
     "Steam"
 };
+
+void swapTile(Cell* first, Cell* second) {
+	Cell temp = *second;
+	*second = *first;
+	*first = temp;
+	return;
+}
 
 int32_t GetMouse_X_safe() {
 	int ret = GetMouseX();
@@ -348,7 +356,64 @@ void sand(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS])
 		{
 			if (grid_duplicate[i][j].material == Sand)
 			{
-				if (grid_duplicate[i][j + 1].material == Empty)
+				grid[i][j].velocityY = 5.0f;
+				if (j + 1 < ROWS && grid_duplicate[i][j + 1].material == Empty && grid[i][j + 1].material == Empty)
+				{
+					if (j + (int32_t)grid_duplicate[i][j].spreadFactor < ROWS)
+					{
+						// Determine the maximum distance to spread downwards
+						int32_t maxSpread = (int32_t)grid_duplicate[i][j].velocityY;
+
+						// Initialize a variable to track the position to move
+						int32_t targetY = j;
+
+						// Check for empty space below the water tile within the spread distance
+						for (int32_t k = 1; k <= maxSpread; k++)
+						{
+							// Calculate the y-coordinate of the potential destination
+							int32_t newY = j + k;
+
+							// Check if the potential destination is within bounds and is empty
+							if (newY < ROWS && grid[i][newY].material == Empty && grid_duplicate[i][newY].material == Empty)
+							{
+								// Update the target position to move downwards
+								targetY = newY;
+							}
+							else
+							{
+								// Stop spreading downwards if an obstacle is encountered
+								break;
+							}
+						}
+
+						// Move water to the determined target position 
+						if (targetY > j && grid_duplicate[i][targetY].material == Empty && grid[i][targetY].material == Empty)
+						{
+							// Move water from the current position to the target position
+							/*grid[i][targetY].material = Water;
+							grid[i][targetY].color = grid[i][j].color;
+
+							// Clear the current position
+							grid[i][j].material = Empty;
+							grid[i][j].color = NOCOLOR;*/
+							swapTile(&grid[i][j], &grid[i][targetY]);
+						}
+					} 
+					else if (j + 1 < ROWS && grid[i][j+1].material == Empty && grid_duplicate[i][j+1].material == Empty && grid[i][j].material == Sand)
+					{
+						/*grid[i][j+1].material = Water;
+						grid[i][j+1].color = grid[i][j].color;
+						// Clear the current position
+						grid[i][j].material = Empty;
+						grid[i][j].color = NOCOLOR;*/
+						swapTile(&grid[i][j+1], &grid[i][j]);
+
+					}
+
+
+					// Apply downward movement
+				}
+				/*if (grid_duplicate[i][j + 1].material == Empty)
 				{
 					grid[i][j + 1].material = grid[i][j].material;
 					grid[i][j].material = Empty;
@@ -363,24 +428,19 @@ void sand(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS])
 					{
 						grid[i][j + 1].velocityY += 1.0f;
 					}
-				}
+					swapTile(&grid[i][j], &grid[i][j+1]);
+				}*/
 				else if (grid_duplicate[i][j + 1].material == Water)
 				{
 					// Apply downward movement
-					grid[i][j + 1].material = Sand;
+					/*grid[i][j + 1].material = Sand;
 					grid[i][j].material = Water;
-					grid[i][j + 1].color = grid_duplicate[i][j].color;
-					grid[i][j].color = grid_duplicate[i][j+1].color;
+
+					grid[i][j + 1].color = grid[i][j].color;
+					grid[i][j].color = grid_duplicate[i][j+1].color;*/
 
 					// Apply gravity
-					if (grid[i][j + 1].velocityY +1 > 9.8f)
-					{
-						grid[i][j + 1].velocityY = 9.8f;
-					}
-					else
-					{
-						grid[i][j + 1].velocityY += 1.0f;
-					}
+					swapTile(&grid[i][j], &grid[i][j+1]);
 				}
 				else
 				{
@@ -394,26 +454,27 @@ void sand(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS])
 						randomValue = 1.0f;
 					}
 					bool canMoveLeft =
-						(i > 0 && j + 1 < ROWS && grid[i - 1][j + 1].material == Empty &&
-						grid[i - 1][j].material == Empty);
+						(i > 0 && j + 1 < ROWS && (grid[i - 1][j + 1].material == Empty || grid[i - 1][j + 1].material == Water) &&
+						(grid[i - 1][j].material == Empty || grid[i - 1][j].material == Water));
 					bool canMoveRight = (i < COLS - 1 && j + 1 < ROWS &&
-						grid[i + 1][j + 1].material == Empty &&
-						grid[i + 1][j].material == Empty);
+						(grid[i + 1][j + 1].material == Empty || grid[i + 1][j + 1].material == Water) &&
+						(grid[i + 1][j].material == Empty || grid[i + 1][j].material == Water));
 
 					if (canMoveLeft || canMoveRight)
 					{
 						int newX = i + (int32_t)randomValue;
 						if (newX >= 0 && newX < COLS && j + 1 < ROWS &&
-							grid[newX][j].material == Empty)
+							(grid[newX][j].material == Empty || grid[newX][j].material == Water ))
 						{
 							// Check if the target position is already occupied
-							if (grid[newX][j + 1].material == Empty)
+							if (grid[newX][j + 1].material == Empty || grid[newX][j + 1].material == Water)
 							{
 								// Move the current sand particle to the new position
-								grid[newX][j + 1].material = Sand;
+								/*grid[newX][j + 1].material = Sand;
 								grid[i][j].material = Empty;
 								grid[newX][j + 1].color = grid[i][j].color;
-								grid[i][j].color = NOCOLOR;
+								grid[i][j].color = NOCOLOR;*/
+								swapTile(&grid[newX][j+1], &grid[i][j]);
 							}
 						}
 					}
@@ -485,33 +546,24 @@ void updateWater(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS])
 						if (targetY > j && grid_duplicate[index][targetY].material == Empty && grid[index][targetY].material == Empty)
 						{
 							// Move water from the current position to the target position
-							grid[index][targetY].material = Water;
+							/*grid[index][targetY].material = Water;
 							grid[index][targetY].color = grid[index][j].color;
 
 							// Clear the current position
 							grid[index][j].material = Empty;
-							grid[index][j].color = NOCOLOR;
+							grid[index][j].color = NOCOLOR;*/
+							swapTile(&grid[index][targetY],&grid[index][j]);
 						}
 					} 
 					else if (j + 1 < ROWS && grid[index][j+1].material == Empty && grid_duplicate[index][j+1].material == Empty && grid[index][j].material == Water)
 					{
-						grid[index][j+1].material = Water;
+						/*grid[index][j+1].material = Water;
 						grid[index][j+1].color = grid[index][j].color;
 						// Clear the current position
 						grid[index][j].material = Empty;
-						grid[index][j].color = NOCOLOR;
+						grid[index][j].color = NOCOLOR;*/
+						swapTile(&grid[index][j+1],&grid[index][j]);
 
-					}
-
-
-					// Apply downward movement
-					if (grid[index][j + 1].velocityY +1 > 9.8f)
-					{
-						grid[index][j + 1].velocityY = 9.8f;
-					}
-					else
-					{
-						grid[index][j + 1].velocityY += 1.0f;
 					}
 				}
 				else
@@ -527,10 +579,12 @@ void updateWater(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS])
 							(j + 1 >= ROWS || grid[nextX][j + 1].material == Empty) && grid_duplicate[nextX][j].material == Empty &&
 							(j >= ROWS || grid[nextX][j].material == Empty))
 						{
+							/*
 							grid[nextX][j + 1].material = grid[index][j].material;
 							grid[index][j].material = Empty;
 							grid[nextX][j + 1].color = grid[index][j].color;
-							grid[index][j].color = NOCOLOR;
+							grid[index][j].color = NOCOLOR;*/
+							swapTile(&grid[nextX][j+1],&grid[index][j]);
 						}
 						else if (nextX >= 0 && nextX < COLS && grid[nextX][j].material != Empty)
 						{
@@ -548,10 +602,12 @@ void updateWater(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS])
 					{
 						if (grid_duplicate[newX][j].material == Empty && grid[newX][j].material == Empty)
 						{
+							swapTile(&grid[newX][j],&grid[index][j]);
+							/*
 							grid[newX][j].material = grid[index][j].material;
 							grid[index][j].material = Empty;
 							grid[newX][j].color = grid[index][j].color;
-							grid[index][j].color = NOCOLOR;
+							grid[index][j].color = NOCOLOR;*/
 						}
 					}
 				}
@@ -587,42 +643,19 @@ void updateSteam(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS])
 			if (grid_duplicate[index][j].material == Steam)
 			{
 				grid[index][j].spreadFactor = 5.0f;
-				if (grid_duplicate[index][j - 1].material == Empty)
+				if (grid_duplicate[index][j - 1].material == Empty || grid_duplicate[index][j - 1].material == Water)
 				{
-					grid[index][j - 1].material = grid[index][j].material;
+					/*grid[index][j - 1].material = grid[index][j].material;
 					grid[index][j].material = Empty;
 					grid[index][j - 1].color = grid[index][j].color;
-					grid[index][j].color = NOCOLOR;
-
-					if (grid[index][j - 1].velocityY + 1.0f > 9.8f)
-					{
-						grid[index][j - 1].velocityY = 9.8f;
-					}
-					else
-					{
-						grid[index][j - 1].velocityY += 1.0f;
-					}
-				}
-				else if (grid_duplicate[index][j - 1].material == Water)
-				{
+					grid[index][j].color = NOCOLOR;*/
 					// Apply downward movement
-					grid[index][j - 1].material = Steam;
+					/*grid[index][j - 1].material = Steam;
 					grid[index][j].material = Water;
 					Color tempcolor = grid[index][j-1].color;
 					grid[index][j - 1].color = grid[index][j].color;
-					grid[index][j].color = tempcolor;
-					
-					
-
-					// Apply gravity
-					if (grid[index][j - 1].velocityY > 9.8f)
-					{
-						grid[index][j - 1].velocityY = 9.8f;
-					}
-					else
-					{
-						grid[index][j - 1].velocityY += 1.0f;
-					}
+					grid[index][j].color = tempcolor;*/
+					swapTile(&grid[index][j-1],&grid[index][j]);
 				}
 				else
 				{
@@ -637,10 +670,11 @@ void updateSteam(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS])
 							(j > 0 && grid[nextX][j - 1].material == Empty) && grid_duplicate[nextX][j].material == Empty &&
 							(j < COLS && grid[nextX][j].material == Empty))
 						{
-								grid[nextX][j - 1].material = grid[index][j].material;
+								/*grid[nextX][j - 1].material = grid[index][j].material;
 								grid[index][j].material = Empty;
 								grid[nextX][j - 1].color = grid[index][j].color;
-								grid[index][j].color = NOCOLOR;
+								grid[index][j].color = NOCOLOR;*/
+								swapTile(&grid[index][j], &grid[nextX][j]);
 						}
 						else if (nextX >= 0 && nextX < COLS && grid[nextX][j].material != Empty)
 						{
@@ -658,10 +692,11 @@ void updateSteam(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS])
 					{
 						if (grid_duplicate[newX][j].material == Empty && grid[newX][j].material == Empty)
 						{
-							grid[newX][j].material = grid[index][j].material;
+							/*grid[newX][j].material = grid[index][j].material;
 							grid[index][j].material = Empty;
 							grid[newX][j].color = grid[index][j].color;
-							grid[index][j].color = NOCOLOR;
+							grid[index][j].color = NOCOLOR;*/
+							swapTile(&grid[index][j], &grid[newX][j]);
 						}
 					}
 				}

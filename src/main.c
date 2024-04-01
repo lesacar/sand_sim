@@ -343,7 +343,7 @@ int main(int argc, char **argv)
 				parse_config_variables(config.cfg_buffer, &config);
 				SetTargetFPS(config.fps);
 			}
-			printf("CFG(%d): fps: %d | brush_size = %d | brush_mode = %d | M:%s\n",config.is_cfg_read, config.fps, config.brush_size, config.brush_mode, str_mat(Water));
+			printf("CFG(%s): fps: %d | brush_size = %d | brush_mode = %d | M:%s\n",tf_str(config.is_cfg_read), config.fps, config.brush_size, config.brush_mode, str_mat(Water));
 		}
         EndDrawing();
         second_counter += cur_dt;

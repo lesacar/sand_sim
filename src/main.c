@@ -222,12 +222,25 @@ int main(int argc, char **argv)
         // DrawRectangle(15, 15, 580, 50, WHITE);
         DrawTextEx(jetmono, TextFormat("Tiles on screen: %05d | Average FPS: %.2f | FPS: %05d ", tileCount, (double)average_fps, (int)(1.0f / cur_dt)), (Vector2){20, 20}, 20, 1, WHITE);
         DrawText(TextFormat("Brush size: %d mode = %s", config.brush_size, config.brush_mode ? "true" : "false"), 20, 44, 20, RED);
-        DrawRectangle(selector_xval-5, selector_yval-5, selector_tsize*MatCount+5*MatCount+5, selector_tsize+10, WHITE);
-        DrawRectangle(selector_xval+selector_offset*Empty, selector_yval, selector_tsize, selector_tsize, (Color){0,0,0,255});
+        DrawRectangle(selector_xval-5, selector_yval-5, selector_tsize*MatCount+5*MatCount+5, selector_tsize+10, DARKGRAY);
+        void DrawRectangleWithBorder(int x, int y, int width, int height, Color fillColor, Color borderColor) {
+            DrawRectangle(x, y, width, height, fillColor);
+            DrawRectangleLinesEx((Rectangle){ x, y, width, height }, 1, borderColor);
+        }
+        DrawRectangleWithBorder(selector_xval + selector_offset * Empty, selector_yval, selector_tsize, selector_tsize, (Color){0, 0, 0, 255}, BLACK);
+        DrawRectangleWithBorder(selector_xval + selector_offset * Sand, selector_yval, selector_tsize, selector_tsize, COLOR_SAND, BLACK);
+        DrawRectangleWithBorder(selector_xval + selector_offset * Water, selector_yval, selector_tsize, selector_tsize, COLOR_WATER, BLACK);
+        DrawRectangleWithBorder(selector_xval + selector_offset * Stone, selector_yval, selector_tsize, selector_tsize, COLOR_STONE, BLACK);
+        DrawRectangleWithBorder(selector_xval + selector_offset * Steam, selector_yval, selector_tsize, selector_tsize, COLOR_STEAM, BLACK);
+        DrawRectangleWithBorder(selector_xval + selector_offset * Spawner, selector_yval, selector_tsize, selector_tsize, WHITE, BLACK);
+        DrawRectangleWithBorder(selector_xval + selector_offset * VoidTile, selector_yval, selector_tsize, selector_tsize, PURPLE, BLACK);
+        /* DrawRectangle(selector_xval+selector_offset*Empty, selector_yval, selector_tsize, selector_tsize, (Color){0,0,0,255});
         DrawRectangle(selector_xval+selector_offset*Sand, selector_yval, selector_tsize, selector_tsize, COLOR_SAND);
         DrawRectangle(selector_xval+selector_offset*Water, selector_yval, selector_tsize, selector_tsize, COLOR_WATER);
         DrawRectangle(selector_xval+selector_offset*Stone, selector_yval, selector_tsize, selector_tsize, COLOR_STONE);
         DrawRectangle(selector_xval+selector_offset*Steam, selector_yval, selector_tsize, selector_tsize, COLOR_STEAM);
+        DrawRectangle(selector_xval+selector_offset*Spawner, selector_yval, selector_tsize, selector_tsize, WHITE);
+        DrawRectangle(selector_xval+selector_offset*VoidTile, selector_yval, selector_tsize, selector_tsize, PURPLE); */
 
         int temp_draw_mouse_x = GetMouse_X_safe()/ BLOCK_SIZE;
         if (temp_draw_mouse_x < 0)

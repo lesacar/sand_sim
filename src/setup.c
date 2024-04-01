@@ -10,8 +10,8 @@ const char *MaterialTypeStrings[] = {
     "Water",
     "Stone",
     "Steam",
-	"Spawner",
-	"Void",
+    "Spawner",
+    "Void"
 };
 
 void swapTile(Cell* first, Cell* second) {
@@ -249,20 +249,30 @@ void spawnSandBrush(Cell (*grid)[ROWS], int32_t mouseX, int32_t mouseY,
 	{
 		return;
 	}
-	if ((material == Spawner || material == VoidTile) && grid[mouseX][mouseY].material == Empty) {
-		if (material == Spawner)
-		{
-			grid[mouseX][mouseY].material = Spawner;
-			grid[mouseX][mouseY].w_material = w_material;
-			grid[mouseX][mouseY].color = rand_color_mat(Spawner);
-		}
-		else if (material == VoidTile)
-		{
-			grid[mouseX][mouseY].w_material = w_material;
-			grid[mouseX][mouseY].material = VoidTile;
-			grid[mouseX][mouseY].color = rand_color_mat(VoidTile);
-		}
-	}
+	    if ((material == Spawner || material == VoidTile))
+    {
+        // Check if a Spawner or VoidTile already exists at the target location
+        if (grid[mouseX / BLOCK_SIZE][mouseY / BLOCK_SIZE].material != Empty)
+        {
+            return; // Return if Spawner or VoidTile already exists
+        }
+
+        // Place the Spawner or VoidTile at the target location
+        if (material == Spawner)
+        {
+            grid[mouseX / BLOCK_SIZE][mouseY / BLOCK_SIZE].material = Spawner;
+            grid[mouseX / BLOCK_SIZE][mouseY / BLOCK_SIZE].w_material = w_material;
+            grid[mouseX / BLOCK_SIZE][mouseY / BLOCK_SIZE].color = rand_color_mat(Spawner);
+            return;
+        }
+        else if (material == VoidTile)
+        {
+            grid[mouseX / BLOCK_SIZE][mouseY / BLOCK_SIZE].w_material = w_material;
+            grid[mouseX / BLOCK_SIZE][mouseY / BLOCK_SIZE].material = VoidTile;
+            grid[mouseX / BLOCK_SIZE][mouseY / BLOCK_SIZE].color = rand_color_mat(VoidTile);
+            return;
+        }
+    }
 	int startX = mouseX / BLOCK_SIZE - brushSize / 2;
 	int startY = mouseY / BLOCK_SIZE - brushSize / 2;
 

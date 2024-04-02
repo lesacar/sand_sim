@@ -7,6 +7,20 @@
 #include "arg_handler.h"
 #include "setup.h"
 
+void DrawRectangleWithBorder(int x, int y, int width, int height, Color fillColor, Color borderColor) {
+	DrawRectangle(x, y, width, height, fillColor);
+	DrawRectangleLinesEx((Rectangle){ x, y, width, height }, 1, borderColor);
+}
+
+void Draw_selector_tooltip(int x, int y, int width, int height, uint32_t material, Font *font) {
+	Vector2 mpos = { GetMouse_X_safe(), GetMouse_Y_safe()};
+	char* str = (char*)str_mat(material);
+	if (CheckCollisionPointRec(mpos, (Rectangle){ x, y, width, height })) {
+		DrawRectangleWithBorder(mpos.x,mpos.y,120,24,DARKGRAY,BLACK);
+		DrawTextEx(*font, TextFormat("%s", str), (Vector2){mpos.x+120-(MeasureTextEx(*font,str,20,0)).x,mpos.y+2},20,0,WHITE);
+	}
+}
+
 bool update_should_stop = false;
 int updates_per_second = 0;
 int32_t displayed_ups;
@@ -115,6 +129,16 @@ void* update_worker(void* data) {
 
 int main(int argc, char **argv)
 {
+	Color colors[] = {
+		NOCOLOR,
+		COLOR_SAND,
+		COLOR_WATER,
+		COLOR_STONE,
+		COLOR_STEAM,
+		WHITE,
+		PURPLE,
+		NOCOLOR
+	};
     // Setup window and display settings
     setup_stuff(SCREEN_WIDTH, SCREEN_HEIGHT, "physim", LOG_WARNING, false);
     int32_t current_monitor = handle_arguments(argc, argv);
@@ -153,7 +177,7 @@ int main(int argc, char **argv)
     int frame_counter = 0;
     float average_fps = 0.0f;
     Font jetmono = LoadFontEx("./src/fonts/JetBrainsMonoNLNerdFont-Regular.ttf", 20, 0, 251);
-
+	SetTextureFilter(jetmono.texture, TEXTURE_FILTER_BILINEAR);
     SetTargetFPS(config.fps);
     Cell(*grid_duplicate)[ROWS] = (Cell(*)[ROWS])malloc(sizeof(Cell) * COLS * ROWS);
     if (grid_duplicate == NULL)
@@ -227,18 +251,20 @@ int main(int argc, char **argv)
         DrawTextEx(jetmono, TextFormat("Tiles on screen: %05d | Average FPS: %.2f | FPS: %05d ", tileCount, (double)average_fps, (int)(1.0f / cur_dt)), (Vector2){20, 20}, 20, 1, WHITE);
         DrawText(TextFormat("Brush size: %d mode = %s", config.brush_size, config.brush_mode ? "true" : "false"), 20, 44, 20, RED);
         DrawRectangle(selector_xval-5, selector_yval-5, selector_tsize*MatCount+5*MatCount+5, selector_tsize+10, DARKGRAY);
-        void DrawRectangleWithBorder(int x, int y, int width, int height, Color fillColor, Color borderColor) {
-            DrawRectangle(x, y, width, height, fillColor);
-            DrawRectangleLinesEx((Rectangle){ x, y, width, height }, 1, borderColor);
-        }
         DrawRectangleWithBorder(selector_xval + selector_offset * Empty, selector_yval, selector_tsize, selector_tsize, (Color){0, 0, 0, 255}, BLACK);
-        DrawRectangleWithBorder(selector_xval + selector_offset * Sand, selector_yval, selector_tsize, selector_tsize, COLOR_SAND, BLACK);
+		for (size_t i = 0; i < sizeof(colors) / sizeof(colors[0]); i++) {
+			DrawRectangleWithBorder(selector_xval + selector_offset * i, selector_yval, selector_tsize, selector_tsize, colors[i], BLACK);
+		}
+		for (size_t i = 0; i < sizeof(colors) / sizeof(colors[0]); i++) {
+			Draw_selector_tooltip(selector_xval + selector_offset * i, selector_yval, selector_tsize, selector_tsize, i, &jetmono);
+		}
+        /* DrawRectangleWithBorder(selector_xval + selector_offset * Sand, selector_yval, selector_tsize, selector_tsize, COLOR_SAND, BLACK);
         DrawRectangleWithBorder(selector_xval + selector_offset * Water, selector_yval, selector_tsize, selector_tsize, COLOR_WATER, BLACK);
         DrawRectangleWithBorder(selector_xval + selector_offset * Stone, selector_yval, selector_tsize, selector_tsize, COLOR_STONE, BLACK);
         DrawRectangleWithBorder(selector_xval + selector_offset * Steam, selector_yval, selector_tsize, selector_tsize, COLOR_STEAM, BLACK);
         DrawRectangleWithBorder(selector_xval + selector_offset * Spawner, selector_yval, selector_tsize, selector_tsize, WHITE, BLACK);
         DrawRectangleWithBorder(selector_xval + selector_offset * VoidTile, selector_yval, selector_tsize, selector_tsize, PURPLE, BLACK);
-        /* DrawRectangle(selector_xval+selector_offset*Empty, selector_yval, selector_tsize, selector_tsize, (Color){0,0,0,255});
+        DrawRectangle(selector_xval+selector_offset*Empty, selector_yval, selector_tsize, selector_tsize, (Color){0,0,0,255});
         DrawRectangle(selector_xval+selector_offset*Sand, selector_yval, selector_tsize, selector_tsize, COLOR_SAND);
         DrawRectangle(selector_xval+selector_offset*Water, selector_yval, selector_tsize, selector_tsize, COLOR_WATER);
         DrawRectangle(selector_xval+selector_offset*Stone, selector_yval, selector_tsize, selector_tsize, COLOR_STONE);

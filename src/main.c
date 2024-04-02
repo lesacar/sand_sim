@@ -14,10 +14,11 @@ void DrawRectangleWithBorder(int x, int y, int width, int height, Color fillColo
 
 void Draw_selector_tooltip(int x, int y, int width, int height, uint32_t material, Font *font) {
 	Vector2 mpos = { GetMouse_X_safe(), GetMouse_Y_safe()};
-	char* str = (char*)str_mat(material);
+	const char* str = str_mat(material);
 	if (CheckCollisionPointRec(mpos, (Rectangle){ x, y, width, height })) {
 		DrawRectangleWithBorder(mpos.x,mpos.y,120,24,DARKGRAY,BLACK);
-		DrawTextEx(*font, TextFormat("%s", str), (Vector2){mpos.x+120-(MeasureTextEx(*font,str,20,0)).x,mpos.y+2},20,0,WHITE);
+		DrawTextEx(*font, str, (Vector2){mpos.x+120-(MeasureTextEx(*font,str,20,0)).x,mpos.y+2},20,0,WHITE);
+        // DrawTextEx(*font, TextFormat("%s", (const char *)str_mat(material)), (Vector2){400,400}, 20, 0, WHITE);
 	}
 }
 
@@ -252,10 +253,10 @@ int main(int argc, char **argv)
         DrawText(TextFormat("Brush size: %d mode = %s", config.brush_size, config.brush_mode ? "true" : "false"), 20, 44, 20, RED);
         DrawRectangle(selector_xval-5, selector_yval-5, selector_tsize*MatCount+5*MatCount+5, selector_tsize+10, DARKGRAY);
         DrawRectangleWithBorder(selector_xval + selector_offset * Empty, selector_yval, selector_tsize, selector_tsize, (Color){0, 0, 0, 255}, BLACK);
-		for (size_t i = 0; i < sizeof(colors) / sizeof(colors[0]); i++) {
+		for (size_t i = 0; i < MatCount; i++) {
 			DrawRectangleWithBorder(selector_xval + selector_offset * i, selector_yval, selector_tsize, selector_tsize, colors[i], BLACK);
 		}
-		for (size_t i = 0; i < sizeof(colors) / sizeof(colors[0]); i++) {
+		for (size_t i = 0; i < MatCount; i++) {
 			Draw_selector_tooltip(selector_xval + selector_offset * i, selector_yval, selector_tsize, selector_tsize, i, &jetmono);
 		}
         /* DrawRectangleWithBorder(selector_xval + selector_offset * Sand, selector_yval, selector_tsize, selector_tsize, COLOR_SAND, BLACK);

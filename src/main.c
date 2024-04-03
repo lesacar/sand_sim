@@ -12,6 +12,24 @@ void DrawRectangleWithBorder(int x, int y, int width, int height, Color fillColo
 	DrawRectangleLinesEx((Rectangle){ x, y, width, height }, 1, borderColor);
 }
 
+void draw_rmb_menu_tile(bool *show_rmb_menu_tile) {
+	int32_t mx = GetMouse_X_safe();
+	int32_t my = GetMouse_Y_safe();
+	printf("%s\n",tf_str(*show_rmb_menu_tile));
+	if (IsKeyPressed(MOUSE_BUTTON_RIGHT)) {
+		*show_rmb_menu_tile = true;
+	}
+	if (*show_rmb_menu_tile == true) {
+		DrawRectangleWithBorder(mx, my, 180,240, GRAY, BLUE);
+	}
+	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !CheckCollisionPointRec((Vector2){mx,my}, (Rectangle){mx,my,180,240})) {
+		*show_rmb_menu_tile = false;
+	}
+	return;
+}
+
+
+
 void Draw_selector_tooltip(int x, int y, int width, int height, uint32_t material, Font *font) {
 	Vector2 mpos = { GetMouse_X_safe(), GetMouse_Y_safe()};
 	const char* str = str_mat(material);
@@ -130,16 +148,7 @@ void* update_worker(void* data) {
 
 int main(int argc, char **argv)
 {
-	Color colors[] = {
-		NOCOLOR,
-		COLOR_SAND,
-		COLOR_WATER,
-		COLOR_STONE,
-		COLOR_STEAM,
-		WHITE,
-		PURPLE,
-		NOCOLOR
-	};
+	
     // Setup window and display settings
     setup_stuff(SCREEN_WIDTH, SCREEN_HEIGHT, "physim", LOG_WARNING, false);
     int32_t current_monitor = handle_arguments(argc, argv);
@@ -151,7 +160,17 @@ int main(int argc, char **argv)
     BeginDrawing();
     ClearBackground(BLACK);
     EndDrawing();
-    int32_t selector_xval = 20; // x coordinate of the first tile's top left corner
+	bool show_rmb_menu_tile = false;
+    Color colors[] = {
+		NOCOLOR,
+		COLOR_SAND,
+		COLOR_WATER,
+		COLOR_STONE,
+		COLOR_STEAM,
+		WHITE,
+		PURPLE,
+		NOCOLOR
+	};int32_t selector_xval = 20; // x coordinate of the first tile's top left corner
     int32_t selector_yval = 75; // y coordinate of the first tile's top left corner
     int32_t selector_offset = 45; // how far away each icon is in the selector (subtract selector_tsize, ex. selector_offset=45; selector_tsize=40; REAL offset = 45-40 = 5)
     int32_t selector_tsize = 40; // size of icon in selector
@@ -377,19 +396,12 @@ int main(int argc, char **argv)
             }
         }
 
-        if (IsMouseButtonDown(MOUSE_RIGHT_BUTTON))
-        {
             int mx = GetMouse_X_safe();
             int my = GetMouse_Y_safe();
 
             int gridX = mx / BLOCK_SIZE;
             int gridY = my / BLOCK_SIZE;
-
-            if (gridX >= 0 && gridX < COLS && gridY >= 0 && gridY < ROWS)
-            {
-                spawnSandBrush(grid, mx, my, config.brush_size, 0, w_material, config.brush_mode);
-            }
-        }
+			draw_rmb_menu_tile(&show_rmb_menu_tile);
 
         if (IsKeyPressed(KEY_R))
         {

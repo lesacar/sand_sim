@@ -43,6 +43,13 @@ typedef struct {
 	bool wants_shader;
 } ConfigData;
 
+typedef struct {
+	Vector2 mpos;
+	Rectangle spos;
+	Vector2 tl_rmb_menu_pos;
+	int64_t status; // 0 if good, negative for errors, TODO: document errors
+} RmbMenu;
+
 // Function to parse configuration file into ConfigData struct
 ConfigData parse_config_file(const char *cfg_file);
 

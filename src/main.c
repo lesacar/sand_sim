@@ -12,18 +12,26 @@ void DrawRectangleWithBorder(int x, int y, int width, int height, Color fillColo
 	DrawRectangleLinesEx((Rectangle){ x, y, width, height }, 1, borderColor);
 }
 
-void draw_rmb_menu_tile(bool *show_rmb_menu_tile) {
-	int32_t mx = GetMouse_X_safe();
-	int32_t my = GetMouse_Y_safe();
-	printf("%s\n",tf_str(*show_rmb_menu_tile));
-	if (IsKeyPressed(MOUSE_BUTTON_RIGHT)) {
+void draw_rmb_menu_tile(RmbMenu *rmb_menu, bool *show_rmb_menu_tile) {
+	if (rmb_menu->status != 0) {
+		*show_rmb_menu_tile = false;
+		return;
+	}
+	int32_t mx = rmb_menu->mpos.x;
+	int32_t my = rmb_menu->mpos.y;
+	if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) == true) {
+		rmb_menu->spos.x = mx;
+		rmb_menu->spos.y = my;
+		rmb_menu->spos.width = 180;
+		rmb_menu->spos.height = 240;
 		*show_rmb_menu_tile = true;
 	}
 	if (*show_rmb_menu_tile == true) {
-		DrawRectangleWithBorder(mx, my, 180,240, GRAY, BLUE);
+		DrawRectangleWithBorder(rmb_menu->spos.x, rmb_menu->spos.y, 180,240, GRAY, BLUE);
 	}
-	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !CheckCollisionPointRec((Vector2){mx,my}, (Rectangle){mx,my,180,240})) {
+	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)  && CheckCollisionPointRec(rmb_menu->mpos, rmb_menu->spos) == false ) {
 		*show_rmb_menu_tile = false;
+		rmb_menu->status = -1;
 	}
 	return;
 }
@@ -161,6 +169,7 @@ int main(int argc, char **argv)
     ClearBackground(BLACK);
     EndDrawing();
 	bool show_rmb_menu_tile = false;
+	RmbMenu rmbmenu = {0};
     Color colors[] = {
 		NOCOLOR,
 		COLOR_SAND,
@@ -396,12 +405,18 @@ int main(int argc, char **argv)
             }
         }
 
-            int mx = GetMouse_X_safe();
-            int my = GetMouse_Y_safe();
+        int mx = GetMouse_X_safe();
+        int my = GetMouse_Y_safe();
 
-            int gridX = mx / BLOCK_SIZE;
-            int gridY = my / BLOCK_SIZE;
-			draw_rmb_menu_tile(&show_rmb_menu_tile);
+        int gridX = mx / BLOCK_SIZE;
+        int gridY = my / BLOCK_SIZE;
+		if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
+			
+			rmbmenu.status = 0;
+		}
+			rmbmenu.mpos.x = mx;
+			rmbmenu.mpos.y = my;
+		draw_rmb_menu_tile(&rmbmenu, &show_rmb_menu_tile);
 
         if (IsKeyPressed(KEY_R))
         {

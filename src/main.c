@@ -19,7 +19,7 @@ void draw_rmb_menu_tile(RmbMenu *rmb_menu, bool *show_rmb_menu_tile) {
 	}
 	int32_t mx = rmb_menu->mpos.x;
 	int32_t my = rmb_menu->mpos.y;
-	if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) == true) {
+	if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) && CheckCollisionPointRec(rmb_menu->mpos, rmb_menu->spos) == false) {
 		rmb_menu->spos.x = mx;
 		rmb_menu->spos.y = my;
 		rmb_menu->spos.width = 180;

@@ -156,7 +156,7 @@ void* update_worker(void* data) {
 
 int main(int argc, char **argv)
 {
-	
+	version_info(argv, argc);
     // Setup window and display settings
     setup_stuff(SCREEN_WIDTH, SCREEN_HEIGHT, "physim", LOG_WARNING, false);
     int32_t current_monitor = handle_arguments(argc, argv);

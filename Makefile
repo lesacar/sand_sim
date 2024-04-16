@@ -51,24 +51,21 @@ check: $(TARGET)
 clean:
 	$(RM) -rf $(BUILD_DIR) $(OBJ_DIR) windows_obj
 
-win: CC = x86_64-w64-mingw32-gcc -D WIN32
+win: CC = x86_64-w64-mingw32-gcc -D WIN32 -D WINDBG
+win: CFLAGS += -g
 win: LDFLAGS = -L./static/windows -lraylib -lm -lopengl32 -lgdi32 -lwinmm -static
 win: INCLUDE = -I./static/windows/include/
 win: TARGET = $(BUILD_DIR)/main.exe
 win: OBJ = $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(SRC))
 win: $(TARGET)
 
-winrel: CFLAGS += -O3
+winrel: CFLAGS += -O3 -D WINREL
 winrel: clean
 winrel: win
 
-windbg: CFLAGS += -g
-windbg: win
-
-
-debug: CFLAGS += -g
+debug: CFLAGS += -g -D UDEBUG
 debug: $(TARGET)
 
-release: CFLAGS += -O3
+release: CFLAGS += -O3 -D URELEASE
 release: clean
 release: $(TARGET)

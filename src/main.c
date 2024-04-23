@@ -19,7 +19,7 @@ void draw_rmb_menu_tile(RmbMenu *rmb_menu, bool *show_rmb_menu_tile) {
 	}
 	int32_t mx = rmb_menu->mpos.x;
 	int32_t my = rmb_menu->mpos.y;
-	if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) == true) {
+	if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) && CheckCollisionPointRec(rmb_menu->mpos, rmb_menu->spos) == false) {
 		rmb_menu->spos.x = mx;
 		rmb_menu->spos.y = my;
 		rmb_menu->spos.width = 180;
@@ -156,7 +156,12 @@ void* update_worker(void* data) {
 
 int main(int argc, char **argv)
 {
-	
+	/* InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Window");
+	while (!WindowShouldClose()) { BeginDrawing(); ClearBackground(BLACK);
+		DrawText(TextFormat("%d", GetFPS()), 20, 20, 20, WHITE);
+		EndDrawing(); }
+	exit(0); */
+	version_info(argv, argc);
     // Setup window and display settings
     setup_stuff(SCREEN_WIDTH, SCREEN_HEIGHT, "physim", LOG_WARNING, false);
     int32_t current_monitor = handle_arguments(argc, argv);
@@ -242,19 +247,6 @@ int main(int argc, char **argv)
 			EndShaderMode();
 		}
 
-        /* for (int i = 0; i < COLS; i++)
-        {
-            for (int j = 0; j < ROWS; j++)
-            {
-                if (grid[i][j].material != Empty)
-                {
-                    Color color = grid[i][j].color;
-                    DrawRectangle(i, j, 1, 1, color);
-                }
-            }
-        } */
-
-
         // Update brush size with mouse wheel input
         config.brush_size += (int32_t)GetMouseWheelMove() * 3;
         if (config.brush_size < 1)
@@ -287,21 +279,7 @@ int main(int argc, char **argv)
 		for (size_t i = 0; i < MatCount; i++) {
 			Draw_selector_tooltip(selector_xval + selector_offset * i, selector_yval, selector_tsize, selector_tsize, i, &jetmono);
 		}
-        /* DrawRectangleWithBorder(selector_xval + selector_offset * Sand, selector_yval, selector_tsize, selector_tsize, COLOR_SAND, BLACK);
-        DrawRectangleWithBorder(selector_xval + selector_offset * Water, selector_yval, selector_tsize, selector_tsize, COLOR_WATER, BLACK);
-        DrawRectangleWithBorder(selector_xval + selector_offset * Stone, selector_yval, selector_tsize, selector_tsize, COLOR_STONE, BLACK);
-        DrawRectangleWithBorder(selector_xval + selector_offset * Steam, selector_yval, selector_tsize, selector_tsize, COLOR_STEAM, BLACK);
-        DrawRectangleWithBorder(selector_xval + selector_offset * Spawner, selector_yval, selector_tsize, selector_tsize, WHITE, BLACK);
-        DrawRectangleWithBorder(selector_xval + selector_offset * VoidTile, selector_yval, selector_tsize, selector_tsize, PURPLE, BLACK);
-        DrawRectangle(selector_xval+selector_offset*Empty, selector_yval, selector_tsize, selector_tsize, (Color){0,0,0,255});
-        DrawRectangle(selector_xval+selector_offset*Sand, selector_yval, selector_tsize, selector_tsize, COLOR_SAND);
-        DrawRectangle(selector_xval+selector_offset*Water, selector_yval, selector_tsize, selector_tsize, COLOR_WATER);
-        DrawRectangle(selector_xval+selector_offset*Stone, selector_yval, selector_tsize, selector_tsize, COLOR_STONE);
-        DrawRectangle(selector_xval+selector_offset*Steam, selector_yval, selector_tsize, selector_tsize, COLOR_STEAM);
-        DrawRectangle(selector_xval+selector_offset*Spawner, selector_yval, selector_tsize, selector_tsize, WHITE);
-        DrawRectangle(selector_xval+selector_offset*VoidTile, selector_yval, selector_tsize, selector_tsize, PURPLE); */
-
-        int temp_draw_mouse_x = GetMouse_X_safe()/ BLOCK_SIZE;
+       int temp_draw_mouse_x = GetMouse_X_safe()/ BLOCK_SIZE;
         if (temp_draw_mouse_x < 0)
         {
             temp_draw_mouse_x = 0;

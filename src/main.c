@@ -200,9 +200,10 @@ int main(int argc, char **argv)
     }
 
     uint32_t material = 0;
-    
+    srand(time(NULL));
     Cell(*grid)[ROWS] = (Cell(*)[ROWS])malloc(sizeof(Cell) * COLS * ROWS);
-    memset(grid, 0, sizeof(Cell) * COLS * ROWS);
+    // memset(grid, 0, sizeof(Cell) * COLS * ROWS);
+	
     Shader bloomShader = LoadShader(0, "src/shaders/bloom.fs");
 
     float cur_dt = 0;
@@ -318,6 +319,16 @@ int main(int argc, char **argv)
 		if (IsKeyPressed(KEY_S)) {
             config.wants_shader = !config.wants_shader;
         }
+		if (IsKeyPressed(KEY_E)) {
+			int randmat = Empty;
+			for (int i = 0; i < COLS; i++) {
+				for (int j = 0; j < ROWS; j++) {
+					randmat = GetRandomValue(0,4);
+					grid[i][j].material = randmat;
+					grid[i][j].color = rand_color_mat(randmat);
+				}
+			}
+		}
         if(IsKeyPressed(KEY_SPACE)) {
 			if (update_should_stop == true) {
 				pthread_create(&update_thread, NULL, update_worker, (void*)&update_data);

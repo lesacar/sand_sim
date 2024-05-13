@@ -103,7 +103,7 @@ void* update_worker(void* data) {
 
     struct timespec delay;
     delay.tv_sec = 0;
-    delay.tv_nsec = 1000000000 / 60; // Initial sleep duration for 60 updates per second
+    delay.tv_nsec = 16666666; // second number is desired ups
 
     while (!update_should_stop) {
         // Measure start time
@@ -207,7 +207,7 @@ int main(int argc, char **argv)
     uint32_t material = Water;
     srand(time(NULL));
     Cell(*grid)[ROWS] = (Cell(*)[ROWS])malloc(sizeof(Cell) * COLS * ROWS);
-    // memset(grid, 0, sizeof(Cell) * COLS * ROWS);
+    memset(grid, 0, sizeof(Cell) * COLS * ROWS);
 	
     Shader bloomShader = LoadShader(0, "src/shaders/bloom.fs");
 
@@ -318,18 +318,18 @@ int main(int argc, char **argv)
 			grid[temp_draw_mouse_x][temp_draw_mouse_y].mass),
 			(Vector2){SCREEN_WIDTH-150,65},20,0,WHITE);
 		DrawTextEx(jetmono, TextFormat("UPS on #2: %d\nmx:%d my:%d i:%d j:%d\n",displayed_ups,GetMouse_X_safe(), GetMouse_Y_safe(), temp_draw_mouse_x,temp_draw_mouse_y), (Vector2){SCREEN_WIDTH-235,20},20,0,WHITE);
-        if (IsKeyPressed(KEY_B)) {
+        if (IsKeyPressed(KEY_N)) {
             config.brush_mode = !config.brush_mode;
         }
-		if (IsKeyPressed(KEY_S)) {
+		if (IsKeyPressed(KEY_B)) {
             config.wants_shader = !config.wants_shader;
         }
 		if (IsKeyPressed(KEY_E) && tileCount == 0) {
 			int randmat = Empty;
 			for (int i = 0; i < COLS; i++) {
 				for (int j = 0; j < ROWS; j++) {
-					// randmat = GetRandomValue(0,4);
-                    randmat = (int)((float)((float)rand() / (float)RAND_MAX) * 4);
+					randmat = GetRandomValue(0,4);
+                    // randmat = (int)((float)((float)rand() / (float)RAND_MAX) * 4);
                     if (GetRandomValue(0, INT32_MAX) < 2100000)
                     {
                         randmat = Spawner;
@@ -346,6 +346,26 @@ int main(int argc, char **argv)
 				}
 			}
 		}
+        if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_S))
+        {
+            
+            #if defined(WIN32) && !defined(__linux__)
+            system("msg * \"Saving grid\"");
+            #elif defined(__linux__) && !defined(WIN32)
+            {
+                char* zenity_string = "zenity --info \\
+--text=\"Saving grid\" \\
+--ok-label=\"Ok\" &";
+                system(zenity_string);
+            }
+            
+            #else
+            fprintf(stderr, "Can't compile for both windows and *nix\n");
+            #endif
+
+            // save_file();
+        }
+        
         if(IsKeyPressed(KEY_SPACE)) {
 			if (update_should_stop == true) {
 				pthread_create(&update_thread, NULL, update_worker, (void*)&update_data);
@@ -425,7 +445,12 @@ int main(int argc, char **argv)
 
         if (IsKeyPressed(KEY_R))
         {
+            update_should_stop = true;
+            struct timespec tmp = { .tv_sec = 0, .tv_nsec = 20000000 };
+            nanosleep(&tmp, NULL);
             memset(grid, 0, sizeof(Cell) * COLS * ROWS);
+            update_should_stop = false;
+            pthread_create(&update_thread, NULL, update_worker, (void*)&update_data);
         }
 		if (IsKeyPressed(KEY_C)) {
 

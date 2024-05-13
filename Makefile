@@ -63,7 +63,7 @@ winrel: CFLAGS += -O3 -D WINREL
 winrel: clean
 winrel: win
 
-debug: CFLAGS += -g -D UDEBUG
+debug: CFLAGS += -g -D UDEBUG -fsanitize=address
 debug: $(TARGET)
 
 release: CFLAGS += -O3 -D URELEASE

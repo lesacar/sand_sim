@@ -199,7 +199,7 @@ int main(int argc, char **argv)
 		printf("CFG: Target fps: %d | brush_size = %d | brush_mode = %s\n", config.fps, config.brush_size, tf_str(config.brush_mode));
     }
 
-    uint32_t material = 0;
+    uint32_t material = Water;
     srand(time(NULL));
     Cell(*grid)[ROWS] = (Cell(*)[ROWS])malloc(sizeof(Cell) * COLS * ROWS);
     // memset(grid, 0, sizeof(Cell) * COLS * ROWS);
@@ -386,8 +386,7 @@ int main(int argc, char **argv)
 
                 int gridX = mx / BLOCK_SIZE;
                 int gridY = my / BLOCK_SIZE;
-
-                if (gridX >= 0 && gridX < COLS && gridY >= 0 && gridY < ROWS)
+				if (gridX >= 0 && gridX < COLS && gridY >= 0 && gridY < ROWS && !CheckCollisionPointRec((Vector2){mx,my}, rmbmenu.spos))
                 {
                     spawnSandBrush(grid, mx, my, config.brush_size, material, w_material,config.brush_mode);
                 }

@@ -74,6 +74,7 @@ extern const char *MaterialTypeStrings[];
 typedef struct
 {
 	uint32_t material;	// 32 bits
+	/// Working material (child material)
 	uint32_t w_material; // 32 bits
 	float friction;		// 32 bits
 	bool isFreeFalling; // 8 bits ?

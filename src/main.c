@@ -19,14 +19,19 @@ void draw_rmb_menu_tile(RmbMenu *rmb_menu, bool *show_rmb_menu_tile) {
 	}
 	int32_t mx = rmb_menu->mpos.x;
 	int32_t my = rmb_menu->mpos.y;
-	if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) && CheckCollisionPointRec(rmb_menu->mpos, rmb_menu->spos) == false) {
+	if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) && CheckCollisionPointRec(rmb_menu->mpos, rmb_menu->spos) == false && *show_rmb_menu_tile == false)  {
 		rmb_menu->spos.x = mx;
 		rmb_menu->spos.y = my;
 		rmb_menu->spos.width = 180;
 		rmb_menu->spos.height = 240;
 		*show_rmb_menu_tile = true;
-	}
-	if (*show_rmb_menu_tile == true) {
+	} if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) && *show_rmb_menu_tile && !CheckCollisionPointRec(rmb_menu->mpos, rmb_menu->spos))
+    {
+        *show_rmb_menu_tile = !*show_rmb_menu_tile;
+        rmb_menu->spos = (Rectangle){ 0 };
+    }
+    
+	if (*show_rmb_menu_tile) {
 		DrawRectangleWithBorder(rmb_menu->spos.x, rmb_menu->spos.y, 180,240, GRAY, BLUE);
 	}
 	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)  && CheckCollisionPointRec(rmb_menu->mpos, rmb_menu->spos) == false ) {
@@ -98,7 +103,7 @@ void* update_worker(void* data) {
 
     struct timespec delay;
     delay.tv_sec = 0;
-    delay.tv_nsec = 16666666; // Initial sleep duration for 60 updates per second
+    delay.tv_nsec = 1000000000 / 60; // Initial sleep duration for 60 updates per second
 
     while (!update_should_stop) {
         // Measure start time
@@ -319,11 +324,23 @@ int main(int argc, char **argv)
 		if (IsKeyPressed(KEY_S)) {
             config.wants_shader = !config.wants_shader;
         }
-		if (IsKeyPressed(KEY_E)) {
+		if (IsKeyPressed(KEY_E) && tileCount == 0) {
 			int randmat = Empty;
 			for (int i = 0; i < COLS; i++) {
 				for (int j = 0; j < ROWS; j++) {
-					randmat = GetRandomValue(0,4);
+					// randmat = GetRandomValue(0,4);
+                    randmat = (int)((float)((float)rand() / (float)RAND_MAX) * 4);
+                    if (GetRandomValue(0, INT32_MAX) < 2100000)
+                    {
+                        randmat = Spawner;
+                        grid[i][j].w_material = Water;
+                    }
+                    if (GetRandomValue(0, INT32_MAX) < 1050000)
+                    {
+                        randmat = VoidTile;
+                        grid[i][j].w_material = Empty;
+                    }
+                    
 					grid[i][j].material = randmat;
 					grid[i][j].color = rand_color_mat(randmat);
 				}

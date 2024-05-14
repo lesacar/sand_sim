@@ -225,6 +225,7 @@ int main(int argc, char **argv)
         printf("Failed to malloc grid\n");
         return -1;
     }
+    memset(grid_duplicate, 0, sizeof(Cell) * COLS * ROWS);
 
     int32_t tileCount = 0;
 

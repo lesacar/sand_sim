@@ -170,7 +170,7 @@ int32_t setup_stuff(int32_t sc_wi, int32_t sc_he, const char *WindowTitle,
 	{
 		SetConfigFlags(FLAG_FULLSCREEN_MODE);
 	}
-	SetConfigFlags(FLAG_WINDOW_RESIZABLE);
+	// SetConfigFlags(FLAG_WINDOW_RESIZABLE);
 
 	InitWindow(sc_wi, sc_he, WindowTitle);
 	return 0;

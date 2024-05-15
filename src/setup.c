@@ -29,6 +29,7 @@ uint8_t Draw_message_box(MsgBox *msgbox, Font *font) {
 		return 0;
 	}
 	//DrawRectangleRec(msgbox->position, YELLOW);
+	int txtfontsize = (msgbox->position.height/6)-4;
 	DrawRectangleRounded(msgbox->position, 0.15f, 0, DARKGRAY);
 	DrawRectangleRounded((Rectangle){msgbox->position.x,msgbox->position.y,msgbox->position.width,24}, 0.92f, 0, GRAY);
 	DrawRectangleRec((Rectangle){msgbox->position.x,msgbox->position.y+12,msgbox->position.width,12}, GRAY);
@@ -36,15 +37,22 @@ uint8_t Draw_message_box(MsgBox *msgbox, Font *font) {
 	DrawTextEx(*font, msgbox->title, (Vector2){msgbox->position.x+8,msgbox->position.y}, 24, 0, WHITE);
 
 
-	int32_t txtw = MeasureTextEx(*font, msgbox->text, 20, 0).x;
-	int32_t charsPerLine = (msgbox->position.width-2)/MeasureTextEx(*font, "a", 20, 0).x;
-for (int32_t i = 0; i < 5; i++) {
-    int32_t textOffset = i * charsPerLine;
-    if (textOffset >= strlen(msgbox->text)) {
-        break;
-    }
-    DrawTextEx(*font, msgbox->text + textOffset, (Vector2){msgbox->position.x + 1, msgbox->position.y + 24 + (i * 24)}, 20, 0, WHITE);
-}
+	//int32_t txtw = MeasureTextEx(*font, msgbox->text, 20, 0).x;
+	int32_t charsPerLine = (msgbox->position.width - 4) / MeasureTextEx(*font, "a", txtfontsize, 0).x;
+	for (int32_t i = 0; i < (msgbox->position.height/txtfontsize)-3; i++) {
+		char txt[charsPerLine + 1]; // +1 for null terminator
+		size_t textOffset = i * charsPerLine;
+		if (textOffset >= strlen(msgbox->text)) {
+			break;
+		}
+		// Copy characters from msgbox->text to txt buffer
+		for (int j = 0; j < charsPerLine && msgbox->text[textOffset + j] != '\0'; j++) {
+			txt[j] = msgbox->text[textOffset + j];
+		}
+		txt[charsPerLine] = '\0'; // Null-terminate the string
+		DrawTextEx(*font, txt, (Vector2){msgbox->position.x + 1, msgbox->position.y + 26 + (i * txtfontsize-3)}, txtfontsize, 0, WHITE);
+	}
+
 
 
 	//DrawTextEx(*font, msgbox->text+(int)msgbox->position.width-2, (Vector2){msgbox->position.x+1,msgbox->position.y+24+22}, 20, 0, WHITE);

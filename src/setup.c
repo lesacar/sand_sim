@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
+#include <time.h>
 
 const char *MaterialTypeStrings[] = {
     "Empty",
@@ -29,7 +30,7 @@ uint8_t Draw_message_box(MsgBox *msgbox, Font *font) {
 		return 0;
 	}
 	//DrawRectangleRec(msgbox->position, YELLOW);
-	int txtfontsize = (msgbox->position.height/6)-4;
+	int txtfontsize = 20;
 	DrawRectangleRounded(msgbox->position, 0.15f, 0, DARKGRAY);
 	DrawRectangleRounded((Rectangle){msgbox->position.x,msgbox->position.y,msgbox->position.width,24}, 0.92f, 0, GRAY);
 	DrawRectangleRec((Rectangle){msgbox->position.x,msgbox->position.y+12,msgbox->position.width,12}, GRAY);

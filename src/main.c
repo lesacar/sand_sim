@@ -183,8 +183,8 @@ int main(int argc, char **argv)
 	mb->show = false;
 	mb->position.x = 400;
 	mb->position.y = 200;
-	mb->position.width = 600;
-	mb->position.height = 340;
+	mb->position.width = 260;
+	mb->position.height = 140;
 	mb->title = "File saving";
 	mb->text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum, Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum.";
 	mb->buttons = 1;

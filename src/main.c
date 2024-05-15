@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <stdio.h>
 #include <raylib.h>
 #include <stdlib.h>
@@ -175,9 +176,19 @@ int main(int argc, char **argv)
         exit(EXIT_FAILURE);
     }
 
-    BeginDrawing();
-    ClearBackground(BLACK);
-    EndDrawing();
+	BeginDrawing();
+	ClearBackground(BLACK);
+	EndDrawing();
+	MsgBox *mb = malloc(sizeof(MsgBox));
+	mb->show = false;
+	mb->position.x = 400;
+	mb->position.y = 400;
+	mb->position.width = 200;
+	mb->position.height = 140;
+	mb->title = "File saving";
+	mb->text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum";
+	mb->buttons = 2;
+
 	bool show_rmb_menu_tile = false;
 	RmbMenu rmbmenu = {0};
     Color colors[] = {
@@ -216,8 +227,10 @@ int main(int argc, char **argv)
     float fps_counter = 0.0f;
     int frame_counter = 0;
     float average_fps = 0.0f;
-    Font jetmono = LoadFontEx("./src/fonts/JetBrainsMonoNLNerdFont-Regular.ttf", 20, 0, 251);
+    Font jetmono = LoadFontEx("./src/fonts/JetBrainsMonoNLNerdFont-Regular.ttf", 32, NULL, 0);
+	//GenTextureMipmaps(&jetmono.texture);
 	SetTextureFilter(jetmono.texture, TEXTURE_FILTER_BILINEAR);
+
     SetTargetFPS(config.fps);
     Cell(*grid_duplicate)[ROWS] = (Cell(*)[ROWS])malloc(sizeof(Cell) * COLS * ROWS);
     if (grid_duplicate == NULL)
@@ -329,14 +342,17 @@ int main(int argc, char **argv)
 			int randmat = Empty;
 			for (int i = 0; i < COLS; i++) {
 				for (int j = 0; j < ROWS; j++) {
-					randmat = GetRandomValue(0,4);
+					randmat = GetRandomValue(0,8);
+					if (randmat > 4) {
+						randmat = 0;
+					}
                     // randmat = (int)((float)((float)rand() / (float)RAND_MAX) * 4);
                     if (GetRandomValue(0, INT32_MAX) < 2100000)
                     {
                         randmat = Spawner;
                         grid[i][j].w_material = Water;
                     }
-                    if (GetRandomValue(0, INT32_MAX) < 1050000)
+                    if (GetRandomValue(0, INT32_MAX) < 1500000)
                     {
                         randmat = VoidTile;
                         grid[i][j].w_material = Empty;
@@ -347,25 +363,11 @@ int main(int argc, char **argv)
 				}
 			}
 		}
-        if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_S))
+         if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_S))
         {
-            
-            #if defined(WIN32) && !defined(__linux__)
-            system("msg * \"Saving grid\"");
-            #elif defined(__linux__) && !defined(WIN32)
-            {
-                char* zenity_string = "zenity --info \\
---text=\"Saving grid\" \\
---ok-label=\"Ok\" &";
-                system(zenity_string);
-            }
-            
-            #else
-            fprintf(stderr, "Can't compile for both windows and *nix\n");
-            #endif
-
-            // save_file();
-        }
+			mb->show = true;
+		}
+		Draw_message_box(mb, &jetmono);
         
         if(IsKeyPressed(KEY_SPACE)) {
 			if (update_should_stop == true) {

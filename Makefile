@@ -54,7 +54,7 @@ clean:
 win: CC = x86_64-w64-mingw32-gcc -D WIN32 -D WINDBG
 win: CFLAGS += -g
 win: LDFLAGS = -L./static/windows -lraylib -lm -lopengl32 -lgdi32 -lwinmm -static
-win: INCLUDE = -I./static/windows/include/
+win: INCLUDE += -I./static/windows/include/
 win: TARGET = $(BUILD_DIR)/main.exe
 win: OBJ = $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(SRC))
 win: $(TARGET)

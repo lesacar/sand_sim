@@ -12,6 +12,7 @@
 #include <immintrin.h>
 #include <raylib.h>
 
+
 #define SCREEN_WIDTH 1440
 #define SCREEN_HEIGHT 720
 #define BLOCK_SIZE 4
@@ -44,11 +45,22 @@ typedef struct {
 } ConfigData;
 
 typedef struct {
+	bool show;
+	Rectangle position;
+	const char *title;
+	const char *text;
+	uint8_t buttons;
+} MsgBox;
+
+typedef struct {
 	Vector2 mpos;
 	Rectangle spos;
 	Vector2 tl_rmb_menu_pos;
 	int64_t status; // 0 if good, negative for errors, TODO: document errors
 } RmbMenu;
+
+// Draw message box
+uint8_t Draw_message_box(MsgBox *msgbox, Font *font);
 
 // Function to parse configuration file into ConfigData struct
 ConfigData parse_config_file(const char *cfg_file);

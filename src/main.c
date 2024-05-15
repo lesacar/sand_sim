@@ -182,12 +182,12 @@ int main(int argc, char **argv)
 	MsgBox *mb = malloc(sizeof(MsgBox));
 	mb->show = false;
 	mb->position.x = 400;
-	mb->position.y = 400;
-	mb->position.width = 200;
-	mb->position.height = 140;
+	mb->position.y = 200;
+	mb->position.width = 600;
+	mb->position.height = 340;
 	mb->title = "File saving";
-	mb->text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum";
-	mb->buttons = 2;
+	mb->text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum, Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum.";
+	mb->buttons = 1;
 
 	bool show_rmb_menu_tile = false;
 	RmbMenu rmbmenu = {0};
@@ -227,7 +227,7 @@ int main(int argc, char **argv)
     float fps_counter = 0.0f;
     int frame_counter = 0;
     float average_fps = 0.0f;
-    Font jetmono = LoadFontEx("./src/fonts/JetBrainsMonoNLNerdFont-Regular.ttf", 32, NULL, 0);
+    Font jetmono = LoadFontEx("./src/fonts/JetBrainsMonoNLNerdFont-Regular.ttf", 64, NULL, 0);
 	//GenTextureMipmaps(&jetmono.texture);
 	SetTextureFilter(jetmono.texture, TEXTURE_FILTER_BILINEAR);
 
@@ -428,7 +428,11 @@ int main(int argc, char **argv)
                 int gridY = my / BLOCK_SIZE;
 				if (gridX >= 0 && gridX < COLS && gridY >= 0 && gridY < ROWS && !CheckCollisionPointRec((Vector2){mx,my}, rmbmenu.spos))
                 {
-                    spawnSandBrush(grid, mx, my, config.brush_size, material, w_material,config.brush_mode);
+					if (mb->show && !CheckCollisionPointRec(GetMousePosition(), mb->position)) {
+						spawnSandBrush(grid, mx, my, config.brush_size, material, w_material,config.brush_mode);
+					} else if (!mb->show){
+						spawnSandBrush(grid, mx, my, config.brush_size, material, w_material,config.brush_mode);
+					}
                 }
             }
         }

@@ -33,7 +33,7 @@ uint8_t Draw_message_box(MsgBox *msgbox, Font *font) {
 	DrawRectangleRounded(msgbox->position, 0.15f, 0, DARKGRAY);
 	DrawRectangleRounded((Rectangle){msgbox->position.x,msgbox->position.y,msgbox->position.width,24}, 0.92f, 0, GRAY);
 	DrawRectangleRec((Rectangle){msgbox->position.x,msgbox->position.y+12,msgbox->position.width,12}, GRAY);
-	DrawRectangleRoundedLines((Rectangle){msgbox->position.x+1,msgbox->position.y+1,msgbox->position.width-2,msgbox->position.height-2}, 0.15f, 10, 1.0f, WHITE);
+	//DrawRectangleRoundedLines((Rectangle){msgbox->position.x+1,msgbox->position.y+1,msgbox->position.width-2,msgbox->position.height-2}, 0.15f, 10, 1.0f, WHITE);
 	DrawTextEx(*font, msgbox->title, (Vector2){msgbox->position.x+8,msgbox->position.y}, 24, 0, WHITE);
 
 
@@ -50,13 +50,8 @@ uint8_t Draw_message_box(MsgBox *msgbox, Font *font) {
 			txt[j] = msgbox->text[textOffset + j];
 		}
 		txt[charsPerLine] = '\0'; // Null-terminate the string
-		DrawTextEx(*font, txt, (Vector2){msgbox->position.x + 1, msgbox->position.y + 26 + (i * txtfontsize-3)}, txtfontsize, 0, WHITE);
+		DrawTextEx(*font, txt, (Vector2){msgbox->position.x + 1, msgbox->position.y + 26 + (i * (MeasureTextEx(*font, "a", txtfontsize, 0).y -2))}, txtfontsize, 0, WHITE);
 	}
-
-
-
-	//DrawTextEx(*font, msgbox->text+(int)msgbox->position.width-2, (Vector2){msgbox->position.x+1,msgbox->position.y+24+22}, 20, 0, WHITE);
-
 	Rectangle ok = {0};
 	Rectangle cancel = {0};
 	uint8_t btnoffsetW = 35;
@@ -70,7 +65,8 @@ uint8_t Draw_message_box(MsgBox *msgbox, Font *font) {
 			//DrawRectangleRec(ok,WHITE); // jagged
 			DrawRectangleRounded((Rectangle){ok.x+1,ok.y+1,ok.width-2,ok.height-2}, 0.3f, 10, WHITE);
 			//DrawRectangleLinesEx(ok, 2.0f, BLACK);
-			DrawRectangleRoundedLines((Rectangle){ok.x+1,ok.y+1,ok.width-2,ok.height-2}, 0.3f, 0, 3.0f, BLACK);
+			DrawRectangleRoundedLines((Rectangle){ok.x+1,ok.y+1,ok.width-2,ok.height-2}, 0.3f, 0, 2.0f, BLACK);
+			DrawTextEx(*font, "Ok", (Vector2){ok.x+ok.width/2-MeasureTextEx(*font,"Ok",btnoffsetH/1.2,0).x/2,ok.y}, btnoffsetH/1.2, 0, BLACK);
 			if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(GetMousePosition(), ok)) {
 				msgbox->show = false;
 				return 1;

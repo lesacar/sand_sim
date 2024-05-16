@@ -188,6 +188,8 @@ int main(int argc, char **argv)
 	mb->title = "File saving";
 	mb->text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum, Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum.";
 	mb->buttons = 1;
+	mb->dragging = false;
+	mb->drag_offset = (Vector2){0,0};
 
 	bool show_rmb_menu_tile = false;
 	RmbMenu rmbmenu = {0};

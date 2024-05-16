@@ -13,6 +13,11 @@
 #include <raylib.h>
 
 
+// Underline on
+#define UON = "\033[4m";
+// Underline off
+#define UOFF = "\033[0m";
+
 #define SCREEN_WIDTH 1440
 #define SCREEN_HEIGHT 720
 #define BLOCK_SIZE 4
@@ -50,6 +55,8 @@ typedef struct {
 	const char *title;
 	const char *text;
 	uint8_t buttons;
+	bool dragging;
+	Vector2 drag_offset;
 } MsgBox;
 
 typedef struct {

@@ -32,10 +32,32 @@ uint8_t Draw_message_box(MsgBox *msgbox, Font *font) {
 	//DrawRectangleRec(msgbox->position, YELLOW);
 	int txtfontsize = 20;
 	DrawRectangleRounded(msgbox->position, 0.15f, 0, DARKGRAY);
-	DrawRectangleRounded((Rectangle){msgbox->position.x,msgbox->position.y,msgbox->position.width,24}, 0.92f, 0, GRAY);
-	DrawRectangleRec((Rectangle){msgbox->position.x,msgbox->position.y+12,msgbox->position.width,12}, GRAY);
+	Rectangle title_top = {msgbox->position.x,msgbox->position.y,msgbox->position.width,24};
+	Rectangle title_bottom = {msgbox->position.x,msgbox->position.y+12,msgbox->position.width,12};
+
+	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(GetMousePosition(), title_top)) {
+		// Start dragging
+		msgbox->dragging = true;
+		Vector2 mousePos = GetMousePosition();
+		msgbox->drag_offset.x = mousePos.x - msgbox->position.x;
+		msgbox->drag_offset.y = mousePos.y - msgbox->position.y;
+	}
+
+	if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+		// Stop dragging
+		msgbox->dragging = false;
+	}
+
+	if (msgbox->dragging) {
+		Vector2 mousePos = GetMousePosition();
+		msgbox->position.x = mousePos.x - msgbox->drag_offset.x;
+		msgbox->position.y = mousePos.y - msgbox->drag_offset.y;
+	}
+
+	DrawRectangleRounded(title_top, 0.92f, 0, GRAY);
+	DrawRectangleRec(title_bottom, GRAY);
 	//DrawRectangleRoundedLines((Rectangle){msgbox->position.x+1,msgbox->position.y+1,msgbox->position.width-2,msgbox->position.height-2}, 0.15f, 10, 1.0f, WHITE);
-	DrawTextEx(*font, msgbox->title, (Vector2){msgbox->position.x+8,msgbox->position.y}, 24, 0, WHITE);
+	DrawTextEx(*font, msgbox->title, (Vector2){msgbox->position.x+12,msgbox->position.y}, 24, 0, WHITE);
 
 
 	//int32_t txtw = MeasureTextEx(*font, msgbox->text, 20, 0).x;

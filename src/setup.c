@@ -120,9 +120,7 @@ uint8_t Draw_message_box(MsgBox *msgbox, Font *font) {
 		}
 	}
 	return 0;
-
 }
-
 
 
 int32_t GetMouse_X_safe() {

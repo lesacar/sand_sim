@@ -187,7 +187,7 @@ int main(int argc, char **argv)
 	mb->position.height = 140;
 	mb->title = "File saving";
 	mb->text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum, Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum.";
-	mb->buttons = 1;
+	mb->buttons = 2;
 	mb->dragging = false;
 	mb->drag_offset = (Vector2){0,0};
 
@@ -369,7 +369,9 @@ int main(int argc, char **argv)
         {
 			mb->show = true;
 		}
-		Draw_message_box(mb, &jetmono);
+		if (Draw_message_box(mb, &jetmono) == 1) {
+			printf("We should save the world now\n");
+		}
         
         if(IsKeyPressed(KEY_SPACE)) {
 			if (update_should_stop == true) {

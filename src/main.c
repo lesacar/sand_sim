@@ -117,11 +117,6 @@ void* update_worker(void* data) {
 
 int main(int argc, char **argv)
 {
-	/* InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Window");
-	while (!WindowShouldClose()) { BeginDrawing(); ClearBackground(BLACK);
-		DrawText(TextFormat("%d", GetFPS()), 20, 20, 20, WHITE);
-		EndDrawing(); }
-	exit(0); */
 	version_info(argv, argc);
     // Setup window and display settings
     setup_stuff(SCREEN_WIDTH, SCREEN_HEIGHT, "physim", LOG_WARNING, false);
@@ -147,6 +142,7 @@ int main(int argc, char **argv)
 	mb->drag_offset = (Vector2){0,0};
 
 	bool show_rmb_menu_tile = false;
+	// maybe should malloc?
 	RmbMenu rmbmenu = {0};
     Color colors[] = {
 		NOCOLOR,
@@ -157,7 +153,8 @@ int main(int argc, char **argv)
 		WHITE,
 		PURPLE,
 		NOCOLOR
-	};int32_t selector_xval = 20; // x coordinate of the first tile's top left corner
+	};
+	int32_t selector_xval = 20; // x coordinate of the first tile's top left corner
     int32_t selector_yval = 75; // y coordinate of the first tile's top left corner
     int32_t selector_offset = 45; // how far away each icon is in the selector (subtract selector_tsize, ex. selector_offset=45; selector_tsize=40; REAL offset = 45-40 = 5)
     int32_t selector_tsize = 40; // size of icon in selector
@@ -452,10 +449,8 @@ int main(int argc, char **argv)
 		
     }
 	UnloadImage(image);
-    // Set the flag to stop the update thread
-    update_should_stop = true;
-
-    // Wait for the update thread to finish
+    
+	update_should_stop = true;
     pthread_join(update_thread, NULL);
 
     // Cleanup

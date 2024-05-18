@@ -7,7 +7,9 @@
 #include <errno.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include "arbitrary.h"
 #include <math.h>
+#include "arbitrary.h"
 #include <omp.h>
 #include <immintrin.h>
 #include <raylib.h>
@@ -59,13 +61,6 @@ typedef struct {
 	Vector2 drag_offset;
 } MsgBox;
 
-typedef struct {
-	Vector2 mpos;
-	Rectangle spos;
-	Vector2 tl_rmb_menu_pos;
-	int64_t status; // 0 if good, negative for errors, TODO: document errors
-} RmbMenu;
-
 // Draw message box
 uint8_t Draw_message_box(MsgBox *msgbox, Font *font);
 
@@ -88,21 +83,7 @@ typedef enum
 	MatCount // !! THIS VALUE SHOULD ALWAYS BE THE LAST ENUM ELEMENT 
 } MaterialTypes;
 
-extern const char *MaterialTypeStrings[];
 
-typedef struct
-{
-	uint32_t material;	// 32 bits
-	/// Working material (child material)
-	uint32_t w_material; // 32 bits
-	float friction;		// 32 bits
-	bool isFreeFalling; // 8 bits ?
-	float velocityX;	// 32 bits
-	float velocityY;	// 32 bits
-	int32_t mass;		// 32 bits
-	float spreadFactor; // 32 bits
-	Color color;		// 32 bits
-} Cell;					// 232 bits
 
 // Function prototype
 int32_t setup_stuff(int32_t sc_wi, int32_t sc_he, const char *WindowTitle, int32_t log_lvl, bool fullscreen);
@@ -114,9 +95,4 @@ void updateSpawner(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS]);
 void updateVoidTile(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS]);
 void spawnSandBrush(Cell (*grid)[ROWS], int32_t mouseX, int32_t mouseY, int32_t brushSize, uint32_t material, uint32_t w_material, bool brushMode);
 Color rand_color_mat(uint32_t material);
-const char* tf_str(bool test);
-const char* str_mat(uint32_t material);
-int32_t GetMouse_X_safe();
-int32_t GetMouse_Y_safe();
-
 #endif /* SETUP_H */

@@ -6,53 +6,9 @@
 #include <unistd.h>
 #include <pthread.h>
 #include "arg_handler.h"
+#include "arbitrary.h"
 #include "setup.h"
 
-void DrawRectangleWithBorder(int x, int y, int width, int height, Color fillColor, Color borderColor) {
-	DrawRectangle(x, y, width, height, fillColor);
-	DrawRectangleLinesEx((Rectangle){ x, y, width, height }, 1, borderColor);
-}
-
-void draw_rmb_menu_tile(RmbMenu *rmb_menu, bool *show_rmb_menu_tile) {
-	if (rmb_menu->status != 0) {
-		*show_rmb_menu_tile = false;
-		return;
-	}
-	int32_t mx = rmb_menu->mpos.x;
-	int32_t my = rmb_menu->mpos.y;
-	if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) && CheckCollisionPointRec(rmb_menu->mpos, rmb_menu->spos) == false && *show_rmb_menu_tile == false)  {
-		rmb_menu->spos.x = mx;
-		rmb_menu->spos.y = my;
-		rmb_menu->spos.width = 180;
-		rmb_menu->spos.height = 240;
-		*show_rmb_menu_tile = true;
-	} if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) && *show_rmb_menu_tile && !CheckCollisionPointRec(rmb_menu->mpos, rmb_menu->spos))
-    {
-        *show_rmb_menu_tile = !*show_rmb_menu_tile;
-        rmb_menu->spos = (Rectangle){ 0 };
-    }
-    
-	if (*show_rmb_menu_tile) {
-		DrawRectangleWithBorder(rmb_menu->spos.x, rmb_menu->spos.y, 180,240, GRAY, BLUE);
-	}
-	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)  && CheckCollisionPointRec(rmb_menu->mpos, rmb_menu->spos) == false ) {
-		*show_rmb_menu_tile = false;
-		rmb_menu->status = -1;
-	}
-	return;
-}
-
-
-
-void Draw_selector_tooltip(int x, int y, int width, int height, uint32_t material, Font *font) {
-	Vector2 mpos = { GetMouse_X_safe(), GetMouse_Y_safe()};
-	const char* str = str_mat(material);
-	if (CheckCollisionPointRec(mpos, (Rectangle){ x, y, width, height })) {
-		DrawRectangleWithBorder(mpos.x,mpos.y,120,24,DARKGRAY,BLACK);
-		DrawTextEx(*font, str, (Vector2){mpos.x+120-(MeasureTextEx(*font,str,20,0)).x,mpos.y+2},20,0,WHITE);
-        // DrawTextEx(*font, TextFormat("%s", (const char *)str_mat(material)), (Vector2){400,400}, 20, 0, WHITE);
-	}
-}
 
 bool update_should_stop = false;
 int updates_per_second = 0;
@@ -244,8 +200,8 @@ int main(int argc, char **argv)
     int32_t tileCount = 0;
 
     pthread_t update_thread;
-    UpdateData update_data = { grid, grid_duplicate, &grid_mutex, &grid_duplicate_mutex };
-    pthread_create(&update_thread, NULL, update_worker, (void*)&update_data);
+	UpdateData update_data = { grid, grid_duplicate, &grid_mutex, &grid_duplicate_mutex };
+	pthread_create(&update_thread, NULL, update_worker, (void*)&update_data); 
 	image.format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
 	image.width=SCREEN_WIDTH;
 	image.height=SCREEN_HEIGHT;

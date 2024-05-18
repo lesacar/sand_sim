@@ -8,22 +8,7 @@
 #include <strings.h>
 #include <time.h>
 
-const char *MaterialTypeStrings[] = {
-    "Empty",
-    "Sand",
-    "Water",
-    "Stone",
-    "Steam",
-    "Spawner",
-    "Void"
-};
 
-void swapTile(Cell* first, Cell* second) {
-	Cell temp = *second;
-	*second = *first;
-	*first = temp;
-	return;
-}
 
 uint8_t Draw_message_box(MsgBox *msgbox, Font *font) {
 	if (!msgbox->show) {
@@ -120,46 +105,6 @@ uint8_t Draw_message_box(MsgBox *msgbox, Font *font) {
 		}
 	}
 	return 0;
-}
-
-
-int32_t GetMouse_X_safe() {
-	int ret = GetMouseX();
-	int sw = GetScreenWidth();
-	if (ret > sw)
-	{
-		return sw;
-	}
-	else if (ret < 0)
-	{
-		return 0;
-	}
-	return ret;
-}
-
-int32_t GetMouse_Y_safe() {
-	int ret = GetMouseY();
-	int sh = GetScreenHeight();
-	if (ret > sh)
-	{
-		return sh;
-	}
-	else if (ret < 0)
-	{
-		return 0;
-	}
-	return ret;
-}
-
-const char* tf_str(bool test) {
-	if (test) {
-		return "true";
-	}
-	return "false";
-}
-
-const char* str_mat(uint32_t material) {
-	return MaterialTypeStrings[material];
 }
 
 // Define a special ConfigData object for error state

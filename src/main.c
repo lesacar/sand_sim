@@ -125,7 +125,6 @@ void* update_worker(void* data) {
         updateSteam(grid, grid_duplicate);
         memcpy(grid_duplicate, grid, sizeof(Cell) * COLS * ROWS);
         updateWater(grid, grid_duplicate);
-
         // Increment updates per second counter
         updates_per_second++;
         // Unlock mutexes after updates
@@ -254,6 +253,7 @@ int main(int argc, char **argv)
 	uint32_t w_material = Water;
     while (!WindowShouldClose())
     {
+		
         cur_dt = GetFrameTime(); // Get frame time
         frame_counter++;
         fps_counter += cur_dt;
@@ -262,6 +262,7 @@ int main(int argc, char **argv)
 		UpdateTexture(screenTex, image.data);
         BeginDrawing();
         ClearBackground(BLACK);
+		
 		if (config.wants_shader) {
 			BeginShaderMode(bloomShader); }
 		DrawTexture(screenTex,0,0,WHITE);
@@ -472,6 +473,7 @@ int main(int argc, char **argv)
 			}
 			printf("CFG(%s): fps: %d | brush_size = %d | brush_mode = %d | M:%s\n",tf_str(config.is_cfg_read), config.fps, config.brush_size, config.brush_mode, str_mat(Water));
 		}
+
         EndDrawing();
         second_counter += cur_dt;
 
@@ -491,6 +493,7 @@ int main(int argc, char **argv)
 			displayed_ups = updates_per_second;
             updates_per_second = 0;
         };
+		
     }
 	UnloadImage(image);
     // Set the flag to stop the update thread
@@ -502,6 +505,9 @@ int main(int argc, char **argv)
     // Cleanup
     UnloadShader(bloomShader);
 	UnloadTexture(screenTex);
+	UnloadFont(jetmono);
+	free(mb);
+	free(grid);
     free(grid_duplicate);
 	free(config.cfg_buffer);
     CloseWindow();

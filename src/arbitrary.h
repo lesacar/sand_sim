@@ -23,7 +23,7 @@ typedef struct
 	float velocityY;	// 32 bits
 	int32_t mass;		// 32 bits
 	float spreadFactor; // 32 bits
-	Color color;		// 32 bits
+	Color color;		// 4 bytes
 } Cell;					// 232 bits
 
 

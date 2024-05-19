@@ -55,7 +55,7 @@ typedef struct {
 	bool show;
 	Rectangle position;
 	const char *title;
-	const char *text;
+	char *text;
 	uint8_t buttons;
 	bool dragging;
 	Vector2 drag_offset;

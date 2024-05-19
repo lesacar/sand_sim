@@ -120,7 +120,7 @@ int main(int argc, char **argv)
 {
 	version_info(argv, argc);
     // Setup window and display settings
-    setup_stuff(SCREEN_WIDTH, SCREEN_HEIGHT, "physim", LOG_WARNING, false);
+    setup_stuff(SCREEN_WIDTH, SCREEN_HEIGHT, "master", LOG_WARNING, false);
     int32_t current_monitor = handle_arguments(argc, argv);
     if (current_monitor < 0)
     {
@@ -137,7 +137,19 @@ int main(int argc, char **argv)
 	mb->position.width = 260;
 	mb->position.height = 140;
 	mb->title = "File saving";
-	mb->text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum, Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum.";
+
+    const char *cwd = GetDirectoryPath(".");
+	char *save_path_strlen;
+	{
+		size_t str_length = strlen("Save file to `") + strlen(cwd) + strlen("` ?") + 1; // +1 for null terminator
+		save_path_strlen = malloc(str_length);
+		snprintf(save_path_strlen, str_length, "Save file to `%s` ?", cwd);
+	}
+
+    mb->text = save_path_strlen; // Assign the dynamically allocated string to the const char* member
+	free(save_path_strlen);
+	save_path_strlen = NULL;
+
 	mb->buttons = 2;
 	mb->dragging = false;
 	mb->drag_offset = (Vector2){0,0};
@@ -423,8 +435,6 @@ int main(int argc, char **argv)
         int mx = GetMouse_X_safe();
         int my = GetMouse_Y_safe();
 
-        int gridX = mx / BLOCK_SIZE;
-        int gridY = my / BLOCK_SIZE;
 		if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
 			
 			rmbmenu.status = 0;
@@ -482,6 +492,9 @@ int main(int argc, char **argv)
     UnloadShader(bloomShader);
 	UnloadTexture(screenTex);
 	UnloadFont(jetmono);
+	if (save_path_strlen != NULL) {
+		free(mb->text);
+	}
 	free(mb);
 	free(grid);
     free(grid_duplicate);

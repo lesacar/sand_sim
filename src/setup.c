@@ -90,10 +90,10 @@ uint8_t Draw_message_box(MsgBox *msgbox, Font *font) {
 					DrawRectangleRoundedLines((Rectangle){cancel.x+1,cancel.y+1,cancel.width-2,cancel.height-2}, 0.3f, 0, 2.0f, BLACK);
 					DrawTextEx(*font, "Ok", (Vector2){ok.x+ok.width/2-MeasureTextEx(*font,"Ok",btnoffsetH/1.2,0).x/2,ok.y}, btnoffsetH/1.2, 0, BLACK);
 					DrawTextEx(*font, "Cancel", (Vector2){cancel.x+cancel.width/2-MeasureTextEx(*font,"Cancel",btnoffsetH/1.2,0).x/2,cancel.y}, btnoffsetH/1.2, 0, BLACK);
-					if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(GetMousePosition(), ok) || IsKeyPressed(KEY_O)) {
+					if ((IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(GetMousePosition(), ok)) || IsKeyPressed(KEY_O)) {
 						msgbox->show = false;
 						return 1;
-					} else if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(GetMousePosition(), cancel) || IsKeyPressed(KEY_C)) {
+					} else if ((IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(GetMousePosition(), cancel)) || IsKeyPressed(KEY_C)) {
 						msgbox->show = false;
 						return 2;
 					}

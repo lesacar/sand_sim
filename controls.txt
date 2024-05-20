@@ -1,6 +1,8 @@
 Scroll with mouse wheel to increase/reduce brush size (max 150)
-Press R to reset simulation
+Press alt + '0' to reset simulation
 Press B to toggle BRUSH / CIRCLE draw mode
 Press SPACE to pause/resume
 Press H to hide this message
-Press S to toggle bloom shader
+Press B to toggle bloom shader
+Press ctrl + q to exit
+Press ctrl + s to save grid to file

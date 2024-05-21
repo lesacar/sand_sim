@@ -715,7 +715,9 @@ void updateSteam(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS])
 			if (grid_duplicate[index][j].material == Steam)
 			{
 				grid[index][j].spreadFactor = 5.0f;
-				if (grid_duplicate[index][j - 1].material == Empty || grid_duplicate[index][j - 1].material == Water)
+				if (grid_duplicate[index][j - 1].material == Empty || 
+					grid_duplicate[index][j - 1].material == Water || 
+					grid_duplicate[index][j - 1].material == Sand )
 				{
 					/*grid[index][j - 1].material = grid[index][j].material;
 					grid[index][j].material = Empty;

@@ -10,6 +10,53 @@
 #include "arbitrary.h"
 #include "setup.h"
 #include "render.h"
+#include "zstd.h"
+#include "common.h"
+
+
+static void compress(Cell (*grid)[ROWS], const char* fname) {
+	size_t fSize = sizeof(grid[0][0]) * COLS * ROWS;
+	void* const fBuff = grid;
+	size_t const cBuffSize = ZSTD_compressBound(fSize);
+	void* const cBuff = malloc_orDie(cBuffSize);
+	size_t const cSize = ZSTD_compress(cBuff, cBuffSize, fBuff, fSize, 1);
+	CHECK_ZSTD(cSize);
+	saveFile_orDie(fname, cBuff, cSize);
+	printf("%25s : %6u -> %7u - %s \n", "grid", (unsigned)fSize, (unsigned)cSize, "world.bin");
+	free(cBuff);
+}
+
+static void decompress(Cell (*grid)[ROWS], const char* fname)
+{
+    size_t cSize;
+    void* const cBuff = mallocAndLoadFile_orDie(fname, &cSize);
+    /* Read the content size from the frame header. For simplicity we require
+     * that it is always present. By default, zstd will write the content size
+     * in the header when it is known. If you can't guarantee that the frame
+     * content size is always written into the header, either use streaming
+     * decompression, or ZSTD_decompressBound().
+     */
+    unsigned long long const rSize = ZSTD_getFrameContentSize(cBuff, cSize);
+    CHECK(rSize != ZSTD_CONTENTSIZE_ERROR, "%s: not compressed by zstd!", fname);
+    CHECK(rSize != ZSTD_CONTENTSIZE_UNKNOWN, "%s: original size unknown!", fname);
+
+    void* const rBuff = grid;
+    /* Decompress.
+     * If you are doing many decompressions, you may want to reuse the context
+     * and use ZSTD_decompressDCtx(). If you want to set advanced parameters,
+     * use ZSTD_DCtx_setParameter().
+     */
+    size_t const dSize = ZSTD_decompress(rBuff, rSize, cBuff, cSize);
+    CHECK_ZSTD(dSize);
+    /* When zstd knows the content size, it will error if it doesn't match. */
+    CHECK(dSize == rSize, "Impossible because zstd will check this condition!");
+
+    /* success */
+    printf("%25s : %6u -> %7u \n", fname, (unsigned)cSize, (unsigned)rSize);
+
+    // free(rBuff);
+    free(cBuff);
+}
 
 bool update_should_stop = false;
 int updates_per_second = 0;
@@ -103,29 +150,43 @@ int main(int argc, char **argv)
 	BeginDrawing();
 	ClearBackground(BLACK);
 	EndDrawing();
-	MsgBox *mb = malloc(sizeof(MsgBox));
-	mb->show = false;
-	mb->position.x = 400;
-	mb->position.y = 200;
-	mb->position.width = 260;
-	mb->position.height = 140;
-	mb->title = "File saving";
+	MsgBox *save_grid = malloc(sizeof(MsgBox));
+	MsgBox *load_grid = malloc(sizeof(MsgBox));
+	load_grid->show = false;
+	load_grid->title = "Load grid from file";
+	load_grid->text = malloc(sizeof(char) * 96);
+	load_grid->text[0] = '\0';
+	strcat(load_grid->text, basename(argv[0]));
+	strcat(load_grid->text, " will attempt to load world.zst");
 
-    const char *cwd = GetDirectoryPath(".");
-	char *save_path_strlen;
-	{
-		size_t str_length = strlen("Save file to `") + strlen(cwd) + strlen("` ?") + 1; // +1 for null terminator
-		save_path_strlen = malloc(str_length);
-		snprintf(save_path_strlen, str_length, "Save file to `%s` ?", cwd);
+	load_grid->buttons = 2;
+	load_grid->position.x = (int)(GetScreenWidth()/2-150);
+	load_grid->position.y = (int)(GetScreenHeight()/2-60);
+	load_grid->position.width = 300;
+	load_grid->position.height = 120;
+	load_grid->dragging = false;
+	load_grid->drag_offset = (Vector2){0,0};
+
+	save_grid->show = false;
+	save_grid->position.x = 400;
+	save_grid->position.y = 200;
+	save_grid->position.width = 260;
+	save_grid->position.height = 140;
+	save_grid->title = "File saving";
+	save_grid->buttons = 2;
+	save_grid->drag_offset = (Vector2){0,0};
+	save_grid->dragging = false;
+
+	char cwd[10] = "";
+	strcat(cwd, GetDirectoryPath("."));
+	size_t str_length = strlen("Save file to `") + strlen(cwd) + strlen("` ?") + 1; // +1 for null terminator
+	save_grid->text = malloc(str_length);
+	if (!save_grid->text) {
+		perror("Failed to allocate memory for save_grid->text");
+		exit(EXIT_FAILURE);
 	}
-
-    mb->text = save_path_strlen; // Assign the dynamically allocated string to the const char* member
-	free(save_path_strlen);
-	save_path_strlen = NULL;
-
-	mb->buttons = 2;
-	mb->dragging = false;
-	mb->drag_offset = (Vector2){0,0};
+	snprintf(save_grid->text, str_length, "Save file to `%s` ?", cwd);
+	save_grid->text[str_length - 1] = '\0';
 
 	bool show_rmb_menu_tile = false;
 	// maybe should malloc?
@@ -161,17 +222,19 @@ int main(int argc, char **argv)
     memset(grid, 0, sizeof(Cell) * COLS * ROWS);
 	printf("Loading world from world.bin\n");
 	FILE *f_save_grid_load = fopen("world.bin","r+");
-	if (f_save_grid_load == NULL) {
-		perror("physim: ");
-		exit(EXIT_FAILURE); }
-	while (true) {
-		fread(grid, sizeof(Cell), ROWS*COLS, f_save_grid_load);
-		if (feof(f_save_grid_load)) {
-			break;
+	if (f_save_grid_load != NULL) {
+		while (true) {
+			fread(grid, sizeof(Cell), ROWS*COLS, f_save_grid_load);
+			if (feof(f_save_grid_load)) {
+				break;
+			}
+			//fseek(f_save_grid_load, 1, SEEK_CUR);
 		}
-		//fseek(f_save_grid_load, 1, SEEK_CUR);
+		fclose(f_save_grid_load);
+
 	}
-	fclose(f_save_grid_load);
+	else { perror("physim: "); }
+
 
 	
     Shader bloomShader = LoadShader(0, "src/shaders/bloom.fs");
@@ -319,22 +382,23 @@ int main(int argc, char **argv)
 		}
 		if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_S))
 		{
-			mb->show = true;
+			save_grid->show = true;
 		}
-		if (Draw_message_box(mb, &jetmono) == 1) {
-			printf("We should save the world now\n");
-			FILE *f_save_grid = fopen("world.bin","w+");
-			if (f_save_grid == NULL) {
-				perror("physim: ");
-				exit(EXIT_FAILURE); }
-			for (int i = 0; i < COLS; i++) {
-				for (int j = 0; j < ROWS; j++) {
-					fwrite(&grid[i][j], sizeof(Cell), 1, f_save_grid);
-					//fprintf(f_save_grid, "\n");
-				}
+		if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_L)) {
+			load_grid->show = true;
+		}
+		if (Draw_message_box(load_grid, &jetmono) == 1) {
+			if (FileExists("world.zst")) {
+				decompress(grid, "world.zst");
 			}
-			fclose(f_save_grid);
+			fprintf(stderr, "You might want to check world.zst exists before loading it\n");
 
+		}
+		if (Draw_message_box(save_grid, &jetmono) == 1) {
+			if (FileExists("world.zst")) {
+				fprintf(stderr, "world.zst was overwritten, was this intended?\n");
+			}
+			compress(grid, "world.zst");
 		}
 
 		if(IsKeyPressed(KEY_SPACE)) {
@@ -396,9 +460,9 @@ int main(int argc, char **argv)
                 int gridY = my / BLOCK_SIZE;
 				if (gridX >= 0 && gridX < COLS && gridY >= 0 && gridY < ROWS && !CheckCollisionPointRec((Vector2){mx,my}, rmbmenu.spos))
                 {
-					if (mb->show && !CheckCollisionPointRec(GetMousePosition(), mb->position)) {
+					if (save_grid->show && !CheckCollisionPointRec(GetMousePosition(), save_grid->position)) {
 						spawnSandBrush(grid, mx, my, config.brush_size, material, w_material,config.brush_mode);
-					} else if (!mb->show){
+					} else if (!save_grid->show){
 						spawnSandBrush(grid, mx, my, config.brush_size, material, w_material,config.brush_mode);
 					}
                 }
@@ -465,10 +529,12 @@ int main(int argc, char **argv)
     UnloadShader(bloomShader);
 	UnloadTexture(screenTex);
 	UnloadFont(jetmono);
-	if (save_path_strlen != NULL) {
-		free(mb->text);
-	}
-	free(mb);
+
+	free(save_grid->text);
+	free(load_grid->text);
+	free(load_grid);
+
+	free(save_grid);
 	free(grid);
     free(grid_duplicate);
 	free(config.cfg_buffer);

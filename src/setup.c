@@ -21,7 +21,6 @@ uint8_t Draw_message_box(MsgBox *msgbox, Font *font) {
 	Rectangle title_bottom = {msgbox->position.x,msgbox->position.y+12,msgbox->position.width,12};
 
 	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(GetMousePosition(), title_top)) {
-		// Start dragging
 		msgbox->dragging = true;
 		Vector2 mousePos = GetMousePosition();
 		msgbox->drag_offset.x = mousePos.x - msgbox->position.x;
@@ -29,7 +28,6 @@ uint8_t Draw_message_box(MsgBox *msgbox, Font *font) {
 	}
 
 	if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
-		// Stop dragging
 		msgbox->dragging = false;
 	}
 
@@ -44,22 +42,22 @@ uint8_t Draw_message_box(MsgBox *msgbox, Font *font) {
 	//DrawRectangleRoundedLines((Rectangle){msgbox->position.x+1,msgbox->position.y+1,msgbox->position.width-2,msgbox->position.height-2}, 0.15f, 10, 1.0f, WHITE);
 	DrawTextEx(*font, msgbox->title, (Vector2){msgbox->position.x+12,msgbox->position.y}, 24, 0, WHITE);
 
-
-	//int32_t txtw = MeasureTextEx(*font, msgbox->text, 20, 0).x;
 	int32_t charsPerLine = (msgbox->position.width - 4) / MeasureTextEx(*font, "a", txtfontsize, 0).x;
-	for (int32_t i = 0; i < (msgbox->position.height/txtfontsize)-3; i++) {
-		char txt[charsPerLine + 1]; // +1 for null terminator
-		size_t textOffset = i * charsPerLine;
-		if (textOffset >= strlen(msgbox->text)) {
-			break;
-		}
-		// Copy characters from msgbox->text to txt buffer
-		for (int j = 0; j < charsPerLine && msgbox->text[textOffset + j] != '\0'; j++) {
-			txt[j] = msgbox->text[textOffset + j];
-		}
-		txt[charsPerLine] = '\0'; // Null-terminate the string
-		DrawTextEx(*font, txt, (Vector2){msgbox->position.x + 1, msgbox->position.y + 26 + (i * (MeasureTextEx(*font, "a", txtfontsize, 0).y -2))}, txtfontsize, 0, WHITE);
-	}
+for (int32_t i = 0; i < (msgbox->position.height/txtfontsize)-3; i++) {
+    char txt[charsPerLine + 1];
+	size_t textOffset = i * charsPerLine;
+    if (textOffset >= strlen(msgbox->text)) {
+        break;
+    }
+    int j;
+    for (j = 0; j < charsPerLine && msgbox->text[textOffset + j] != '\0'; j++) {
+        txt[j] = msgbox->text[textOffset + j];
+    }
+    txt[j] = '\0';
+	DrawTextEx(*font, txt, (Vector2){msgbox->position.x + 1, msgbox->position.y + 26 + (i * (MeasureTextEx(*font, "a", txtfontsize, 0).y -2))}, txtfontsize, 0, WHITE);
+}
+
+
 	Rectangle ok = {0};
 	Rectangle cancel = {0};
 	uint8_t btnoffsetW = 35;

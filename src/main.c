@@ -399,7 +399,8 @@ int main(int argc, char **argv)
 		if (Draw_message_box(load_grid, &jetmono) == 1) {
 			if (FileExists("world.zst")) {
 				update_should_stop = true;
-				nanosleep(&(struct timespec){.tv_sec = 0, .tv_nsec = 30000000}, NULL);
+				// nanosleep(&(struct timespec){.tv_sec = 0, .tv_nsec = 30000000}, NULL);
+				pthread_join(update_thread, NULL);
 				decompress(grid, "world.zst");
 				pthread_create(&update_thread, NULL, update_worker, (void*)&update_data);
 			}
@@ -495,8 +496,9 @@ int main(int argc, char **argv)
         if ( IsKeyDown(KEY_LEFT_ALT) && IsKeyPressed(KEY_ZERO))
         {
             update_should_stop = true;
-            struct timespec tmp = { .tv_sec = 0, .tv_nsec = 20000000 };
-            nanosleep(&tmp, NULL);
+            // struct timespec tmp = { .tv_sec = 0, .tv_nsec = 20000000 };
+            // nanosleep(&tmp, NULL);
+			pthread_join(update_thread, NULL);
             memset(grid, 0, sizeof(Cell) * COLS * ROWS);
             update_should_stop = false;
             pthread_create(&update_thread, NULL, update_worker, (void*)&update_data);

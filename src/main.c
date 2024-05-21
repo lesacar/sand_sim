@@ -391,8 +391,9 @@ int main(int argc, char **argv)
 			if (FileExists("world.zst")) {
 				decompress(grid, "world.zst");
 			}
-			fprintf(stderr, "You might want to check world.zst exists before loading it\n");
-
+			else {
+				fprintf(stderr, "You might want to check world.zst exists before loading it\n");
+			} 
 		}
 		if (Draw_message_box(save_grid, &jetmono) == 1) {
 			if (FileExists("world.zst")) {
@@ -406,7 +407,6 @@ int main(int argc, char **argv)
 				pthread_create(&update_thread, NULL, update_worker, (void*)&update_data);
 			}
 			update_should_stop = !update_should_stop;
-
         }
 
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))

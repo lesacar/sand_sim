@@ -10,7 +10,6 @@
 #include "arbitrary.h"
 #include <math.h>
 #include "arbitrary.h"
-#include <omp.h>
 #include <immintrin.h>
 #include <raylib.h>
 
@@ -20,8 +19,8 @@
 // Underline off
 #define UOFF = "\033[0m";
 
-#define SCREEN_WIDTH 1440
-#define SCREEN_HEIGHT 720
+#define SCREEN_WIDTH 1200
+#define SCREEN_HEIGHT 640
 #define BLOCK_SIZE 4
 #define ROWS (SCREEN_HEIGHT / BLOCK_SIZE)
 #define COLS (SCREEN_WIDTH / BLOCK_SIZE)

@@ -275,7 +275,7 @@ int main(int argc, char **argv)
 	image.width=SCREEN_WIDTH;
 	image.height=SCREEN_HEIGHT;
 	Texture2D screenTex = LoadTextureFromImage(image);
-	uint32_t w_material = Water;
+	uint32_t w_material = Empty;
     while (!WindowShouldClose())
     {
 		
@@ -366,10 +366,14 @@ int main(int argc, char **argv)
         }
 		if (IsKeyPressed(KEY_E) && tileCount == 0) {
 			update_should_stop = true;
+			pthread_join(update_thread, NULL);
+
+
 			int randmat = Empty;
+			printf("%ld\n", config.random_grid_randomness);
 			for (int i = 0; i < COLS; i++) {
 				for (int j = 0; j < ROWS; j++) {
-					randmat = GetRandomValue(0,8);
+					randmat = GetRandomValue(0,config.random_grid_randomness);
 					if (randmat > 4) {
 						randmat = 0;
 					}
@@ -377,7 +381,11 @@ int main(int argc, char **argv)
                     if (GetRandomValue(0, INT32_MAX) < 2100000)
                     {
                         randmat = Spawner;
-                        grid[i][j].w_material = Water;
+						if (GetRandomValue(0, 10) > 5) {
+							grid[i][j].w_material = Water;
+						} else {
+							grid[i][j].w_material = Sand;
+						}
                     }
                     if (GetRandomValue(0, INT32_MAX) < 1500000)
                     {
@@ -388,6 +396,8 @@ int main(int argc, char **argv)
 					grid[i][j].color = rand_color_mat(randmat);
 				}
 			}
+			update_should_stop = false;
+			pthread_create(&update_thread, NULL, update_worker, (void*)&update_data);
 		}
 		if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_S))
 		{
@@ -452,9 +462,13 @@ int main(int argc, char **argv)
 				{
 					material = Spawner;
 				}
-				else if (mx > selector_xval+selector_offset*VoidTile && mx < selector_xval+selector_offset*MatCount)
+				else if (mx > selector_xval+selector_offset*VoidTile && mx < selector_xval+selector_offset*Obsidian)
 				{
 					material = VoidTile;
+				}
+				else if (mx > selector_xval+selector_offset*Obsidian && mx < selector_xval+selector_offset*MatCount)
+				{
+					material = Obsidian;
 				}
 			}
 		}

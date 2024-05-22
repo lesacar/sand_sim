@@ -1,5 +1,8 @@
 #include "arbitrary.h"
+#include "raylib.h"
+#include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 
 static const char *MaterialTypeStrings[] = {
     "Empty",
@@ -8,7 +11,8 @@ static const char *MaterialTypeStrings[] = {
     "Stone",
     "Steam",
     "Spawner",
-    "Void"
+    "Void",
+	"Obsidian"
 };
 
 void swapTile(Cell* first, Cell* second) {
@@ -58,6 +62,13 @@ void draw_rmb_menu_tile(RmbMenu *rmb_menu, bool *show_rmb_menu_tile) {
     
 	if (*show_rmb_menu_tile) {
 		DrawRectangleWithBorder(rmb_menu->spos.x, rmb_menu->spos.y, 180,240, GRAY, BLUE);
+		DrawText("w_material", rmb_menu->spos.x+2, rmb_menu->spos.y+2, 16, WHITE);
+		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(GetMousePosition(), (Rectangle){rmb_menu->spos.x, rmb_menu->spos.y, MeasureText("w_material", 16),20})) {
+			printf("Change the material nigga\n");
+			fflush(stdout);
+			*show_rmb_menu_tile = false;
+			rmb_menu->spos = (Rectangle){ 0 };
+		}
 	}
 	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)  && CheckCollisionPointRec(rmb_menu->mpos, rmb_menu->spos) == false ) {
 		*show_rmb_menu_tile = false;

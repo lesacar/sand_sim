@@ -104,7 +104,7 @@ for (int32_t i = 0; i < (msgbox->position.height/txtfontsize)-3; i++) {
 }
 
 // Define a special ConfigData object for error state
-static const ConfigData ERROR_CONFIG = { .is_cfg_read = false, .cfg_file_size = -1, .cfg_buffer = NULL, .fps = 60, .brush_size = 10, .brush_mode=true, .read_map=false, .wants_shader=false };
+static const ConfigData ERROR_CONFIG = { .is_cfg_read = false, .cfg_file_size = -1, .cfg_buffer = NULL, .fps = 60, .brush_size = 10, .brush_mode=true, .read_map=false, .wants_shader=false, .random_grid_randomness = 8 };
 
 ConfigData parse_config_file(const char *cfg_file) {
     ConfigData config = { .is_cfg_read = false, .cfg_file_size = 0, .cfg_buffer = NULL, .fps = 60, .brush_size = 10, .brush_mode=true };
@@ -189,9 +189,10 @@ void parse_config_variables(const char *cfg_buffer, ConfigData *config) {
                     config->brush_size = atoi(value);
 				} else if (strcmp(variable, "read_map") == 0) {
 					config->read_map = (strcmp(value, "true") == 0);
-				}
-                else if (strcmp(variable, "wants_shader") == 0) {
+				} else if (strcmp(variable, "wants_shader") == 0) {
 					config->wants_shader = (strcmp(value, "true") == 0);
+				} else if (strcmp(variable, "random_grid_randomness") == 0) {
+					config->random_grid_randomness = atoi(value);
 				}
 				// Add more conditions for additional variables as needed
             }
@@ -278,9 +279,15 @@ Color rand_color_mat(uint32_t material) {
 		case VoidTile:
 			temp_color = PURPLE;
 			break;
+		case Obsidian:
+			randR = (rand() % 20) - 10;
+			randG = (rand() % 20) - 10;
+			randB = (rand() % 20) - 10;
+			temp_color = (Color){113 + randR, 98 + randG, 122 + randB, 255};
+			break;
 		default:
 			temp_color = (Color){0,0,0,0};
-		break;
+			break;
 	}
 	return temp_color;
 }
@@ -381,6 +388,12 @@ void spawnSandBrush(Cell (*grid)[ROWS], int32_t mouseX, int32_t mouseY,
 							grid[i][j].spreadFactor = 5.0f;
 							grid[i][j].color = rand_color_mat(Steam);
 						}
+						else if (material == Obsidian)
+						{
+							grid[i][j].friction = 0.0f;
+							grid[i][j].spreadFactor = 0.0f;
+							grid[i][j].color = rand_color_mat(Obsidian);
+						}
 						
 					}
 				}
@@ -412,6 +425,12 @@ void spawnSandBrush(Cell (*grid)[ROWS], int32_t mouseX, int32_t mouseY,
 							grid[i][j].friction = 0.0f;
 							grid[i][j].spreadFactor = 5.0f;
 							grid[i][j].color = rand_color_mat(Steam);
+						}
+						else if (material == Obsidian)
+						{
+							grid[i][j].friction = 0.0f;
+							grid[i][j].spreadFactor = 5.0f;
+							grid[i][j].color = rand_color_mat(Obsidian);
 						}
 					}
 				}
@@ -793,7 +812,7 @@ void updateSpawner(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS]) {
                             if (grid[newI][newJ].material == Empty && (float)rand()/RAND_MAX > 0.8f) {
                                 grid[newI][newJ].material = grid[i][j].w_material;
                                 // Assuming rand_color_mat() returns a Color
-                                grid[newI][newJ].color = rand_color_mat(Water);
+                                grid[newI][newJ].color = rand_color_mat(grid[i][j].w_material);
                             }
                         }
                     }

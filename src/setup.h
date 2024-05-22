@@ -48,6 +48,7 @@ typedef struct {
     int brush_size;
 	bool read_map;
 	bool wants_shader;
+	int64_t random_grid_randomness;
 } ConfigData;
 
 typedef struct {
@@ -79,6 +80,7 @@ typedef enum
 	Steam,
 	Spawner,
 	VoidTile,
+	Obsidian,
 	MatCount // !! THIS VALUE SHOULD ALWAYS BE THE LAST ENUM ELEMENT 
 } MaterialTypes;
 

@@ -504,33 +504,8 @@ void sand(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS])
 
 					// Apply downward movement
 				}
-				/*if (grid_duplicate[i][j + 1].material == Empty)
-				{
-					grid[i][j + 1].material = grid[i][j].material;
-					grid[i][j].material = Empty;
-					grid[i][j + 1].color = grid[i][j].color;
-					grid[i][j].color = NOCOLOR;
-
-					if (grid[i][j + 1].velocityY + 1.0f > 9.8f)
-					{
-						grid[i][j + 1].velocityY = 9.8f;
-					}
-					else
-					{
-						grid[i][j + 1].velocityY += 1.0f;
-					}
-					swapTile(&grid[i][j], &grid[i][j+1]);
-				}*/
 				else if (grid_duplicate[i][j + 1].material == Water)
 				{
-					// Apply downward movement
-					/*grid[i][j + 1].material = Sand;
-					grid[i][j].material = Water;
-
-					grid[i][j + 1].color = grid[i][j].color;
-					grid[i][j].color = grid_duplicate[i][j+1].color;*/
-
-					// Apply gravity
 					swapTile(&grid[i][j], &grid[i][j+1]);
 				}
 				else
@@ -545,26 +520,23 @@ void sand(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS])
 						randomValue = 1.0f;
 					}
 					bool canMoveLeft =
-						(i > 0 && j + 1 < ROWS && (grid[i - 1][j + 1].material == Empty || grid[i - 1][j + 1].material == Water) &&
-						(grid[i - 1][j].material == Empty || grid[i - 1][j].material == Water));
-					bool canMoveRight = (i < COLS - 1 && j + 1 < ROWS &&
-						(grid[i + 1][j + 1].material == Empty || grid[i + 1][j + 1].material == Water) &&
-						(grid[i + 1][j].material == Empty || grid[i + 1][j].material == Water));
+						(i > 0 && j + 1 < ROWS && (grid[i - 1][j + 1].material == Empty || grid[i - 1][j + 1].material == Water || 
+						grid[i - 1][j + 1].material == Steam) &&
+						(grid[i - 1][j].material == Empty || grid[i - 1][j].material == Water || grid[i - 1][j].material == Steam));
+					bool canMoveRight = 
+						(i < COLS - 1 && j + 1 < ROWS && (grid[i + 1][j + 1].material == Empty || grid[i + 1][j + 1].material == Water ||
+						grid[i + 1][j + 1].material == Steam) &&
+						(grid[i + 1][j].material == Empty || grid[i + 1][j].material == Water || grid[i + 1][j].material == Steam));
 
 					if (canMoveLeft || canMoveRight)
 					{
 						int newX = i + (int32_t)randomValue;
 						if (newX >= 0 && newX < COLS && j + 1 < ROWS &&
-							(grid[newX][j].material == Empty || grid[newX][j].material == Water ))
+							(grid[newX][j].material == Empty || grid[newX][j].material == Water || grid[newX][j].material == Steam))
 						{
 							// Check if the target position is already occupied
-							if (grid[newX][j + 1].material == Empty || grid[newX][j + 1].material == Water)
+							if (grid[newX][j+1].material == Empty || grid[newX][j+1].material == Water || grid[newX][j+1].material == Steam)
 							{
-								// Move the current sand particle to the new position
-								/*grid[newX][j + 1].material = Sand;
-								grid[i][j].material = Empty;
-								grid[newX][j + 1].color = grid[i][j].color;
-								grid[i][j].color = NOCOLOR;*/
 								swapTile(&grid[newX][j+1], &grid[i][j]);
 							}
 						}

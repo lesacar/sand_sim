@@ -1,5 +1,3 @@
-// TODO: PAUSE THREAD WHEN LOADING/SAVING WORLD!!!!!!!
-// ^^^^^^^^^^^^ <--- loading corruption should be fixed now
 // TODO: add more materials, lava, obsidian, wood (planks)
 // TODO: make right click menu on tiles actually allow customization
 // off that tile, like tile.w_material, etc...
@@ -408,9 +406,11 @@ int main(int argc, char **argv)
 		}
 		if (Draw_message_box(load_grid, &jetmono) == 1) {
 			if (FileExists("world.zst")) {
+				bool tmp = update_should_stop;
 				update_should_stop = true;
 				// nanosleep(&(struct timespec){.tv_sec = 0, .tv_nsec = 30000000}, NULL);
 				pthread_join(update_thread, NULL);
+				update_should_stop = tmp;
 				decompress(grid, "world.zst");
 				pthread_create(&update_thread, NULL, update_worker, (void*)&update_data);
 			}

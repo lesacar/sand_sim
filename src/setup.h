@@ -36,6 +36,10 @@
 	(Color) { 51, 83, 69, 255 }
 #define COLOR_STEAM \
 	(Color) { 42, 71, 94, 255 }
+#define COLOR_OBSIDIAN \
+	(Color) { 113, 98, 122, 255}
+#define COLOR_LAVA \
+	(Color) { 255, 102, 0, 255}
 #define NOCOLOR \
 	(Color) { 0, 0, 0, 0 }
 
@@ -81,6 +85,7 @@ typedef enum
 	Spawner,
 	VoidTile,
 	Obsidian,
+	Lava,
 	MatCount // !! THIS VALUE SHOULD ALWAYS BE THE LAST ENUM ELEMENT 
 } MaterialTypes;
 
@@ -91,6 +96,7 @@ int32_t setup_stuff(int32_t sc_wi, int32_t sc_he, const char *WindowTitle, int32
 int32_t set_monitor_and_fps(int32_t monitor);
 void sand(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS]);
 void updateWater(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS]);
+void updateLava(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS]);
 void updateSteam(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS]);
 void updateSpawner(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS]);
 void updateVoidTile(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS]);

@@ -1,5 +1,4 @@
 // TODO: add more materials, lava, obsidian, wood (planks)
-//
 // TODO: make right click menu on tiles actually allow customization
 // off that tile, like tile.w_material, etc...
 // TODO: add support for multiple world files, zstd is great for saving raw memory currently
@@ -89,7 +88,7 @@ void* update_worker(void* data) {
 
     struct timespec delay;
     delay.tv_sec = 0;
-    delay.tv_nsec = 16666666; // second number is desired ups
+    delay.tv_nsec = 16666666; // second number is desired ups (maybe)
 
     while (!update_should_stop) {
         // Measure start time
@@ -110,6 +109,8 @@ void* update_worker(void* data) {
         updateSteam(grid, grid_duplicate);
         memcpy(grid_duplicate, grid, sizeof(Cell) * COLS * ROWS);
         updateWater(grid, grid_duplicate);
+		memcpy(grid_duplicate, grid, sizeof(Cell) * COLS * ROWS);
+		updateLava(grid, grid_duplicate);
         // Increment updates per second counter
         updates_per_second++;
         // Unlock mutexes after updates
@@ -207,6 +208,8 @@ int main(int argc, char **argv)
 		COLOR_STEAM,
 		WHITE,
 		PURPLE,
+		COLOR_OBSIDIAN,
+		COLOR_LAVA,
 		NOCOLOR
 	};
 	int32_t selector_xval = 20; // x coordinate of the first tile's top left corner
@@ -228,22 +231,6 @@ int main(int argc, char **argv)
     srand(time(NULL));
     Cell(*grid)[ROWS] = (Cell(*)[ROWS])malloc(sizeof(Cell) * COLS * ROWS);
     memset(grid, 0, sizeof(Cell) * COLS * ROWS);
-	printf("Loading world from world.bin\n");
-	FILE *f_save_grid_load = fopen("world.bin","r+");
-	if (f_save_grid_load != NULL) {
-		while (true) {
-			fread(grid, sizeof(Cell), ROWS*COLS, f_save_grid_load);
-			if (feof(f_save_grid_load)) {
-				break;
-			}
-			//fseek(f_save_grid_load, 1, SEEK_CUR);
-		}
-		fclose(f_save_grid_load);
-
-	}
-	else { perror("physim: "); }
-
-
 	
     Shader bloomShader = LoadShader(0, "src/shaders/bloom.fs");
 
@@ -467,9 +454,13 @@ int main(int argc, char **argv)
 				{
 					material = VoidTile;
 				}
-				else if (mx > selector_xval+selector_offset*Obsidian && mx < selector_xval+selector_offset*MatCount)
+				else if (mx > selector_xval+selector_offset*Obsidian && mx < selector_xval+selector_offset*Lava)
 				{
 					material = Obsidian;
+				}
+				else if (mx > selector_xval+selector_offset*Lava && mx < selector_xval+selector_offset*MatCount)
+				{
+					material = Lava;
 				}
 			}
 		}

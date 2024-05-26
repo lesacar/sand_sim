@@ -1,4 +1,5 @@
 #include "setup.h"
+#include "arbitrary.h"
 #include <raylib.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -8,6 +9,7 @@
 #include <strings.h>
 #include <time.h>
 
+#define LAVA_KILLS
 
 
 uint8_t Draw_message_box(MsgBox *msgbox, Font *font) {
@@ -285,6 +287,9 @@ Color rand_color_mat(uint32_t material) {
 			randB = (rand() % 20) - 10;
 			temp_color = (Color){113 + randR, 98 + randG, 122 + randB, 255};
 			break;
+		case Lava:
+			temp_color = (Color){255 - abs(randR/2), 102 + randG, 0 + abs(randB), 255};
+			break;
 		default:
 			temp_color = (Color){0,0,0,0};
 			break;
@@ -376,10 +381,14 @@ void spawnSandBrush(Cell (*grid)[ROWS], int32_t mouseX, int32_t mouseY,
 							grid[i][j].spreadFactor = 5.0f;
 							grid[i][j].color = rand_color_mat(Water);
 						}
-						else if (material == Stone)
+						else if (material == Lava)
 						{
 							grid[i][j].friction = 0.0f;
-							grid[i][j].spreadFactor = 0.0f;
+							grid[i][j].spreadFactor = 5.0f;
+							grid[i][j].color = rand_color_mat(Lava);
+						}
+						else if (material == Stone)
+						{
 							grid[i][j].color = rand_color_mat(Stone);
 						}
 						else if (material == Steam)
@@ -390,8 +399,6 @@ void spawnSandBrush(Cell (*grid)[ROWS], int32_t mouseX, int32_t mouseY,
 						}
 						else if (material == Obsidian)
 						{
-							grid[i][j].friction = 0.0f;
-							grid[i][j].spreadFactor = 0.0f;
 							grid[i][j].color = rand_color_mat(Obsidian);
 						}
 						
@@ -416,8 +423,6 @@ void spawnSandBrush(Cell (*grid)[ROWS], int32_t mouseX, int32_t mouseY,
 						}
 						else if (material == Stone)
 						{
-							grid[i][j].friction = 0.0f;
-							grid[i][j].spreadFactor = 0.0f;
 							grid[i][j].color = rand_color_mat(Stone);
 						}
 						else if (material == Steam)
@@ -428,9 +433,13 @@ void spawnSandBrush(Cell (*grid)[ROWS], int32_t mouseX, int32_t mouseY,
 						}
 						else if (material == Obsidian)
 						{
+							grid[i][j].color = rand_color_mat(Obsidian);
+						}
+						else if (material == Lava)
+						{
 							grid[i][j].friction = 0.0f;
 							grid[i][j].spreadFactor = 5.0f;
-							grid[i][j].color = rand_color_mat(Obsidian);
+							grid[i][j].color = rand_color_mat(Lava);
 						}
 					}
 				}
@@ -548,7 +557,7 @@ void sand(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS])
 }
 
 
-void updateWater(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS])
+void updateLava(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS])
 {
 	for (int j = ROWS - 2; j >= 0; j--)
 	{
@@ -573,7 +582,7 @@ void updateWater(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS])
 		{
 			int index = order[i];
 
-			if (grid_duplicate[index][j].material == Water)
+			if (grid_duplicate[index][j].material == Lava)
 			{
 				grid[index][j].spreadFactor = 5.0f;
 				if (j + 1 < ROWS && grid_duplicate[index][j + 1].material == Empty && grid[index][j + 1].material == Empty)
@@ -601,6 +610,11 @@ void updateWater(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS])
 							else
 							{
 								// Stop spreading downwards if an obstacle is encountered
+								if (grid[index][newY].material == Water && grid_duplicate[index][newY].material == Water) {
+									memset(&grid[index][newY], 0, sizeof(Cell));
+									grid[index][newY].material = Obsidian;
+									grid[index][newY].color = rand_color_mat(Obsidian);
+								}
 								break;
 							}
 						}
@@ -618,9 +632,9 @@ void updateWater(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS])
 							swapTile(&grid[index][targetY],&grid[index][j]);
 						}
 					} 
-					else if (j + 1 < ROWS && grid[index][j+1].material == Empty && grid_duplicate[index][j+1].material == Empty && grid[index][j].material == Water)
+					else if (j + 1 < ROWS && grid[index][j+1].material == Empty && grid_duplicate[index][j+1].material == Empty && grid[index][j].material == Lava)
 					{
-						/*grid[index][j+1].material = Water;
+						/*grid[index][j+1].material = Lava;
 						grid[index][j+1].color = grid[index][j].color;
 						// Clear the current position
 						grid[index][j].material = Empty;
@@ -822,4 +836,133 @@ void updateVoidTile(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS]) {
 }
 
 
-	
+void updateWater(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS])
+{
+	for (int j = ROWS - 2; j >= 0; j--)
+	{
+		// Shuffle the order in which cells are processed within each row
+		int order[COLS];
+		for (int i = 0; i < COLS; i++)
+		{
+			order[i] = i;
+		}
+
+		// Shuffle the order array using Fisher-Yates shuffle algorithm
+		for (int i = COLS - 1; i > 0; i--)
+		{
+			int randomIndex = rand() % (i + 1);
+			int temp = order[i];
+			order[i] = order[randomIndex];
+			order[randomIndex] = temp;
+		}
+
+		// Process cells in the shuffled order
+		for (int i = 0; i < COLS; i++)
+		{
+			int index = order[i];
+
+			if (grid_duplicate[index][j].material == Water)
+			{
+				grid[index][j].spreadFactor = 5.0f;
+				if (j + 1 < ROWS && grid_duplicate[index][j + 1].material == Empty && grid[index][j + 1].material == Empty)
+				{
+					if (j + (int32_t)grid_duplicate[index][j].spreadFactor < ROWS)
+					{
+						// Determine the maximum distance to spread downwards
+						int32_t maxSpread = (int32_t)grid_duplicate[index][j].spreadFactor;
+
+						// Initialize a variable to track the position to move
+						int32_t targetY = j;
+
+						// Check for empty space below the water tile within the spread distance
+						for (int32_t k = 1; k <= maxSpread; k++)
+						{
+							// Calculate the y-coordinate of the potential destination
+							int32_t newY = j + k;
+
+							// Check if the potential destination is within bounds and is empty
+							if (newY < ROWS && grid[index][newY].material == Empty && grid_duplicate[index][newY].material == Empty)
+							{
+								// Update the target position to move downwards
+								targetY = newY;
+							}
+							else
+							{
+								// Stop spreading downwards if an obstacle is encountered
+								break;
+							}
+						}
+
+						// Move water to the determined target position 
+						if (targetY > j && grid_duplicate[index][targetY].material == Empty && grid[index][targetY].material == Empty)
+						{
+							// Move water from the current position to the target position
+							/*grid[index][targetY].material = Water;
+							grid[index][targetY].color = grid[index][j].color;
+
+							// Clear the current position
+							grid[index][j].material = Empty;
+							grid[index][j].color = NOCOLOR;*/
+							swapTile(&grid[index][targetY],&grid[index][j]);
+						}
+					} 
+					else if (j + 1 < ROWS && grid[index][j+1].material == Empty && grid_duplicate[index][j+1].material == Empty && grid[index][j].material == Water)
+					{
+						/*grid[index][j+1].material = Water;
+						grid[index][j+1].color = grid[index][j].color;
+						// Clear the current position
+						grid[index][j].material = Empty;
+						grid[index][j].color = NOCOLOR;*/
+						swapTile(&grid[index][j+1],&grid[index][j]);
+
+					}
+				}
+				else
+				{
+					float randomValue = fastRand();
+					int direction = (randomValue <= 0.5f ? -1 : 1);
+					int newX = index;
+
+					for (int32_t k = 0; k < abs((int32_t)grid[index][j].spreadFactor); k++)
+					{
+						int nextX = newX + direction;
+						if ((j + 1 < ROWS || grid_duplicate[nextX][j + 1].material == Empty) && nextX < COLS && nextX > 0 &&
+							(j + 1 >= ROWS || grid[nextX][j + 1].material == Empty) && grid_duplicate[nextX][j].material == Empty &&
+							(j >= ROWS || grid[nextX][j].material == Empty))
+						{
+							/*
+							grid[nextX][j + 1].material = grid[index][j].material;
+							grid[index][j].material = Empty;
+							grid[nextX][j + 1].color = grid[index][j].color;
+							grid[index][j].color = NOCOLOR;*/
+							swapTile(&grid[nextX][j+1],&grid[index][j]);
+						}
+						else if (nextX >= 0 && nextX < COLS && grid[nextX][j].material != Empty)
+						{
+							// Stop horizontal movement if an obstacle is encountered
+							break;
+						}
+						else
+						{
+							// Update newX if the next position is valid and empty
+							newX = nextX;
+						}
+					}
+
+					if (newX >= 0 && newX < COLS && j + 1 < ROWS && grid[newX][j].material == Empty && grid_duplicate[newX][j].material == Empty)
+					{
+						if (grid_duplicate[newX][j].material == Empty && grid[newX][j].material == Empty)
+						{
+							swapTile(&grid[newX][j],&grid[index][j]);
+							/*
+							grid[newX][j].material = grid[index][j].material;
+							grid[index][j].material = Empty;
+							grid[newX][j].color = grid[index][j].color;
+							grid[index][j].color = NOCOLOR;*/
+						}
+					}
+				}
+			}
+		}
+	}
+}

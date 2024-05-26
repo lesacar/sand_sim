@@ -1,5 +1,6 @@
 #include "arbitrary.h"
 #include "raylib.h"
+#include "setup.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -12,7 +13,8 @@ static const char *MaterialTypeStrings[] = {
     "Steam",
     "Spawner",
     "Void",
-	"Obsidian"
+	"Obsidian",
+	"Lava"
 };
 
 void swapTile(Cell* first, Cell* second) {

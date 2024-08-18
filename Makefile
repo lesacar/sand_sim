@@ -46,7 +46,7 @@ winrel: CFLAGS += -O3 -D WINREL
 winrel: clean
 winrel: win
 
-debug: CFLAGS += -g -D UDEBUG
+debug: CFLAGS += -ggdb -pg -D UDEBUG
 debug: $(TARGET)
 
 release: CFLAGS += -O3 -D URELEASE

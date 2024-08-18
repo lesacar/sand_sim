@@ -611,9 +611,14 @@ void updateLava(Cell (*grid)[ROWS], Cell (*grid_duplicate)[ROWS])
 							{
 								// Stop spreading downwards if an obstacle is encountered
 								if (grid[index][newY].material == Water && grid_duplicate[index][newY].material == Water) {
+									memset(&grid[index][j], 0, sizeof(Cell));
+									memset(&grid[index][newY-1], 0, sizeof(Cell));
+									grid[index][newY-1].material = Obsidian;
+									grid[index][newY-1].color = rand_color_mat(Obsidian);
+
 									memset(&grid[index][newY], 0, sizeof(Cell));
-									grid[index][newY].material = Obsidian;
-									grid[index][newY].color = rand_color_mat(Obsidian);
+									grid[index][newY].material = Steam;
+									grid[index][newY].color = rand_color_mat(Steam);
 								}
 								break;
 							}

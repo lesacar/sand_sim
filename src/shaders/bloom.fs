@@ -1,17 +1,12 @@
 #version 330
 
-// Input vertex attributes (from vertex shader)
 in vec2 fragTexCoord;
 in vec4 fragColor;
 
-// Input uniform values
 uniform sampler2D texture0;
 uniform vec4 colDiffuse;
 
-// Output fragment color
 out vec4 finalColor;
-
-// NOTE: Add here your custom variables
 
 const vec2 size = vec2(432, 243);   // Framebuffer size
 const float samples = 5.0;          // Pixels per axis; higher = bigger glow, worse performance
